@@ -33,19 +33,21 @@ const Switch: Component<SwitchProps> = (props) => {
       data-slot="switch"
       disabled={local.disabled}
       class={cn(
-        "peer relative inline-flex shrink-0 cursor-pointer items-center rounded-[var(--radius-xl)] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
+        "peer relative inline-flex shrink-0 cursor-pointer items-center rounded-xl outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
         local.class,
       )}
       style={{
         width: `${TRACK_WIDTH}px`,
         height: `${TRACK_HEIGHT}px`,
-        background: local.checked ? "var(--primary)" : "color-mix(in oklch, var(--primary) 30%, transparent)",
+        background: local.checked
+          ? "var(--primary)"
+          : "color-mix(in oklch, var(--primary) 30%, transparent)",
       }}
       onClick={() => local.onChange?.(!local.checked)}
     >
       <span
         data-slot="switch-thumb"
-        class="pointer-events-none block rounded-[var(--radius-xl)] shadow-lg transition-transform"
+        class="pointer-events-none block rounded-xl shadow-lg transition-transform"
         style={{
           width: `${THUMB_SIZE}px`,
           height: `${THUMB_SIZE}px`,

@@ -185,7 +185,7 @@ const ResponsiveDialogContent: ParentComponent<ComponentProps<"div">> = (props) 
           {/* Overlay */}
           <div
             class={cn(
-              "fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out",
+              "fixed inset-0 bg-black/80 transition-opacity duration-100 ease-out",
               isClosing() || isOpening() ? "opacity-0" : "opacity-100",
             )}
             onClick={handleClose}
@@ -196,14 +196,17 @@ const ResponsiveDialogContent: ParentComponent<ComponentProps<"div">> = (props) 
             when={isMobile()}
             fallback={
               /* Desktop: Centered Dialog */
-              <div class="fixed inset-0 flex items-center justify-center p-4" onClick={handleClose}>
+              <div
+                class="fixed inset-0 flex items-start justify-center p-4 pt-[15vh]"
+                onClick={handleClose}
+              >
                 <div
                   ref={contentRef}
                   role="dialog"
                   aria-modal="true"
                   tabIndex={-1}
                   class={cn(
-                    "relative flex w-full max-w-lg flex-col rounded-lg border border-border bg-background p-6 shadow-lg transition-all duration-300 ease-out h-[70vh]",
+                    "relative flex max-h-[70vh] w-full max-w-lg flex-col overflow-y-auto rounded-lg border border-border bg-background p-6 shadow-lg outline-none transition-all duration-50 ease-out",
                     isClosing() || isOpening() ? "scale-95 opacity-0" : "scale-100 opacity-100",
                     local.class,
                   )}
@@ -223,7 +226,7 @@ const ResponsiveDialogContent: ParentComponent<ComponentProps<"div">> = (props) 
                 aria-modal="true"
                 tabIndex={-1}
                 class={cn(
-                  "relative max-h-[85vh] w-full overflow-y-auto rounded-t-xl border-border border-x border-t bg-background p-6 shadow-lg transition-transform duration-300 ease-out",
+                  "relative max-h-[85vh] w-full overflow-y-auto rounded-t-xl border-border border-x border-t bg-background p-6 shadow-lg outline-none transition-transform duration-300 ease-out",
                   isClosing() || isOpening() ? "translate-y-full" : "translate-y-0",
                   local.class,
                 )}

@@ -7,7 +7,7 @@ const Card: Component<ComponentProps<"div">> = (props) => {
     <div
       data-slot="card"
       class={cn(
-        "flex flex-col rounded-lg border border-border/50 bg-card py-3 text-card-foreground shadow-sm backdrop-blur-sm transition-all hover:border-border  md:py-4",
+        "flex flex-col rounded-lg border border-border/50 bg-card py-3 text-card-foreground shadow-sm backdrop-blur-sm transition-all hover:border-border md:py-4",
         local.class,
       )}
       {...others}

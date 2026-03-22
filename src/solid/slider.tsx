@@ -50,17 +50,19 @@ const Slider: Component<SliderProps> = (props) => {
       onChange={local.onChange}
       onChangeEnd={local.onChangeEnd}
       class={cn(
-        "relative flex w-full touch-none select-none items-center",
+        "relative flex w-full touch-none select-none items-center rounded-xl bg-primary/30",
         local.disabled && "cursor-not-allowed opacity-50",
         local.class,
       )}
+      style={{
+        "padding-left": `${HALF_THUMB}px`,
+        "padding-right": `${HALF_THUMB}px`,
+      }}
     >
       <KSlider.Track
-        class={cn("relative w-full rounded-[var(--radius-xl)]", local.trackClass)}
+        class={cn("relative w-full", local.trackClass)}
         style={{
           height: `${THUMB_SIZE}px`,
-          margin: `0 ${HALF_THUMB}px`,
-          background: "color-mix(in oklch, var(--primary) 30%, transparent)",
           cursor: local.disabled ? "not-allowed" : "pointer",
         }}
       >
@@ -69,7 +71,7 @@ const Slider: Component<SliderProps> = (props) => {
             position: "absolute",
             top: "0",
             bottom: "0",
-            left: `${-HALF_THUMB}px`,
+            "margin-left": `${-HALF_THUMB}px`,
             "margin-right": `${-HALF_THUMB}px`,
             "border-radius": "var(--radius-xl)",
             background: "var(--primary)",

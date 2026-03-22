@@ -1,31 +1,76 @@
 # @glasshome/ui
 
-SolidJS component library for GlassHome, built on Kobalte.
+SolidJS component library for GlassHome, built on [Kobalte](https://kobalte.dev).
+
+56 accessible, theme-aware components plus utility functions and a Tailwind v4 CSS preset — everything you need to build smart-home dashboards.
 
 ## Install
 
 ```bash
-bun add @glasshome/ui
+npm install @glasshome/ui solid-js
+# or
+bun add @glasshome/ui solid-js
 ```
 
-## Quick Start
+> `solid-js ^1.9.9` is a required peer dependency.
+
+## Subpath Imports
+
+### `@glasshome/ui` — Utilities
+
+Framework-agnostic helpers exported from the root entrypoint.
+
+```typescript
+import { cn, createIsMobile } from "@glasshome/ui";
+
+// Merge Tailwind classes with conflict resolution
+const cls = cn("px-4 py-2", condition && "bg-primary text-white");
+
+// Reactive mobile breakpoint signal (SolidJS)
+const isMobile = createIsMobile();
+```
+
+### `@glasshome/ui/solid` — Components
+
+All 56 Kobalte-based components are exported from a single subpath.
 
 ```tsx
-import { Button, Card, Badge } from "@glasshome/ui";
+import { Button, Card, CardHeader, CardTitle, CardContent, Badge } from "@glasshome/ui/solid";
 
-function App() {
+function DeviceCard() {
   return (
     <Card>
-      <Badge>New</Badge>
-      <Button onClick={() => console.log("clicked")}>Click me</Button>
+      <CardHeader>
+        <CardTitle>Living Room</CardTitle>
+        <Badge>Online</Badge>
+      </CardHeader>
+      <CardContent>
+        <Button onClick={() => console.log("toggled")}>Toggle Light</Button>
+      </CardContent>
     </Card>
   );
 }
 ```
 
-## Documentation
+Available components include:
 
-Full docs at [glasshome.app/docs](https://glasshome.app/docs)
+`Accordion` · `Alert` · `AlertDialog` · `AspectRatio` · `Avatar` · `Badge` · `Breadcrumb` · `Button` · `ButtonGroup` · `Calendar` · `Card` · `Carousel` · `Checkbox` · `Collapsible` · `Command` · `ContextMenu` · `CopyButton` · `Dialog` · `Dock` · `Drawer` · `DropdownMenu` · `Empty` · `Field` · `Form` · `GeometricBackground` · `GlassEffect` · `HoverCard` · `Input` · `InputGroup` · `InputOTP` · `Item` · `Kbd` · `Label` · `Menubar` · `NavigationMenu` · `Pagination` · `Popover` · `Progress` · `RadioGroup` · `ResizablePanel` · `ResponsiveDialog` · `ScrollArea` · `Select` · `Separator` · `Sheet` · `Skeleton` · `Slider` · `Sonner (toast)` · `Spinner` · `Switch` · `Table` · `Tabs` · `Textarea` · `Toggle` · `ToggleGroup` · `Tooltip`
+
+### `@glasshome/ui/styles` — Tailwind v4 CSS
+
+Import the shared CSS preset in your app's stylesheet:
+
+```css
+@import "@glasshome/ui/styles";
+```
+
+This provides the GlassHome design tokens (colors, radii, animations) as a Tailwind v4 theme layer.
+
+## Peer Dependencies
+
+| Package    | Required | Notes                                    |
+| ---------- | -------- | ---------------------------------------- |
+| `solid-js` | Yes      | SolidJS reactive primitives and JSX runtime |
 
 ## License
 

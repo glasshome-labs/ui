@@ -5,6 +5,27 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "homepage": "https://github.com/glasshome/ui#readme",
+  "bugs": {
+    "url": "https://github.com/glasshome/ui/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false,
+  "keywords": [
+    "solidjs",
+    "components",
+    "kobalte",
+    "ui",
+    "home-assistant",
+    "smart-home",
+    "tailwindcss",
+    "glasshome"
+  ],
   "exports": {
     ".": {
       "@glasshome/source": "./src/index.ts",
@@ -15,11 +36,6 @@
       "@glasshome/source": "./src/solid/index.ts",
       "types": "./dist/solid/index.d.ts",
       "import": "./dist/solid/index.js"
-    },
-    "./solid/*": {
-      "@glasshome/source": "./src/solid/*.tsx",
-      "types": "./dist/solid/*.d.ts",
-      "import": "./dist/solid/*.js"
     },
     "./styles": "./src/styles/globals.css",
     "./package.json": "./package.json"
@@ -54,7 +70,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/glasshome-labs/ui.git"
+    "url": "https://github.com/glasshome/ui.git"
   },
   "author": "GlassHome Labs",
   "license": "MIT"

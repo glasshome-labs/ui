@@ -138,12 +138,7 @@ const GeometricBackground: ParentComponent<{ class?: string }> = (props) => {
   const [local] = splitProps(props, ["class", "children"]);
   return (
     <>
-      <div
-        class={cn(
-          "fixed inset-0 h-screen w-full overflow-hidden bg-background dark:bg-[#0a0a14]",
-          local.class,
-        )}
-      >
+      <div class={cn("fixed inset-0 h-screen w-full overflow-hidden bg-background", local.class)}>
         <div class="absolute inset-0 overflow-hidden">
           <ElegantShape
             delay={1.2}
