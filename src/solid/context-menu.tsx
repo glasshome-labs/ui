@@ -171,17 +171,17 @@ const ContextMenuShortcut: Component<ComponentProps<"span">> = (props) => {
 
 export {
   ContextMenu,
-  ContextMenuTrigger,
-  ContextMenuContent,
-  ContextMenuItem,
   ContextMenuCheckboxItem,
-  ContextMenuRadioItem,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
   ContextMenuLabel,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
   ContextMenuSeparator,
   ContextMenuShortcut,
-  ContextMenuGroup,
   ContextMenuSub,
   ContextMenuSubContent,
   ContextMenuSubTrigger,
-  ContextMenuRadioGroup,
+  ContextMenuTrigger,
 };

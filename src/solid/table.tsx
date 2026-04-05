@@ -86,4 +86,4 @@ const TableCaption: Component<ComponentProps<"caption">> = (props) => {
   );
 };
 
-export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption };
+export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };

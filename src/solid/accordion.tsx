@@ -52,4 +52,4 @@ const AccordionContent: ParentComponent<ComponentProps<typeof AccordionPrimitive
   );
 };
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger };

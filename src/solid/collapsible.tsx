@@ -35,4 +35,4 @@ const CollapsibleContent: Component<ComponentProps<typeof CollapsiblePrimitive.C
   );
 };
 
-export { Collapsible, CollapsibleTrigger, CollapsibleContent };
+export { Collapsible, CollapsibleContent, CollapsibleTrigger };

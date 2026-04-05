@@ -213,10 +213,10 @@ const CarouselNext: Component<ComponentProps<typeof Button>> = (props) => {
 };
 
 export {
-  type CarouselApi,
   Carousel,
+  type CarouselApi,
   CarouselContent,
   CarouselItem,
-  CarouselPrevious,
   CarouselNext,
+  CarouselPrevious,
 };

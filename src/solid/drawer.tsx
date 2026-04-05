@@ -110,12 +110,12 @@ const DrawerDescription: Component<ComponentProps<typeof DialogPrimitive.Descrip
 
 export {
   Drawer,
-  DrawerOverlay,
-  DrawerTrigger,
   DrawerClose,
   DrawerContent,
-  DrawerHeader,
-  DrawerFooter,
-  DrawerTitle,
   DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerTitle,
+  DrawerTrigger,
 };

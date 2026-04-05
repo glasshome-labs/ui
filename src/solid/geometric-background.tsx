@@ -226,4 +226,4 @@ const GeometricBackground: ParentComponent<{ class?: string }> = (props) => {
   );
 };
 
-export { GeometricBackground, ElegantShape };
+export { ElegantShape, GeometricBackground };

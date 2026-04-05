@@ -24,4 +24,4 @@ const HoverCardContent: Component<ComponentProps<typeof HoverCardPrimitive.Conte
   );
 };
 
-export { HoverCard, HoverCardTrigger, HoverCardContent };
+export { HoverCard, HoverCardContent, HoverCardTrigger };

@@ -47,4 +47,4 @@ const TabsContent: Component<ComponentProps<typeof TabsPrimitive.Content>> = (pr
   );
 };
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsContent, TabsList, TabsTrigger };

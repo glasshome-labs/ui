@@ -79,13 +79,13 @@ const DropdownMenuShortcut: Component<ComponentProps<"span">> = (props) => {
 
 export {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuSub,
-  DropdownMenuRadioGroup,
+  DropdownMenuTrigger,
 };

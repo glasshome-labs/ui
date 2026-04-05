@@ -263,5 +263,5 @@ const Calendar: Component<CalendarProps> = (props) => {
   );
 };
 
-export { Calendar };
 export type { CalendarProps, DateRange };
+export { Calendar };

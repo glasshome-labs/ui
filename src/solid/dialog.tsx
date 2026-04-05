@@ -73,11 +73,11 @@ const DialogDescription: Component<ComponentProps<typeof DialogPrimitive.Descrip
 
 export {
   Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
   DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 };

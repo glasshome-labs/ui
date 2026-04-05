@@ -35,4 +35,4 @@ const AvatarFallback: Component<ComponentProps<typeof ImagePrimitive.Fallback>> 
   );
 };
 
-export { Avatar, AvatarImage, AvatarFallback };
+export { Avatar, AvatarFallback, AvatarImage };

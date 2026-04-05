@@ -146,4 +146,4 @@ const ResizableHandle: Component<ComponentProps<"div"> & { withHandle?: boolean 
   );
 };
 
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle };
+export { ResizableHandle, ResizablePanel, ResizablePanelGroup };

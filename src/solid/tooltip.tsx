@@ -21,4 +21,4 @@ const TooltipContent: Component<ComponentProps<typeof TooltipPrimitive.Content>>
   );
 };
 
-export { Tooltip, TooltipTrigger, TooltipContent };
+export { Tooltip, TooltipContent, TooltipTrigger };

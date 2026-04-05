@@ -21,5 +21,5 @@ const Toaster: Component<ComponentProps<typeof SolidSonner>> = (props) => {
   );
 };
 
-export { Toaster };
 export { toast } from "solid-sonner";
+export { Toaster };

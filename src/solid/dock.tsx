@@ -167,5 +167,5 @@ const Dock: Component<DockProps> = (props) => {
   );
 };
 
+export type { DockIconButtonProps, DockItem, DockProps };
 export { Dock };
-export type { DockProps, DockItem, DockIconButtonProps };
