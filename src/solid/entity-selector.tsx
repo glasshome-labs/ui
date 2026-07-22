@@ -117,6 +117,19 @@ export function EntitySelector(props: EntitySelectorProps) {
 		});
 	});
 
+	const classExcludedCount = createMemo(() =>
+		props.deviceClass ? usableViews().length - classFiltered().length : 0,
+	);
+
+	const classExcludedMessage = () => {
+		const n = classExcludedCount();
+		const hidden =
+			n === 1
+				? `1 ${props.domain} entity was hidden because it does not`
+				: `${n} ${props.domain} entities were hidden because they do not`;
+		return `No ${props.deviceClass} ${props.domain} entities found. ${hidden} report ${props.deviceClass}.`;
+	};
+
 	const diagnosticCount = createMemo(
 		() => classFiltered().filter((v) => v.entityCategory != null).length,
 	);
@@ -548,9 +561,16 @@ export function EntitySelector(props: EntitySelectorProps) {
 									<Show
 										when={diagnosticCount() > 0}
 										fallback={
-											<span class="text-muted-foreground text-sm">
-												No {props.domain} entities found in your home
-											</span>
+											<Show
+												when={classExcludedCount() > 0}
+												fallback={
+													<span class="text-muted-foreground text-sm">
+														No {props.domain} entities found in your home
+													</span>
+												}
+											>
+												<span class="text-muted-foreground text-sm">{classExcludedMessage()}</span>
+											</Show>
 										}
 									>
 										<span class="text-muted-foreground text-sm">
