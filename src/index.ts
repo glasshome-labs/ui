@@ -30,6 +30,14 @@ export {
 	CARD_SURFACE_OPAQUE,
 	TRACK_SURFACE,
 } from "./lib/card-classes.js";
+export {
+	CAROUSEL_DOTS,
+	CAROUSEL_VIEWPORT,
+	type CarouselTransition,
+	carouselDot,
+	carouselItem,
+	carouselTrack,
+} from "./lib/carousel-classes.js";
 export { glassToneText, toneTextMix } from "./lib/glass-tone.js";
 export { INPUT_CLASS, INPUT_SURFACE } from "./lib/input-classes.js";
 export {

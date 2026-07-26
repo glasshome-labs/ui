@@ -18,6 +18,14 @@ import {
 	splitProps,
 	useContext,
 } from "solid-js";
+import {
+	CAROUSEL_DOTS,
+	CAROUSEL_VIEWPORT,
+	type CarouselTransition,
+	carouselDot,
+	carouselItem,
+	carouselTrack,
+} from "../lib/carousel-classes.js";
 import { cn } from "../lib/utils.js";
 import { Button } from "./button.js";
 
@@ -46,10 +54,6 @@ function useCarousel() {
 	}
 	return context;
 }
-
-/* slide moves a track; fade and wipe stack the slides and reveal the incoming
- * one in place (wipe sweeps a diagonal clip-path, fade cross-dissolves). */
-type CarouselTransition = "slide" | "fade" | "wipe";
 
 const Carousel: ParentComponent<
 	ComponentProps<"div"> & {
@@ -172,19 +176,11 @@ const Carousel: ParentComponent<
 const CarouselContent: Component<ComponentProps<"div">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	const { viewportRef, orientation, transition } = useCarousel();
-	// Stacked modes keep every slide in the same grid cell; embla's fade plugin
-	// drives opacity, and `wipe` layers a clip-path sweep on top of it.
-	const stacked = () => transition() !== "slide";
 
 	return (
-		<div ref={viewportRef} class="h-full overflow-hidden" data-slot="carousel-content">
+		<div ref={viewportRef} class={CAROUSEL_VIEWPORT} data-slot="carousel-content">
 			<div
-				class={cn(
-					stacked()
-						? "grid [&>*]:col-start-1 [&>*]:row-start-1"
-						: cn("flex", orientation() === "horizontal" ? "-ml-4" : "-mt-4 flex-col"),
-					local.class,
-				)}
+				class={cn(carouselTrack(transition(), orientation()), local.class)}
 				data-transition={transition()}
 				{...rest}
 			/>
@@ -202,12 +198,7 @@ const CarouselItem: Component<ComponentProps<"div">> = (props) => {
 			role="group"
 			aria-roledescription="slide"
 			data-slot="carousel-item"
-			class={cn(
-				"min-w-0 shrink-0 grow-0 basis-full",
-				transition() === "slide" && (orientation() === "horizontal" ? "pl-4" : "pt-4"),
-				transition() === "wipe" && "carousel-wipe",
-				local.class,
-			)}
+			class={cn(carouselItem(transition(), orientation()), local.class)}
 			{...rest}
 		/>
 	);
@@ -219,11 +210,7 @@ const CarouselDots: Component<ComponentProps<"div">> = (props) => {
 	const { selected, slideCount, scrollTo } = useCarousel();
 
 	return (
-		<div
-			class={cn("flex items-center justify-center gap-2", local.class)}
-			data-slot="carousel-dots"
-			{...rest}
-		>
+		<div class={cn(CAROUSEL_DOTS, local.class)} data-slot="carousel-dots" {...rest}>
 			{Array.from({ length: slideCount() }, (_, i) => (
 				<button
 					type="button"
@@ -231,10 +218,7 @@ const CarouselDots: Component<ComponentProps<"div">> = (props) => {
 					data-active={selected() === i ? "" : undefined}
 					aria-label={`Go to slide ${i + 1}`}
 					aria-current={selected() === i}
-					class={cn(
-						"h-1.5 rounded-full bg-foreground/40 transition-all hover:bg-foreground/70",
-						selected() === i ? "w-6 bg-foreground/80" : "w-1.5",
-					)}
+					class={carouselDot(selected() === i)}
 					onClick={() => scrollTo(i)}
 				/>
 			))}
