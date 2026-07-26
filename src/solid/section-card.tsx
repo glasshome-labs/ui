@@ -2,6 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { type ComponentProps, type JSX, Show, splitProps } from "solid-js";
 import { CARD_BLUR, CARD_SURFACE_BASE } from "../lib/card-classes.js";
 import { SECTION_INNER_RADIUS, SECTION_PADDING, SECTION_ROW_CLASS } from "../lib/section-tokens.js";
+import { cn } from "../lib/utils.js";
 import { CountPill } from "./count-pill.js";
 
 /* Performant-blur injection (dash): when active() the card gates CARD_BLUR off
@@ -26,6 +27,7 @@ type SectionCardProps = {
 	action?: JSX.Element;
 	toolbar?: JSX.Element;
 	headerClass?: string;
+	class?: string;
 	glass?: GlassSurface;
 	children: JSX.Element;
 };
@@ -39,7 +41,11 @@ export function SectionCard(props: SectionCardProps) {
 	return (
 		<section
 			ref={glass().ref}
-			class={`${CARD_SURFACE_BASE} relative overflow-hidden rounded-[var(--radius)] transition-colors [contain:layout_style_paint] hover:border-border`}
+			class={cn(
+				CARD_SURFACE_BASE,
+				"relative overflow-hidden rounded-[var(--radius)] transition-colors [contain:layout_style_paint] hover:border-border",
+				props.class,
+			)}
 			classList={{ [CARD_BLUR]: !active() }}
 			style={glass().style?.() ?? {}}
 		>
