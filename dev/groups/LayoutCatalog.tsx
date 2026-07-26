@@ -3,6 +3,7 @@ import {
 	AspectRatio,
 	Carousel,
 	CarouselContent,
+	CarouselDots,
 	CarouselItem,
 	CarouselNext,
 	CarouselPrevious,
@@ -63,6 +64,32 @@ export function LayoutCatalog() {
 					</Carousel>
 				</div>
 				<CatalogNote>arrows / arrow-keys scroll; loops</CatalogNote>
+			</CatalogItem>
+
+			<CatalogItem name="Carousel wipe" hint="stacked slides · autoplay · dots">
+				<div class="w-full px-12">
+					<Carousel transition="wipe" autoplay={2500} opts={{ loop: true }} class="w-full">
+						<CarouselContent>
+							<For each={["one", "two", "three"]}>
+								{(slide, i) => (
+									<CarouselItem>
+										<div
+											class="flex h-24 items-center justify-center rounded-md border border-border/50 font-semibold text-2xl text-foreground"
+											style={{ background: `var(--chart-${i() + 1})` }}
+										>
+											{slide}
+										</div>
+									</CarouselItem>
+								)}
+							</For>
+						</CarouselContent>
+						<CarouselDots class="mt-3" />
+					</Carousel>
+				</div>
+				<CatalogNote>
+					transition="wipe" | "fade" | "slide"; autoplay pauses on interaction and is skipped under
+					prefers-reduced-motion
+				</CatalogNote>
 			</CatalogItem>
 
 			<CatalogItem name="Overlay" hint="floating glass panel">

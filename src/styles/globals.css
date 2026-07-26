@@ -162,3 +162,19 @@
 		background: var(--muted-foreground);
 	}
 }
+
+/* Carousel `wipe`: the incoming slide is revealed by a diagonal corner-to-corner
+ * sweep. Embla's fade plugin stacks the slides and owns opacity; the clip-path
+ * rides on top, keyed off the slide's own selected state. */
+.carousel-wipe {
+	clip-path: polygon(0 0, 0 0, 0 0, 0 0);
+	transition: clip-path var(--duration-expand) var(--ease-emphasis);
+}
+.carousel-wipe[data-selected] {
+	clip-path: polygon(0 0, 200% 0, 0 200%, 0 0);
+}
+@media (prefers-reduced-motion: reduce) {
+	.carousel-wipe {
+		transition: none;
+	}
+}
