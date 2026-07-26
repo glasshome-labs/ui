@@ -160,6 +160,14 @@
 	--shadow-2xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.4);
 	--tracking-normal: 0em;
 	--spacing: 0.27rem;
+
+	/* Motion. Durations name the gesture, not the number: micro is a hover or
+	 * border change, state a tone or chip swap, expand an open/close. Theme
+	 * independent, so declared once; zeroed under prefers-reduced-motion. */
+	--ease-emphasis: cubic-bezier(0.22, 1, 0.36, 1);
+	--duration-micro: 120ms;
+	--duration-state: 160ms;
+	--duration-expand: 200ms;
 }
 
 .dark {
@@ -417,6 +425,13 @@
 	::view-transition-old(area-title),
 	::view-transition-new(area-title) {
 		animation: none !important;
+	}
+
+	/* Anything timed off the motion scale stops moving, no per-component opt-in. */
+	:root {
+		--duration-micro: 0ms;
+		--duration-state: 0ms;
+		--duration-expand: 0ms;
 	}
 }
 
