@@ -75,6 +75,15 @@ export {
 	CardHeader,
 	CardTitle,
 } from "./card.js";
+export type { CarouselApi } from "./carousel.js";
+// Wave 5: React-Library Alternatives - Complex
+export {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	CarouselNext,
+	CarouselPrevious,
+} from "./carousel.js";
 export {
 	AreaChart,
 	BarList,
