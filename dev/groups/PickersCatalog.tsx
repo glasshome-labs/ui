@@ -9,6 +9,7 @@ import {
 	EntityDataContext,
 	EntitySelector,
 	type EntityViewLike,
+	IconPicker,
 	parseColor,
 } from "../../src/solid";
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
@@ -82,6 +83,7 @@ export function PickersCatalog() {
 	const [color, setColor] = createSignal<Color>(parseColor("hsl(220, 90%, 56%)"));
 
 	// AreaPicker / EntitySelector selection state.
+	const [icon, setIcon] = createSignal("mdi:lightbulb");
 	const [area, setArea] = createSignal<string>("");
 	const [lightIds, setLightIds] = createSignal<string[]>([]);
 
@@ -115,6 +117,17 @@ export function PickersCatalog() {
 						/>
 					</div>
 					<CatalogNote>channel="hue" / "lightness"</CatalogNote>
+				</CatalogItem>
+
+				<CatalogItem name="IconPicker" hint="curated set + host-provided search" span={2}>
+					<div class="w-full max-w-sm">
+						<IconPicker value={icon()} onChange={setIcon} placeholder="mdi:lightbulb" />
+					</div>
+					<CatalogNote>
+						Browsing the curated libraries needs no host wiring. Pass searchIcons to add live
+						search: dash proxies Iconify same-origin so the design system carries no network or CSP
+						policy of its own.
+					</CatalogNote>
 				</CatalogItem>
 
 				<CatalogItem name="AreaPicker" hint="area combobox (EntityDataContext)" span={2}>

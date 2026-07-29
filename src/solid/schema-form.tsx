@@ -2,6 +2,7 @@ import type { JSONSchema7 } from "json-schema";
 import { createSignal, For, Show } from "solid-js";
 import { AreaPicker } from "./area-picker.js";
 import { EntitySelector } from "./entity-selector.js";
+import { IconPicker, type IconPickerProps } from "./icon-picker.js";
 import { Input } from "./input.js";
 import { Label } from "./label.js";
 import { NumberField } from "./number-field.js";
@@ -9,9 +10,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Switch } from "./switch.js";
 
 interface ExtendedJSONSchema extends JSONSchema7 {
+	/** Explicit control choice from the SDK's field.* helpers. */
+	formType?: string;
 	domain?: string;
 	singleSelect?: boolean;
 	deviceClass?: string;
+}
+
+const warnedLegacyAreaKeys = new Set<string>();
+
+/**
+ * @deprecated Removed in the next major. Before the SDK had `field.area()`,
+ * an area picker was inferred from the property name alone, so a field had to
+ * be called `areaId` to get one and any other name silently rendered a text
+ * input. Declare `field.area()` instead — it works under any name.
+ */
+function isLegacyAreaKey(key: string, prop: ExtendedJSONSchema): boolean {
+	const lower = key.toLowerCase();
+	if (prop.type !== "string" || (lower !== "areaid" && lower !== "area_id")) return false;
+	const isDev = typeof process !== "undefined" && process.env?.NODE_ENV !== "production";
+	if (isDev && !warnedLegacyAreaKeys.has(key)) {
+		warnedLegacyAreaKeys.add(key);
+		console.warn(
+			`[SchemaForm] "${key}" renders an area picker because of its name. That fallback is removed in the next major; declare it with field.area() instead. https://glasshome.app/docs/widget-sdk/config`,
+		);
+	}
+	return true;
 }
 
 interface SchemaFormProps {
@@ -19,6 +43,8 @@ interface SchemaFormProps {
 	data: Record<string, unknown>;
 	onChange: (data: Record<string, unknown>) => void;
 	errors?: string[];
+	/** Passed through to IconPicker for formType: "icon-picker" fields. */
+	searchIcons?: IconPickerProps["searchIcons"];
 }
 
 export function SchemaForm(props: SchemaFormProps) {
@@ -61,8 +87,15 @@ export function SchemaForm(props: SchemaFormProps) {
 								deviceClass={(prop as ExtendedJSONSchema).deviceClass}
 								multiple={(prop as ExtendedJSONSchema).singleSelect !== true}
 							/>
+						) : /* Icon picker (declared) */
+						prop.formType === "icon-picker" ? (
+							<IconPicker
+								value={String(formData()[key] ?? prop.default ?? "")}
+								onChange={(val) => updateField(key, val)}
+								searchIcons={props.searchIcons}
+							/>
 						) : /* Area picker */
-						key.toLowerCase() === "areaid" || key.toLowerCase() === "area_id" ? (
+						prop.formType === "area-picker" || isLegacyAreaKey(key, prop) ? (
 							<AreaPicker
 								value={String(formData()[key] ?? prop.default ?? "")}
 								onChange={(val) => updateField(key, val)}

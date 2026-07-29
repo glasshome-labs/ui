@@ -1,5 +1,11 @@
 // Original components
 
+// Deliberately NOT re-exported here: `Icon` from @iconify-icon/solid. A barrel
+// re-export makes every ui import eagerly evaluate iconify-icon, which then
+// claims the <iconify-icon> element before the host registers its bundled icon
+// data — every icon silently falls back to a network fetch (see apps/dash
+// main.tsx import-order comment). One door for icons has to wait for the ui
+// import to stop carrying an iconify copy at all.
 // Color helpers for ColorWheel/ColorSlider consumers, re-exported so they
 // don't need a direct @kobalte/core dependency.
 export { type Color, parseColor } from "@kobalte/core/colors";
@@ -207,6 +213,7 @@ export {
 	HoverCardContent,
 	HoverCardTrigger,
 } from "./hover-card.js";
+export { IconPicker, type IconPickerProps } from "./icon-picker.js";
 export { Input } from "./input.js";
 export {
 	InputGroup,
@@ -302,6 +309,7 @@ export {
 export { Separator } from "./separator.js";
 export {
 	LabeledField,
+	LabeledIconPicker,
 	LabeledInput,
 	RowActions,
 	SectionAddButton,

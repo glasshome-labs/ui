@@ -1,13 +1,13 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show } from "solid-js";
 import { Button } from "./button.js";
+import { IconPicker, type IconPickerProps } from "./icon-picker.js";
 import { Input } from "./input.js";
 import { Switch } from "./switch.js";
 
 /**
  * Generic settings/list row primitives, shared by dash settings and any list UI.
- * Presentational only — no app data or routing. (dash's LabeledIconPicker stays
- * local since it depends on the dash IconPicker.)
+ * Presentational only — no app data or routing.
  */
 
 export function SectionAddButton(props: { onClick: () => void }) {
@@ -57,6 +57,25 @@ export function LabeledField(props: { label: string; children: JSX.Element }) {
 			<p class="mb-1 font-medium text-sm">{props.label}</p>
 			{props.children}
 		</div>
+	);
+}
+
+export function LabeledIconPicker(props: {
+	label: string;
+	value: string;
+	onChange: (value: string) => void;
+	placeholder?: string;
+	searchIcons?: IconPickerProps["searchIcons"];
+}) {
+	return (
+		<LabeledField label={props.label}>
+			<IconPicker
+				value={props.value}
+				onChange={props.onChange}
+				placeholder={props.placeholder}
+				searchIcons={props.searchIcons}
+			/>
+		</LabeledField>
 	);
 }
 
