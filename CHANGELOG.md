@@ -3,10 +3,6 @@
 ## [1.1.0](https://github.com/glasshome/ui/compare/v1.0.1...v1.1.0) (2026-07-29)
 
 
-### ⚠ BREAKING CHANGES
-
-* drop the unused Carousel port
-
 ### Features
 
 * **carousel:** add a server-rendered Astro twin ([7b0010c](https://github.com/glasshome/ui/commit/7b0010cb645493f815b58595a978cdd5b5bb3cd7))
@@ -23,21 +19,6 @@
 * **glass:** publish a descendant-readable tone ([fb6c98f](https://github.com/glasshome/ui/commit/fb6c98f9d37c3e9b7a0e130459f8415c22e685d0))
 * lock the carousel autoplay and fade deps ([73f0668](https://github.com/glasshome/ui/commit/73f06688bd5da69d7602fb7586fc55c492c80a99))
 * **section-card:** accept a class passthrough ([d21c1b5](https://github.com/glasshome/ui/commit/d21c1b5bf6244b1e2ecc9e3172b3fcdde8e1122c))
-
-
-### Reverts
-
-* restore the Carousel port ([5866780](https://github.com/glasshome/ui/commit/586678032361e0cb527775d618ddaad10d6b80aa))
-
-
-### Miscellaneous Chores
-
-* release 1.1.0 ([66ea053](https://github.com/glasshome/ui/commit/66ea0532d39f30afd1f980bf04469a4032283d7b))
-
-
-### Code Refactoring
-
-* drop the unused Carousel port ([e273fa7](https://github.com/glasshome/ui/commit/e273fa778435cd271a1b95cc2afbf4869e7b2443))
 
 ## 1.0.1 (2026-07-21)
 
