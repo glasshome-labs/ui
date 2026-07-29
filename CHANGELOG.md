@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/glasshome/ui/compare/v1.1.0...v1.1.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* **carousel:** let the Astro twin accept the div attributes it spreads ([f61f626](https://github.com/glasshome/ui/commit/f61f6267395c6ca72f47cafffe17fbb5d3226008))
+
 ## [1.1.0](https://github.com/glasshome/ui/compare/v1.0.1...v1.1.0) (2026-07-29)
 
 
