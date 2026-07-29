@@ -7,6 +7,7 @@
  * Slides go in the default slot as <CarouselItem>-shaped elements, or pass
  * `count` to have dots rendered for you.
  */
+import type { HTMLAttributes } from "astro/types";
 import {
 	CAROUSEL_DOTS,
 	CAROUSEL_VIEWPORT,
@@ -16,14 +17,16 @@ import {
 } from "../lib/carousel-classes";
 import { cn } from "../lib/utils";
 
-interface Props {
+// Extends div attributes because everything not destructured below is spread
+// onto the root; without it a caller's style/role/aria-* is a type error while
+// still working at runtime.
+interface Props extends HTMLAttributes<"div"> {
 	transition?: CarouselTransition;
 	/** Advance every N ms. Skipped under prefers-reduced-motion. */
 	autoplay?: number;
 	loop?: boolean;
 	/** Slide count; when set, dots are rendered. */
 	count?: number;
-	class?: string;
 }
 
 const {
