@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/glasshome/ui/compare/v1.1.1...v1.1.2) (2026-07-29)
+
+
+### Bug Fixes
+
+* **astro:** accept the attributes every component already spreads ([75b5bf6](https://github.com/glasshome/ui/commit/75b5bf690c80f85f35647312aa3f193e1148dbc7))
+
 ## [1.1.1](https://github.com/glasshome/ui/compare/v1.1.0...v1.1.1) (2026-07-29)
 
 
