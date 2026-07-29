@@ -34,6 +34,13 @@ leaks into a nested glass element; set knobs on the element itself):
 | `--glass-rim` | number | 1 | bevel strength 0..1 (cards/overlays 0.3) |
 | `--glass-text` | % | 65% | tinted text mix, used by `.glass-tint` only |
 
+`.glass` also publishes `--surface-tone`, an ordinary **inheriting** property
+mirroring that surface's `--glass-tone`. Descendants that need the accent (an
+icon, a label) read `--surface-tone`; reading `--glass-tone` from a child
+silently yields `transparent` and paints nothing, because the knobs do not
+inherit by design. A nested `.glass` re-declares `--surface-tone` from its own
+knob, so the no-leak guarantee still holds.
+
 The `.glass` formula is deliberately **unlayered**, so it owns
 border/background/box-shadow on the element: `bg-*`, `border-*`, and `shadow-*`
 utilities on a glass element are no-ops. Tune via knobs instead.

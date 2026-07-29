@@ -101,6 +101,14 @@
  * mixed toward transparent-black down to mud on light surfaces. Deliberately
  * unlayered so the material owns border/background/box-shadow; tune via knobs. */
 :where(.glass) {
+	/* Descendant-readable mirror of this surface's tone. The --glass-* knobs are
+	 * @property inherits:false so a nested glass element never picks up an
+	 * ancestor's tint — correct for surfaces, but it also means a plain child
+	 * (an icon, a label) reading var(--glass-tone) silently gets `transparent`
+	 * and paints nothing. --surface-tone is an ordinary inheriting property, so
+	 * children can read it; a nested .glass re-declares it from its own knob,
+	 * which resets the chain and keeps the no-leak guarantee. */
+	--surface-tone: var(--glass-tone);
 	border: 1px solid var(--glass-edge);
 	/* Base is a gradient layer (not background-color) so the frost slice can sit
 	 * BELOW it — background-color always paints under every image layer, which
