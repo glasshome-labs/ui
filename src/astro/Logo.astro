@@ -1,14 +1,4 @@
 ---
-/**
- * The GlassHome lockup for Astro / SSR pages — the same spec the Solid <Logo>
- * renders, as plain HTML with zero JS. Use this instead of hand-building a
- * mark + "GlassHome" + sub-line stack; that is how the lockup ended up in six
- * shapes across the repos.
- *
- * `href` renders the whole lockup as a link. The `sub` slot replaces the
- * sub-brand line for surfaces that animate over it (e.g. hub's launch
- * countdown cross-fade); it inherits nothing, so pass LOGO_SUB_CLASS yourself.
- */
 import {
 	cn,
 	LOGO_DEFAULT_SIZE,
@@ -23,8 +13,23 @@ import {
 	LOGO_SUB_CLASS,
 	type LogoSize,
 } from "@glasshome/ui";
+/**
+ * The GlassHome lockup for Astro / SSR pages — the same spec the Solid <Logo>
+ * renders, as plain HTML with zero JS. Use this instead of hand-building a
+ * mark + "GlassHome" + sub-line stack; that is how the lockup ended up in six
+ * shapes across the repos.
+ *
+ * `href` renders the whole lockup as a link. The `sub` slot replaces the
+ * sub-brand line for surfaces that animate over it (e.g. hub's launch
+ * countdown cross-fade); it inherits nothing, so pass LOGO_SUB_CLASS yourself.
+ */
+import type { HTMLAttributes } from "astro/types";
 
-interface Props {
+// Renders <a> when href is set, <div> otherwise, so the div attributes are the
+// common base and the anchor-only ones a lockup link actually wants are added.
+interface Props
+	extends HTMLAttributes<"div">,
+		Partial<Pick<HTMLAttributes<"a">, "target" | "rel">> {
 	/** Sub-brand line. Defaults to "Dash". */
 	sub?: string;
 	size?: LogoSize;
@@ -32,7 +37,6 @@ interface Props {
 	href?: string;
 	/** Override the mark asset. Both apps serve the default path. */
 	src?: string;
-	class?: string;
 	/** Extra classes for the mark, e.g. a hover transform. */
 	markClass?: string;
 }

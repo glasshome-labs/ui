@@ -1,4 +1,7 @@
 ---
+import { buttonVariants, cn } from "@glasshome/ui";
+import type { HTMLAttributes } from "astro/types";
+
 /**
  * Static button/CTA for Astro / SSR pages — the same `buttonVariants` recipe the
  * Solid <Button> uses, rendered as a plain <a>/<button> with zero JS. Drop this
@@ -9,15 +12,16 @@
  * (sizeless: color + shape only) so marketing CTAs supply their own height and
  * padding via `class`, matching how the hub pill tokens are used.
  */
-import { buttonVariants, cn } from "@glasshome/ui";
 
-interface Props {
-	variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
-	size?: "default" | "sm" | "lg" | "icon" | "none";
-	href?: string;
-	type?: "button" | "submit" | "reset";
-	class?: string;
-}
+// Renders <a> when href is set, <button> otherwise. `type` is omitted from the
+// button attributes because this component narrows it to the three form values.
+type Props = Omit<HTMLAttributes<"button">, "type"> &
+	Partial<Pick<HTMLAttributes<"a">, "target" | "rel" | "download">> & {
+		variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+		size?: "default" | "sm" | "lg" | "icon" | "none";
+		href?: string;
+		type?: "button" | "submit" | "reset";
+	};
 
 const {
 	variant = "default",

@@ -1,4 +1,5 @@
 ---
+import type { HTMLAttributes } from "astro/types";
 import {
 	CARD_INTERACTIVE,
 	CARD_PADDING,
@@ -8,12 +9,20 @@ import {
 } from "../lib/card-classes";
 import { cn } from "../lib/utils";
 
-interface Props {
+// Everything not destructured below is spread onto the rendered tag, so its
+// attributes must be accepted. Not Polymorphic<>: call sites pick the tag at
+// runtime (`as={href ? "a" : "div"}`), which widens to a union that a generic
+// tag parameter cannot resolve. The div attributes are the base; the handful
+// belonging to the other tags this is used as are named.
+interface Props
+	extends HTMLAttributes<"div">,
+		Partial<Pick<HTMLAttributes<"a">, "href" | "target" | "rel">>,
+		Partial<Pick<HTMLAttributes<"details">, "name" | "open">> {
 	as?: keyof HTMLElementTagNameMap;
 	interactive?: boolean;
 	opaque?: boolean;
 	padding?: CardPadding;
-	class?: string;
+	type?: "button" | "submit" | "reset";
 }
 
 const {

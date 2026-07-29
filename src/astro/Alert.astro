@@ -1,11 +1,4 @@
 ---
-/**
- * Static tone alert/callout for Astro / SSR pages — the same `ALERT_TONES` table
- * and surface recipe the Solid <Alert> and hub's docs Callout use, rendered as
- * plain HTML with zero JS and the lucide glyph inlined as SVG (no icon runtime).
- * Drop this into `.astro` markup instead of hand-writing a
- * `rounded-lg border border-primary/40 bg-primary/10` note box.
- */
 import {
 	ALERT_CLASS,
 	ALERT_CONTENT_CLASS,
@@ -19,12 +12,19 @@ import {
 	cn,
 	glassToneText,
 } from "@glasshome/ui";
+/**
+ * Static tone alert/callout for Astro / SSR pages — the same `ALERT_TONES` table
+ * and surface recipe the Solid <Alert> and hub's docs Callout use, rendered as
+ * plain HTML with zero JS and the lucide glyph inlined as SVG (no icon runtime).
+ * Drop this into `.astro` markup instead of hand-writing a
+ * `rounded-lg border border-primary/40 bg-primary/10` note box.
+ */
+import type { HTMLAttributes } from "astro/types";
 
-interface Props {
+interface Props extends HTMLAttributes<"div"> {
 	tone?: AlertTone;
 	/** Bold heading line. Optional. */
 	title?: string;
-	class?: string;
 }
 
 const { tone = "info", title, class: className, ...rest } = Astro.props;
