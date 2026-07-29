@@ -4,14 +4,56 @@ on:
   push:
     branches: [main]
 
+# `contents`/`pull-requests` for the release PR and the tag; `id-token` for the
+# npm OIDC exchange in the publish steps below.
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
+      # Publishing lives in this job rather than in a workflow keyed on
+      # `release: published`, because releases this action creates are authored
+      # by GITHUB_TOKEN, and GitHub does not trigger workflows from those events.
+      # A separate publish workflow therefore never fires, silently, and npm lags
+      # the tag (1.1.0 shipped that way). Gating on `release_created` keeps it to
+      # one hop, and keeps the repo free of a long-lived PAT whose only job would
+      # be working around that rule.
       - uses: googleapis/release-please-action@v4
+        id: release
         with:
           release-type: node
+
+      - uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.release_created }}
+      - uses: oven-sh/setup-bun@v2
+        if: ${{ steps.release.outputs.release_created }}
+      # npm >= 11.5.1 (node 24) required for OIDC trusted publishing; auth is
+      # the npmjs trusted-publisher binding (org glasshome, repo ui, this
+      # workflow file), no NPM_TOKEN involved.
+      - uses: actions/setup-node@v4
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+      - run: bun install --frozen-lockfile
+        if: ${{ steps.release.outputs.release_created }}
+      - run: bun run lint
+        if: ${{ steps.release.outputs.release_created }}
+      - run: bun run check:tokens
+        if: ${{ steps.release.outputs.release_created }}
+      - run: bun run check:types
+        if: ${{ steps.release.outputs.release_created }}
+      - run: bun run test
+        if: ${{ steps.release.outputs.release_created }}
+      - run: bun run build
+        if: ${{ steps.release.outputs.release_created }}
+      - run: bun run check:publish
+        if: ${{ steps.release.outputs.release_created }}
+      - run: node -e "await import('./dist/index.js'); await import('./dist/tokens/index.js')"
+        if: ${{ steps.release.outputs.release_created }}
+      - run: npm publish --provenance --access public
+        if: ${{ steps.release.outputs.release_created }}
