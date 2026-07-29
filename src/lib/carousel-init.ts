@@ -74,7 +74,9 @@ export function initCarousels(root: ParentNode = document) {
 		el.addEventListener("carousel:pause", () => autoplay?.stop());
 		el.addEventListener("carousel:resume", () => autoplay?.play());
 
-		dots.forEach((dot, i) => dot.addEventListener("click", () => embla.scrollTo(i)));
+		dots.forEach((dot, i) => {
+			dot.addEventListener("click", () => embla.scrollTo(i));
+		});
 		el.querySelector("[data-carousel-prev]")?.addEventListener("click", () => embla.scrollPrev());
 		el.querySelector("[data-carousel-next]")?.addEventListener("click", () => embla.scrollNext());
 
