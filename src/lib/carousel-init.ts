@@ -28,21 +28,51 @@ export function initCarousels(root: ParentNode = document) {
 		const plugins = [];
 		if (transition !== "slide") plugins.push(Fade());
 		if (autoplayMs > 0 && !reduced) {
-			plugins.push(Autoplay({ delay: autoplayMs, stopOnInteraction: true }));
+			// Manual nav should not kill autoplay for good; hovering pauses it and
+			// leaving resumes, which is what a hero carousel wants.
+			plugins.push(
+				Autoplay({
+					delay: autoplayMs,
+					stopOnInteraction: false,
+					stopOnMouseEnter: true,
+					stopOnFocusIn: true,
+				}),
+			);
 		}
 
 		const embla = EmblaCarousel(viewport, { loop }, plugins);
 		const dots = Array.from(el.querySelectorAll("[data-carousel-dot]")) as HTMLButtonElement[];
 
+		let previous = -1;
 		const onSelect = () => {
 			const index = embla.selectedScrollSnap();
-			embla.slideNodes().forEach((node, i) => node.toggleAttribute("data-selected", i === index));
+			embla.slideNodes().forEach((node, i) => {
+				node.toggleAttribute("data-selected", i === index);
+				// The outgoing slide stays visible one layer down until the sweep lands.
+				node.toggleAttribute("data-prev", i === previous && i !== index);
+			});
+			previous = index;
 			dots.forEach((dot, i) => {
 				dot.className = carouselDot(i === index);
 				dot.setAttribute("aria-current", String(i === index));
 			});
 			el.dispatchEvent(new CustomEvent("carousel:select", { detail: { index }, bubbles: true }));
 		};
+
+		el.addEventListener("keydown", (e) => {
+			const key = (e as KeyboardEvent).key;
+			if (key !== "ArrowLeft" && key !== "ArrowRight") return;
+			e.preventDefault();
+			if (key === "ArrowLeft") embla.scrollPrev();
+			else embla.scrollNext();
+		});
+
+		// A host that covers the carousel (a lightbox) pauses it, so the slide
+		// does not change behind the overlay.
+		const autoplay = (embla.plugins() as { autoplay?: { play: () => void; stop: () => void } })
+			.autoplay;
+		el.addEventListener("carousel:pause", () => autoplay?.stop());
+		el.addEventListener("carousel:resume", () => autoplay?.play());
 
 		dots.forEach((dot, i) => dot.addEventListener("click", () => embla.scrollTo(i)));
 		el.querySelector("[data-carousel-prev]")?.addEventListener("click", () => embla.scrollPrev());

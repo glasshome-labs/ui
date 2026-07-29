@@ -13,17 +13,17 @@ export function carouselTrack(
 ) {
 	return transition === "slide"
 		? `flex ${orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col"}`
-		: "grid [&>*]:col-start-1 [&>*]:row-start-1";
+		: "carousel-stack";
 }
 
 export function carouselItem(
 	transition: CarouselTransition,
 	orientation: "horizontal" | "vertical" = "horizontal",
 ) {
-	const base = "min-w-0 shrink-0 grow-0 basis-full";
-	if (transition === "wipe") return `${base} carousel-wipe`;
-	if (transition === "fade") return base;
-	return `${base} ${orientation === "horizontal" ? "pl-4" : "pt-4"}`;
+	// Stacked slides fill their grid cell; only a flex track needs basis/gutter.
+	if (transition === "wipe") return "min-w-0 carousel-wipe";
+	if (transition === "fade") return "min-w-0";
+	return `min-w-0 shrink-0 grow-0 basis-full ${orientation === "horizontal" ? "pl-4" : "pt-4"}`;
 }
 
 export const CAROUSEL_DOTS = "flex items-center justify-center gap-2";

@@ -163,18 +163,53 @@
 	}
 }
 
-/* Carousel `wipe`: the incoming slide is revealed by a diagonal corner-to-corner
- * sweep. Embla's fade plugin stacks the slides and owns opacity; the clip-path
- * rides on top, keyed off the slide's own selected state. */
+/* Stacked carousel modes (fade, wipe) put every slide in one grid cell. This is
+ * structural, so it ships as real CSS: a Tailwind arbitrary variant written in
+ * package source never reaches a consumer, because Tailwind skips node_modules
+ * when scanning for class names. */
+.carousel-stack {
+	display: grid;
+}
+.carousel-stack > * {
+	grid-column: 1;
+	grid-row: 1;
+}
+
+/* Carousel `wipe`: the incoming slide sweeps in diagonally over the previous
+ * one, which stays fully visible beneath until the sweep lands. Only the
+ * incoming slide animates: giving the outgoing one a matching transition makes
+ * it collapse at the same time, which reads as two wipes from opposite corners.
+ * Slides are opaque here; embla's fade plugin only stops the track translating,
+ * and its opacity would wash out the sweep. */
 .carousel-wipe {
-	clip-path: polygon(0 0, 0 0, 0 0, 0 0);
-	transition: clip-path var(--duration-expand) var(--ease-emphasis);
+	/* Content choreography, not a state change: the motion scale's rungs are for
+	 * micro-interactions and are far too quick to read as a sweep. Override per
+	 * instance by setting --carousel-wipe on the carousel. */
+	--carousel-wipe: 1600ms;
+	clip-path: polygon(0 0, 300% 0, 0 300%, 0 0);
+	/* The fade plugin fades AND parks inactive slides off-screen
+	 * (transform: translate(containerWidth + 2)), on embla's own short scroll
+	 * duration. Both have to be neutralised or the sweep reveals empty space
+	 * once the outgoing slide leaves: in wipe mode clip-path is the only reveal,
+	 * and z-index alone decides what shows through. Inline styles, hence
+	 * !important. */
+	opacity: 1 !important;
+	transform: none !important;
+}
+.carousel-wipe[data-prev] {
+	z-index: 1;
 }
 .carousel-wipe[data-selected] {
-	clip-path: polygon(0 0, 200% 0, 0 200%, 0 0);
+	z-index: 2;
+	animation: carousel-wipe-in var(--carousel-wipe) ease-in-out;
+}
+@keyframes carousel-wipe-in {
+	from {
+		clip-path: polygon(0 0, 0 0, 0 0, 0 0);
+	}
 }
 @media (prefers-reduced-motion: reduce) {
-	.carousel-wipe {
-		transition: none;
+	.carousel-wipe[data-selected] {
+		animation: none;
 	}
 }

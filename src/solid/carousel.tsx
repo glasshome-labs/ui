@@ -96,7 +96,15 @@ const Carousel: ParentComponent<
 		const plugins = [...(local.plugins ?? [])];
 		if (transition() !== "slide") plugins.push(Fade());
 		if (local.autoplay && !reduced) {
-			plugins.push(Autoplay({ delay: local.autoplay, stopOnInteraction: true }));
+			// Manual nav should not kill autoplay for good; hover/focus pauses it.
+			plugins.push(
+				Autoplay({
+					delay: local.autoplay,
+					stopOnInteraction: false,
+					stopOnMouseEnter: true,
+					stopOnFocusIn: true,
+				}),
+			);
 		}
 		const embla = EmblaCarousel(
 			viewportEl,
@@ -109,17 +117,21 @@ const Carousel: ParentComponent<
 		setApi(embla);
 		local.setApi?.(embla);
 
+		let previous = -1;
 		const onSelect = () => {
 			setCanScrollPrev(embla.canScrollPrev());
 			setCanScrollNext(embla.canScrollNext());
 			setSelected(embla.selectedScrollSnap());
 			setSlideCount(embla.scrollSnapList().length);
-			// Slides carry their own selected state so CSS transitions (wipe) can
-			// key off it; embla itself only drives transform and opacity.
+			// Slides carry their own selected state so CSS (wipe) can key off it;
+			// embla itself only drives transform and opacity. data-prev keeps the
+			// outgoing slide one layer down until the sweep lands.
 			const active = embla.selectedScrollSnap();
 			embla.slideNodes().forEach((node, i) => {
 				node.toggleAttribute("data-selected", i === active);
+				node.toggleAttribute("data-prev", i === previous && i !== active);
 			});
+			previous = active;
 		};
 		onSelect();
 		embla.on("reInit", onSelect);
