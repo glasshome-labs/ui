@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.1.0](https://github.com/glasshome/ui/compare/v1.0.1...v1.1.0) (2026-07-29)
+
+
+### Features
+
+* **carousel:** add a server-rendered Astro twin ([7b0010c](https://github.com/glasshome/ui/commit/7b0010cb645493f815b58595a978cdd5b5bb3cd7))
+* **carousel:** add fade and wipe transitions, autoplay, and dots ([e0d917b](https://github.com/glasshome/ui/commit/e0d917bd28cba356b6f5fd8876937ad8affc7bd5))
+* **icon-picker:** own the icon picker, and dispatch SchemaForm on formType ([273a533](https://github.com/glasshome/ui/commit/273a533683f56cf87e62a71e5014bb883399efe9))
+* **theme:** add a motion scale with reduced-motion built in ([e687f83](https://github.com/glasshome/ui/commit/e687f83e17fdd166359c50cb565a7f678d8b031b))
+
+
+### Bug Fixes
+
+* **carousel:** give the dots forEach a statement body ([4d68b08](https://github.com/glasshome/ui/commit/4d68b08e4c9941e12aa139663c912af1d4d79313))
+* **carousel:** make the wipe transition actually read ([d820a2e](https://github.com/glasshome/ui/commit/d820a2eb9b62f121e4285d18fe4810d949195180))
+* **entity-selector:** name the real filter when a device-class empties the list ([e366242](https://github.com/glasshome/ui/commit/e366242b901d7e55dd4a4d135f1a9794378510a5))
+* **glass:** publish a descendant-readable tone ([fb6c98f](https://github.com/glasshome/ui/commit/fb6c98f9d37c3e9b7a0e130459f8415c22e685d0))
+* lock the carousel autoplay and fade deps ([73f0668](https://github.com/glasshome/ui/commit/73f06688bd5da69d7602fb7586fc55c492c80a99))
+* **section-card:** accept a class passthrough ([d21c1b5](https://github.com/glasshome/ui/commit/d21c1b5bf6244b1e2ecc9e3172b3fcdde8e1122c))
+
 ## 1.0.1 (2026-07-21)
 
 ### Fixed
