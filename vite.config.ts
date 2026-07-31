@@ -4,6 +4,9 @@ import solid from "vite-plugin-solid";
 export default defineConfig({
 	plugins: [solid()],
 	build: {
+		// tsc emits the .d.ts files into dist as a separate step, and a watch
+		// rebuild must not delete them. `build` cleans dist itself instead.
+		emptyOutDir: false,
 		lib: {
 			entry: {
 				index: "src/index.ts",

@@ -56,11 +56,11 @@
 		"scripts"
 	],
 	"scripts": {
-		"build": "vite build && tsc",
+		"build": "rm -rf dist && vite build && tsc",
 		"check:tokens": "bun scripts/check-tokens.ts",
 		"check:types": "tsc --noEmit -p tsconfig.test.json",
 		"check:publish": "publint && attw --pack . --profile esm-only --exclude-entrypoints ./styles ./styles/theme",
-		"dev": "vite build --watch",
+		"dev": "tsc -b --force && vite build --watch",
 		"lint": "biome check .",
 		"test": "vitest run",
 		"test:watch": "vitest",
