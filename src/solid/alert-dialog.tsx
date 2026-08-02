@@ -1,4 +1,5 @@
 import { AlertDialog as AlertDialogPrimitive } from "@kobalte/core/alert-dialog";
+import type { VariantProps } from "cva";
 import { type Component, type ComponentProps, splitProps } from "solid-js";
 import { OVERLAY_SURFACE, SCRIM_CLASS } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
@@ -94,11 +95,21 @@ const AlertDialogDescription: Component<ComponentProps<typeof AlertDialogPrimiti
 	);
 };
 
-const AlertDialogAction: Component<ComponentProps<typeof AlertDialogPrimitive.CloseButton>> = (
-	props,
-) => {
-	const [local, rest] = splitProps(props, ["class"]);
-	return <AlertDialogPrimitive.CloseButton class={cn(buttonVariants(), local.class)} {...rest} />;
+/** Confirming action. Pass `variant` (e.g. "destructive"); layering a second
+ *  buttonVariants() call through `class` cannot work, because the variants
+ *  carry tone as arbitrary custom properties that tailwind-merge keeps side by
+ *  side, leaving the later stylesheet rule to win. */
+const AlertDialogAction: Component<
+	ComponentProps<typeof AlertDialogPrimitive.CloseButton> &
+		Pick<VariantProps<typeof buttonVariants>, "variant" | "size">
+> = (props) => {
+	const [local, rest] = splitProps(props, ["class", "variant", "size"] as const);
+	return (
+		<AlertDialogPrimitive.CloseButton
+			class={cn(buttonVariants({ variant: local.variant, size: local.size }), local.class)}
+			{...rest}
+		/>
+	);
 };
 
 const AlertDialogCancel: Component<ComponentProps<typeof AlertDialogPrimitive.CloseButton>> = (
