@@ -57,6 +57,7 @@
 	],
 	"scripts": {
 		"build": "rm -rf dist && vite build && tsc",
+		"check:structural": "bun scripts/check-structural-classes.ts",
 		"check:tokens": "bun scripts/check-tokens.ts",
 		"check:types": "tsc --noEmit -p tsconfig.test.json",
 		"check:publish": "publint && attw --pack . --profile esm-only --exclude-entrypoints ./styles ./styles/theme",

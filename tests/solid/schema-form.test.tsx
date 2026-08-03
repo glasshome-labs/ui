@@ -8,6 +8,14 @@
 import { fireEvent, render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { describe, expect, it, vi } from "vitest";
+
+// The real iconify-icon custom element schedules render timers that can fire
+// after this file's happy-dom window is torn down (unhandled "document is not
+// defined"); nothing here asserts icon internals.
+vi.mock("@iconify-icon/solid", () => ({
+	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
+}));
+
 import { type EntityDataAdapter, EntityDataContext } from "../../src/solid/entity-data.js";
 import { dragTargetIndex } from "../../src/solid/list-reorder.js";
 import {

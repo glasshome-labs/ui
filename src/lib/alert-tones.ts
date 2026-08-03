@@ -47,10 +47,12 @@ export const alertIconFill = (c: string) => `color-mix(in srgb, ${c} 16%, transp
 
 export const ALERT_CLASS =
 	"relative overflow-hidden flex items-start gap-3 rounded-lg border p-3 backdrop-blur-sm";
+/* gh-alert-* svg chrome lives in globals.css as real CSS: an arbitrary variant
+ * here only works if the consumer's Tailwind scans package source. */
 export const ALERT_ICON_CLASS =
-	"flex size-8 shrink-0 items-center justify-center rounded-md [&>svg]:size-[18px]";
+	"gh-alert-icon flex size-8 shrink-0 items-center justify-center rounded-md";
 export const ALERT_ICON_BG_CLASS =
-	"pointer-events-none absolute -right-3 -bottom-4 [&>svg]:size-28 [&>svg]:[stroke-width:2.5px]";
+	"gh-alert-icon-bg pointer-events-none absolute -right-3 -bottom-4";
 export function alertIconBgStyle(color: string): Record<string, string> {
 	return {
 		color,
@@ -61,5 +63,4 @@ export function alertIconBgStyle(color: string): Record<string, string> {
 }
 export const ALERT_CONTENT_CLASS = "relative z-10 min-w-0 flex-1";
 export const ALERT_TITLE_CLASS = "font-semibold text-base leading-snug";
-export const ALERT_DESCRIPTION_CLASS =
-	"text-foreground/80 text-sm leading-snug [&:not(:first-child)]:mt-0.5";
+export const ALERT_DESCRIPTION_CLASS = "gh-alert-desc text-foreground/80 text-sm leading-snug";

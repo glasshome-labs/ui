@@ -4,6 +4,9 @@ import { cva } from "cva";
  * muddy over dark heroes/sections. Every class is literal for Tailwind's
  * scanner. `size: none` is sizeless for callers that own height/padding. */
 export const buttonVariants = cva({
+	// structural-ok: the [&_svg]: utilities stay in Tailwind's utility layer so a
+	// caller's own [&_svg]:size-* override can still win; unlayered real CSS in
+	// globals.css would beat every consumer utility regardless of specificity.
 	base: "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium text-sm outline-none transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
 	variants: {
 		variant: {

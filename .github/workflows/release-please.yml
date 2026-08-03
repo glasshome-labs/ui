@@ -45,6 +45,8 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
       - run: bun run check:tokens
         if: ${{ steps.release.outputs.release_created }}
+      - run: bun run check:structural
+        if: ${{ steps.release.outputs.release_created }}
       - run: bun run check:types
         if: ${{ steps.release.outputs.release_created }}
       - run: bun run test

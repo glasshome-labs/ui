@@ -204,6 +204,22 @@
 	}
 }
 
+/* Alert/toast icon chrome + description spacing: structural (same rationale as
+ * .carousel-stack below), so real CSS instead of [&>svg]: arbitrary variants.
+ * Values mirror the former utilities: size-[18px], size-28, mt-0.5. */
+.gh-alert-icon > svg {
+	width: 18px;
+	height: 18px;
+}
+.gh-alert-icon-bg > svg {
+	width: 7rem;
+	height: 7rem;
+	stroke-width: 2.5px;
+}
+.gh-alert-desc:not(:first-child) {
+	margin-top: 0.125rem;
+}
+
 /* Stacked carousel modes (fade, wipe) put every slide in one grid cell. This is
  * structural, so it ships as real CSS: a Tailwind arbitrary variant written in
  * package source never reaches a consumer, because Tailwind skips node_modules
