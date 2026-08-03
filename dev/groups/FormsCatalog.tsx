@@ -90,6 +90,8 @@ export function FormsCatalog() {
 	const [fieldSwitch, setFieldSwitch] = createSignal(true);
 	const [slider, setSlider] = createSignal([60]);
 	const [range, setRange] = createSignal([35, 72]);
+	const [setpoints, setSetpoints] = createSignal([12, 30]);
+	const [boilerTarget, setBoilerTarget] = createSignal([52]);
 	const [otp, setOtp] = createSignal("12");
 	const [fruit, setFruit] = createSignal<string | null>("Banana");
 	const [schemaData, setSchemaData] = createSignal<Record<string, unknown>>({
@@ -231,6 +233,40 @@ export function FormsCatalog() {
 					min={0}
 					max={100}
 					aria-label="Temperature range"
+				/>
+			</CatalogItem>
+
+			<CatalogItem
+				name="Slider, setpoints"
+				hint="thumbColors + fillTone pair + markers + minStepsBetweenThumbs"
+			>
+				<Slider
+					value={setpoints()}
+					fillTone={["oklch(0.68 0.15 235)", "oklch(0.66 0.19 40)"]}
+					onChange={setSetpoints}
+					min={7}
+					max={35}
+					step={0.5}
+					minStepsBetweenThumbs={1}
+					thumbColors={["oklch(0.68 0.15 235)", "oklch(0.66 0.19 40)"]}
+					markers={[21.5]}
+					aria-label="Heat and cool setpoints"
+				/>
+				<CatalogNote>
+					Marker is the current reading. Fill stays the glass material; only colors change.
+				</CatalogNote>
+			</CatalogItem>
+
+			<CatalogItem name="Slider, tinted fill" hint={`fillTone, value: ${boilerTarget()[0]}`}>
+				<Slider
+					value={boilerTarget()}
+					onChange={setBoilerTarget}
+					min={43}
+					max={60}
+					fillTone="oklch(0.66 0.19 40)"
+					thumbColors={["oklch(0.66 0.19 40)"]}
+					markers={[48]}
+					aria-label="Water heater target"
 				/>
 			</CatalogItem>
 

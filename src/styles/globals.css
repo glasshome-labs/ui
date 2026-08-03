@@ -109,6 +109,13 @@
 	 * children can read it; a nested .glass re-declares it from its own knob,
 	 * which resets the chain and keeps the no-leak guarantee. */
 	--surface-tone: var(--glass-tone);
+	/* Second tint axis. Ordinary (inheriting) properties, so they are re-declared
+	 * on every .glass to reset the chain at each glass boundary (same no-leak
+	 * trick as --surface-tone). Defaults reproduce the single-tone wash exactly;
+	 * override tone-2/wash-2/angle together for a two-tone tint (slider fills). */
+	--glass-tone-2: var(--glass-tone);
+	--glass-wash-2: calc(var(--glass-wash) / 3);
+	--glass-wash-angle: 135deg;
 	border: 1px solid var(--glass-edge);
 	/* Base is a gradient layer (not background-color) so the frost slice can sit
 	 * BELOW it — background-color always paints under every image layer, which
@@ -118,9 +125,9 @@
 		radial-gradient(120% 120% at 22% 8%, oklch(1 0 0 / var(--glass-light)), transparent 58%),
 		radial-gradient(120% 120% at 82% 100%, oklch(0 0 0 / var(--glass-shade)), transparent 58%),
 		linear-gradient(
-			135deg,
+			var(--glass-wash-angle),
 			color-mix(in srgb, var(--glass-tone) var(--glass-wash), transparent),
-			color-mix(in srgb, var(--glass-tone) calc(var(--glass-wash) / 3), transparent)
+			color-mix(in srgb, var(--glass-tone-2) var(--glass-wash-2), transparent)
 		),
 		linear-gradient(var(--glass-base), var(--glass-base)), var(--glass-frost, none);
 	box-shadow:
@@ -128,6 +135,32 @@
 		inset 0 -2px 4px color-mix(in srgb, var(--glass-tone) var(--glass-glow), transparent),
 		0 1px 3px color-mix(in srgb, var(--glass-tone) var(--glass-drop), transparent),
 		0 10px 30px -16px oklch(0 0 0 / var(--glass-lift));
+}
+
+/* Two-tone edge: border-color cannot gradient, so the border goes transparent
+ * and a masked 1px ring runs tone-1→tone-2 at the .glass-tint edge alpha.
+ * Must stay unlayered (the formula's border is unlayered and beats any @layer)
+ * and must read the inheriting mirrors, not the inherits:false knobs, which
+ * resolve to initial on a pseudo. Element must be positioned. */
+:where(.glass-edge-gradient) {
+	border-color: transparent;
+}
+:where(.glass-edge-gradient)::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	padding: 1px;
+	background: linear-gradient(
+		var(--glass-wash-angle),
+		oklch(from var(--surface-tone) l c h / 0.45),
+		oklch(from var(--glass-tone-2) l c h / 0.45)
+	);
+	mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
+	mask-composite: exclude;
+	pointer-events: none;
 }
 
 /* PageHeader banner surface: bespoke three-stop card gradient (its material

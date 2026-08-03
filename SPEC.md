@@ -25,7 +25,14 @@ leaks into a nested glass element; set knobs on the element itself):
 | `--glass-tone` | color | `transparent` | tint color; every tone term is inert when transparent |
 | `--glass-base` | color | `var(--card)` | ground fill; carry alpha for translucency (`color-mix(in srgb, var(--card) 60%, transparent)`) |
 | `--glass-edge` | color | border 60% | border color (`.glass-tint` derives it from the tone) |
-| `--glass-wash` | % | 28% | tone gradient strength (second stop = wash/3) |
+| `--glass-wash` | % | 28% | tone gradient strength (second stop = wash-2) |
+| `--glass-tone-2` | color | `var(--glass-tone)` | second tint stop; ordinary property re-declared per `.glass` (no leak), not `@property` |
+| `--glass-wash-2` | % | wash/3 | second stop strength; raise to `var(--glass-wash)` for an equal-strength two-tone wash |
+| `--glass-wash-angle` | angle | 135deg | tone wash direction; 90deg for horizontal fills (sliders) |
+
+Two-tone surfaces add `.glass-edge-gradient`: border-color cannot gradient, so
+the class swaps the border for a masked 1px ring running tone-1→tone-2 at the
+`.glass-tint` edge alpha (element must be positioned).
 | `--glass-light` | number | 0.05 | top-left white sheen (`.glass-tint` raises to 0.16) |
 | `--glass-shade` | number | 0 | bottom-right dark shade (light-theme depth) |
 | `--glass-glow` | % | 16% | inner tone glow |
