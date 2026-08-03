@@ -243,6 +243,12 @@ export {
 } from "./item.js";
 export { Kbd, KbdGroup } from "./kbd.js";
 export { Label } from "./label.js";
+export {
+	createListReorder,
+	dragTargetIndex,
+	type ListReorder,
+	type ListReorderOptions,
+} from "./list-reorder.js";
 export { Logo } from "./logo.js";
 export { NumberField } from "./number-field.js";
 export { Overlay } from "./overlay.js";

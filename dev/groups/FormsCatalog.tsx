@@ -59,7 +59,7 @@ const flowNodesSchema: ExtendedJSONSchema = {
 	items: {
 		formType: "variants",
 		discriminator: "kind",
-		title: "Node type",
+		title: "Type",
 		labels: { input: "Input", output: "Output" },
 		default: { kind: "input", weight: 1 },
 		oneOf: [

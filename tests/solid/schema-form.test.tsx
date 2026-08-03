@@ -9,6 +9,7 @@ import { fireEvent, render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { describe, expect, it, vi } from "vitest";
 import { type EntityDataAdapter, EntityDataContext } from "../../src/solid/entity-data.js";
+import { dragTargetIndex } from "../../src/solid/list-reorder.js";
 import {
 	type ExtendedJSONSchema,
 	extractItemDefaults,
@@ -59,7 +60,7 @@ const nodeItemSchema: ExtendedJSONSchema = {
 	default: { kind: "input", entities: [] },
 	formType: "variants",
 	discriminator: "kind",
-	title: "Node type",
+	title: "Type",
 	labels: { input: "Input", output: "Output" },
 };
 
@@ -223,16 +224,30 @@ describe("formType list", () => {
 		expect((atMin("button", { name: "Remove Solar" }) as HTMLButtonElement).disabled).toBe(true);
 	});
 
-	it("reorders items with the move buttons", () => {
+	it("reorders items from the grip handle via arrow keys", () => {
 		const onChange = vi.fn();
 		const { getAllByRole } = render(() => (
 			<SchemaForm schema={listSchema} data={{ nodes: twoNodes }} onChange={onChange} />
 		));
-		const downButtons = getAllByRole("button", { name: "Move down" }) as HTMLButtonElement[];
-		expect(downButtons[0]?.disabled).toBe(false);
-		expect(downButtons[1]?.disabled).toBe(true);
-		fireEvent.click(downButtons[0] as HTMLButtonElement);
+		const handles = getAllByRole("button", { name: /^Reorder / }) as HTMLButtonElement[];
+		expect(handles).toHaveLength(2);
+		fireEvent.keyDown(handles[0] as HTMLButtonElement, { key: "ArrowDown" });
 		expect(onChange).toHaveBeenCalledWith({ nodes: [twoNodes[1], twoNodes[0]] });
+		onChange.mockClear();
+		fireEvent.keyDown(handles[0] as HTMLButtonElement, { key: "ArrowUp" });
+		expect(onChange).not.toHaveBeenCalled();
+	});
+
+	it("dragTargetIndex crosses a neighbor at half its height", () => {
+		const heights = [40, 40, 120, 40];
+		expect(dragTargetIndex(heights, 0, 0)).toBe(0);
+		expect(dragTargetIndex(heights, 0, 21)).toBe(1);
+		expect(dragTargetIndex(heights, 0, 19)).toBe(0);
+		expect(dragTargetIndex(heights, 0, 40 + 61)).toBe(2);
+		expect(dragTargetIndex(heights, 3, -(120 / 2 + 1))).toBe(2);
+		expect(dragTargetIndex(heights, 1, -21)).toBe(0);
+		expect(dragTargetIndex(heights, 0, -50)).toBe(0);
+		expect(dragTargetIndex(heights, 3, 999)).toBe(3);
 	});
 
 	it("expands a row to the recursive item editor", () => {

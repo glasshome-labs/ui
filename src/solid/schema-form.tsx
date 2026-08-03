@@ -1,15 +1,18 @@
 import { Icon } from "@iconify-icon/solid";
 import type { JSONSchema7 } from "json-schema";
-import { createSignal, For, Match, Show, Switch as SwitchFlow } from "solid-js";
+import { createMemo, createSignal, For, Index, Match, Show, Switch as SwitchFlow } from "solid-js";
 import { cn } from "../lib/utils.js";
 import { Alert } from "./alert.js";
 import { AreaPicker } from "./area-picker.js";
+import { Badge } from "./badge.js";
 import { Button } from "./button.js";
 import { Card } from "./card.js";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible.js";
 import { EntitySelector } from "./entity-selector.js";
 import { IconPicker, type IconPickerProps } from "./icon-picker.js";
 import { Input } from "./input.js";
 import { Label } from "./label.js";
+import { createListReorder } from "./list-reorder.js";
 import { NumberField } from "./number-field.js";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select.js";
 import { Switch } from "./switch.js";
@@ -171,7 +174,7 @@ export function SchemaForm(props: SchemaFormProps) {
 	};
 
 	return (
-		<div class={cn("space-y-5", props.class)} data-slot="schema-form">
+		<div class={cn("w-full min-w-0 space-y-5", props.class)} data-slot="schema-form">
 			<For each={properties()}>
 				{([key, prop]) => (
 					<LabeledField
@@ -341,6 +344,16 @@ function ListControl(props: FieldProps) {
 	const atMax = () => props.prop.maxItems !== undefined && items().length >= props.prop.maxItems;
 	const [openIndex, setOpenIndex] = createSignal(-1);
 
+	const kindLabel = (item: unknown) => {
+		const schema = itemSchema();
+		if (schema.formType !== "variants" || schema.discriminator === undefined) return undefined;
+		const kind = recordOf(item)[schema.discriminator];
+		if (typeof kind !== "string") return undefined;
+		return schema.labels?.[kind] ?? kind;
+	};
+
+	// The kind badge carries the variant label, so the caption never repeats it:
+	// labelField value, else "Item N".
 	const caption = (item: unknown, index: number) => {
 		const record = recordOf(item);
 		const labelField = props.prop.labelField;
@@ -348,11 +361,6 @@ function ListControl(props: FieldProps) {
 			const value = record[labelField];
 			if (typeof value === "string" && value.trim() !== "") return value;
 			if (typeof value === "number") return String(value);
-		}
-		const schema = itemSchema();
-		if (schema.formType === "variants" && schema.discriminator !== undefined) {
-			const kind = record[schema.discriminator];
-			if (typeof kind === "string") return schema.labels?.[kind] ?? kind;
 		}
 		return `Item ${index + 1}`;
 	};
@@ -365,16 +373,29 @@ function ListControl(props: FieldProps) {
 		if (openIndex() === index) setOpenIndex(-1);
 		else if (openIndex() > index) setOpenIndex(openIndex() - 1);
 	};
-	const move = (index: number, delta: number) => {
-		const target = index + delta;
-		if (target < 0 || target >= items().length) return;
+	const reorder = (from: number, to: number) => {
+		if (to === from || to < 0 || to >= items().length) return;
 		const next = [...items()];
-		const [moved] = next.splice(index, 1);
-		next.splice(target, 0, moved);
+		const [moved] = next.splice(from, 1);
+		next.splice(to, 0, moved);
 		props.onChange(next);
-		if (openIndex() === index) setOpenIndex(target);
-		else if (openIndex() === target) setOpenIndex(index);
+		const open = openIndex();
+		if (open === from) setOpenIndex(to);
+		else if (open !== -1) {
+			if (from < open && to >= open) setOpenIndex(open - 1);
+			else if (from > open && to <= open) setOpenIndex(open + 1);
+		}
 	};
+
+	// gapPx mirrors the container's gap-2 so the drop slot reads visually.
+	const listDrag = createListReorder({
+		count: () => items().length,
+		gapPx: 8,
+		onReorder: reorder,
+		onDragStart: (index) => {
+			if (openIndex() === index) setOpenIndex(-1);
+		},
+	});
 	const add = () => {
 		const next = [...items(), extractItemDefaults(itemSchema())];
 		props.onChange(next);
@@ -382,75 +403,105 @@ function ListControl(props: FieldProps) {
 	};
 
 	return (
-		<div class="flex flex-col gap-2" data-slot="schema-form-list">
-			<For each={items()}>
+		<div class="flex w-full min-w-0 flex-col gap-2" data-slot="schema-form-list">
+			<Index each={items()}>
 				{(item, index) => (
-					<Card data-slot="schema-form-list-item">
-						<div class="flex items-center gap-0.5 py-1 pr-1.5 pl-2">
-							<button
-								type="button"
-								class="flex min-w-0 flex-1 cursor-pointer items-center gap-2 py-1.5 text-left text-sm"
-								aria-expanded={openIndex() === index()}
-								onClick={() => setOpenIndex(openIndex() === index() ? -1 : index())}
+					<Card
+						ref={(el: HTMLElement) => listDrag.setRowEl(index, el)}
+						class={cn(
+							"w-full min-w-0 overflow-hidden transition-transform duration-(--duration-state)",
+							listDrag.draggingIndex() === index && "relative shadow-lg",
+						)}
+						style={listDrag.rowStyle(index)}
+						data-slot="schema-form-list-item"
+					>
+						<Collapsible
+							open={openIndex() === index}
+							onOpenChange={(open) => {
+								if (listDrag.isToggleSuppressed()) return;
+								setOpenIndex(open ? index : -1);
+							}}
+						>
+							<div
+								class={cn(
+									"relative flex min-h-11 select-none items-center gap-0.5 py-1 pr-1.5 pl-2",
+									"transition-colors duration-(--duration-micro) hover:bg-muted/40",
+								)}
+								onPointerDown={(e: PointerEvent) => {
+									const btn = (e.target as HTMLElement).closest("button");
+									if (btn && btn.dataset.slot !== "collapsible-trigger") return;
+									listDrag.startDrag(index, e, false);
+								}}
 							>
+								{/* Invisible layer over the whole bar: clicking anywhere toggles;
+								    the action buttons sit above it and win their own clicks. */}
+								<CollapsibleTrigger
+									class="absolute inset-0 rounded-[inherit] py-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+									aria-label={caption(item(), index)}
+								/>
 								<Icon
 									icon="lucide:chevron-right"
 									width={16}
 									height={16}
 									class={cn(
-										"shrink-0 text-muted-foreground transition-transform",
-										openIndex() === index() && "rotate-90",
+										"pointer-events-none relative shrink-0 text-muted-foreground transition-transform duration-(--duration-state)",
+										openIndex() === index && "rotate-90",
 									)}
 									aria-hidden="true"
 								/>
-								<span class="truncate">{caption(item, index())}</span>
-							</button>
-							<Button
-								variant="ghost"
-								size="icon"
-								class="size-7 p-1"
-								aria-label="Move up"
-								disabled={index() === 0}
-								onClick={() => move(index(), -1)}
-							>
-								<Icon icon="lucide:chevron-up" width={16} height={16} aria-hidden="true" />
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								class="size-7 p-1"
-								aria-label="Move down"
-								disabled={index() === items().length - 1}
-								onClick={() => move(index(), 1)}
-							>
-								<Icon icon="lucide:chevron-down" width={16} height={16} aria-hidden="true" />
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								class="size-7 p-1"
-								aria-label={`Remove ${caption(item, index())}`}
-								disabled={items().length <= minItems()}
-								onClick={() => removeAt(index())}
-							>
-								<Icon icon="lucide:x" width={16} height={16} aria-hidden="true" />
-							</Button>
-						</div>
-						<Show when={openIndex() === index()}>
-							<div class="border-border border-t p-3">
-								<FieldControl
-									id={`${props.id}.${index()}`}
-									name={props.name}
-									prop={itemSchema()}
-									value={item}
-									onChange={(value) => replaceAt(index(), value)}
-									searchIcons={props.searchIcons}
-								/>
+								<span class="pointer-events-none relative ml-2 min-w-0 flex-1 truncate text-left text-sm">
+									{caption(item(), index)}
+								</span>
+								<Show when={kindLabel(item())}>
+									{(label) => (
+										<Badge class="pointer-events-none relative mr-1 shrink-0">{label()}</Badge>
+									)}
+								</Show>
+								<Button
+									variant="ghost"
+									size="icon"
+									class="relative cursor-grab touch-none active:cursor-grabbing"
+									aria-label={`Reorder ${caption(item(), index)}`}
+									onPointerDown={(e: PointerEvent) => listDrag.startDrag(index, e, true)}
+									onKeyDown={(e: KeyboardEvent) => {
+										if (e.key === "ArrowUp") {
+											e.preventDefault();
+											reorder(index, index - 1);
+										} else if (e.key === "ArrowDown") {
+											e.preventDefault();
+											reorder(index, index + 1);
+										}
+									}}
+								>
+									<Icon icon="lucide:grip-vertical" width={16} height={16} aria-hidden="true" />
+								</Button>
+								<Button
+									variant="ghost"
+									size="icon"
+									class="relative"
+									aria-label={`Remove ${caption(item(), index)}`}
+									disabled={items().length <= minItems()}
+									onClick={() => removeAt(index)}
+								>
+									<Icon icon="lucide:x" width={16} height={16} aria-hidden="true" />
+								</Button>
 							</div>
-						</Show>
+							<CollapsibleContent>
+								<div class="border-border border-t p-3">
+									<LabeledField
+										id={`${props.id}.${index}`}
+										name={props.name}
+										prop={itemSchema()}
+										value={item()}
+										onChange={(value) => replaceAt(index, value)}
+										searchIcons={props.searchIcons}
+									/>
+								</div>
+							</CollapsibleContent>
+						</Collapsible>
 					</Card>
 				)}
-			</For>
+			</Index>
 			<Show when={items().length < minItems()}>
 				<p class="text-muted-foreground text-xs">
 					Add at least {minItems()} {minItems() === 1 ? "item" : "items"}.
@@ -458,7 +509,6 @@ function ListControl(props: FieldProps) {
 			</Show>
 			<Button
 				variant="outline"
-				size="sm"
 				class="self-start"
 				disabled={atMax()}
 				onClick={add}
@@ -476,13 +526,17 @@ function VariantsControl(props: FieldProps) {
 	const discriminator = () => props.prop.discriminator ?? "";
 	const kinds = () => branches().map((b) => branchKind(b, discriminator()));
 	const value = () => recordOf(props.value ?? props.prop.default);
-	const currentKind = () => {
+	// Memos with default === equality: typing in a field changes value() but not
+	// the kind string, so the branch tuples keep their identity and the field
+	// subtree is NOT remounted (a remount would drop focus on every keystroke).
+	const currentKind = createMemo(() => {
 		const kind = value()[discriminator()];
 		if (typeof kind === "string" && kinds().includes(kind)) return kind;
 		return kinds()[0] ?? "";
-	};
-	const currentBranch = () =>
-		branches().find((b) => branchKind(b, discriminator()) === currentKind());
+	});
+	const currentBranch = createMemo(() =>
+		branches().find((b) => branchKind(b, discriminator()) === currentKind()),
+	);
 	const labelFor = (kind: string) => props.prop.labels?.[kind] ?? kind;
 
 	const switchKind = (kind: string) => {
@@ -492,14 +546,14 @@ function VariantsControl(props: FieldProps) {
 		props.onChange(switchVariantValue(branch, discriminator(), kind, value()));
 	};
 
-	const branchFields = () => {
+	const branchFields = createMemo(() => {
 		const branch = currentBranch();
 		if (!branch) return [];
 		return propertiesOf(branch).filter(([key]) => key !== discriminator());
-	};
+	});
 
 	return (
-		<div class="flex flex-col gap-3" data-slot="schema-form-variants">
+		<div class="flex w-full min-w-0 flex-col gap-3" data-slot="schema-form-variants">
 			<Select
 				value={currentKind()}
 				onChange={(val) => {
@@ -515,18 +569,24 @@ function VariantsControl(props: FieldProps) {
 				</SelectTrigger>
 				<SelectContent />
 			</Select>
-			<For each={branchFields()}>
-				{([subKey, subProp]) => (
-					<LabeledField
-						id={`${props.id}.${subKey}`}
-						name={subKey}
-						prop={subProp}
-						value={value()[subKey]}
-						onChange={(fieldValue) => props.onChange({ ...value(), [subKey]: fieldValue })}
-						searchIcons={props.searchIcons}
-					/>
+			<Show when={currentKind()} keyed>
+				{(_kind) => (
+					<div class="fade-in-0 flex animate-in flex-col gap-3 duration-(--duration-state)">
+						<For each={branchFields()}>
+							{([subKey, subProp]) => (
+								<LabeledField
+									id={`${props.id}.${subKey}`}
+									name={subKey}
+									prop={subProp}
+									value={value()[subKey]}
+									onChange={(fieldValue) => props.onChange({ ...value(), [subKey]: fieldValue })}
+									searchIcons={props.searchIcons}
+								/>
+							)}
+						</For>
+					</div>
 				)}
-			</For>
+			</Show>
 		</div>
 	);
 }
