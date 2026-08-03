@@ -280,7 +280,11 @@ export {
 	ResponsiveDialogTitle,
 	ResponsiveDialogTrigger,
 } from "./responsive-dialog.js";
-export { SchemaForm } from "./schema-form.js";
+export {
+	type ExtendedJSONSchema,
+	SCHEMA_FORM_FORM_TYPES,
+	SchemaForm,
+} from "./schema-form.js";
 export { ScopeIndicator } from "./scope-indicator.js";
 export { ScrollArea, ScrollBar } from "./scroll-area.js";
 export {

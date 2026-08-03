@@ -1,5 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
+import type { ExtendedJSONSchema } from "../../src/solid";
 import {
 	Checkbox,
 	Field,
@@ -46,6 +47,42 @@ import {
 } from "../../src/solid";
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
 
+/* Wire shape the SDK's field.list(field.variants(...)) serializes to. */
+const flowNodesSchema: ExtendedJSONSchema = {
+	type: "array",
+	title: "Flow nodes",
+	minItems: 2,
+	maxItems: 4,
+	formType: "list",
+	addLabel: "Add node",
+	labelField: "label",
+	items: {
+		formType: "variants",
+		discriminator: "kind",
+		title: "Node type",
+		labels: { input: "Input", output: "Output" },
+		default: { kind: "input", weight: 1 },
+		oneOf: [
+			{
+				type: "object",
+				properties: {
+					kind: { type: "string", const: "input" },
+					label: { type: "string", title: "Label" },
+					weight: { type: "number", title: "Weight", default: 1 },
+				},
+			},
+			{
+				type: "object",
+				properties: {
+					kind: { type: "string", const: "output" },
+					label: { type: "string", title: "Label" },
+					remainder: { type: "boolean", title: "Remainder node", default: false },
+				},
+			},
+		],
+	} satisfies ExtendedJSONSchema,
+};
+
 export function FormsCatalog() {
 	const [checked, setChecked] = createSignal(true);
 	const [radio, setRadio] = createSignal("comfortable");
@@ -60,6 +97,12 @@ export function FormsCatalog() {
 		brightness: 80,
 		mode: "auto",
 		enabled: true,
+	});
+	const [listData, setListData] = createSignal<Record<string, unknown>>({
+		nodes: [
+			{ kind: "input", label: "Solar", weight: 2 },
+			{ kind: "output", label: "House", remainder: true },
+		],
 	});
 
 	return (
@@ -249,6 +292,20 @@ export function FormsCatalog() {
 				<CatalogNote>
 					Renders inputs from a JSON Schema (string → Input, integer → number, enum → Select,
 					boolean → Switch). Entity/area branches need HA context, so they are omitted here.
+				</CatalogNote>
+			</CatalogItem>
+
+			<CatalogItem name="SchemaForm: list + variants" hint="array of union items" span={2}>
+				<SchemaForm
+					schema={{ type: "object", properties: { nodes: flowNodesSchema } }}
+					data={listData()}
+					onChange={setListData}
+				/>
+				<CatalogNote>
+					formType "list": card per item, captioned by labelField (fallback: variant label, then
+					Item N), reorder/remove, add appends item defaults and disables at maxItems. formType
+					"variants": Select over the discriminator; switching kind keeps same-named values. Unknown
+					formTypes render a read-only "needs a newer dashboard" notice.
 				</CatalogNote>
 			</CatalogItem>
 		</CatalogGroup>
