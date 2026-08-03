@@ -62,6 +62,10 @@ export function createListReorder(opts: ListReorderOptions): ListReorder {
 	const gap = opts.gapPx ?? DEFAULT_GAP_PX;
 	const rowEls: Array<HTMLElement | undefined> = [];
 	const [drag, setDrag] = createSignal<{ from: number; to: number; dy: number } | null>(null);
+	// One-frame phase after a drop: transforms clear with transitions disabled,
+	// otherwise every row animates from its dragged offset back to zero before
+	// the reordered content appears (visible snap-back).
+	const [settling, setSettling] = createSignal(false);
 	let suppressToggle = false;
 
 	const startDrag = (index: number, e: PointerEvent, immediate: boolean) => {
@@ -96,6 +100,14 @@ export function createListReorder(opts: ListReorderOptions): ListReorder {
 			el.removeEventListener("pointerup", onUp);
 			el.removeEventListener("pointercancel", onUp);
 			const d = drag();
+			if (active && d) {
+				setSettling(true);
+				if (typeof requestAnimationFrame === "function") {
+					requestAnimationFrame(() => requestAnimationFrame(() => setSettling(false)));
+				} else {
+					setSettling(false);
+				}
+			}
 			setDrag(null);
 			if (active && d) opts.onReorder(d.from, d.to);
 			setTimeout(() => {
@@ -110,7 +122,7 @@ export function createListReorder(opts: ListReorderOptions): ListReorder {
 
 	const rowStyle = (index: number): Record<string, string | number> | undefined => {
 		const d = drag();
-		if (!d) return undefined;
+		if (!d) return settling() ? { transition: "none" } : undefined;
 		if (index === d.from) {
 			return { transform: `translateY(${d.dy}px)`, transition: "none", "z-index": 10 };
 		}
