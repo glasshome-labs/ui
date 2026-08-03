@@ -27,6 +27,7 @@ type SectionCardProps = {
 	action?: JSX.Element;
 	toolbar?: JSX.Element;
 	headerClass?: string;
+	subtitleClass?: string;
 	class?: string;
 	glass?: GlassSurface;
 	children: JSX.Element;
@@ -65,7 +66,9 @@ export function SectionCard(props: SectionCardProps) {
 								</Show>
 							</div>
 							<Show when={props.subtitle}>
-								<SectionMeta class="mt-0.5">{props.subtitle}</SectionMeta>
+								<SectionMeta class={cn("mt-0.5", props.subtitleClass)}>
+									{props.subtitle}
+								</SectionMeta>
 							</Show>
 						</div>
 					</div>
@@ -86,7 +89,7 @@ export function SectionCard(props: SectionCardProps) {
 
 export function SectionRow(props: ComponentProps<"div">) {
 	const [local, rest] = splitProps(props, ["class"]);
-	return <div class={`${SECTION_ROW_CLASS} ${local.class ?? ""}`} {...rest} />;
+	return <div class={cn(SECTION_ROW_CLASS, local.class)} {...rest} />;
 }
 
 type SectionIconSize = "sm" | "md" | "lg";
@@ -124,7 +127,10 @@ export function SectionIcon(props: {
 export function SectionTitle(props: { children: JSX.Element; class?: string }) {
 	return (
 		<h2
-			class={`truncate font-bold text-foreground text-lg tracking-tight sm:text-xl md:text-2xl ${props.class ?? ""}`}
+			class={cn(
+				"truncate font-bold text-foreground text-lg tracking-tight sm:text-xl md:text-2xl",
+				props.class,
+			)}
 		>
 			{props.children}
 		</h2>
@@ -132,15 +138,16 @@ export function SectionTitle(props: { children: JSX.Element; class?: string }) {
 }
 
 export function SectionSubtitle(props: { children: JSX.Element; class?: string }) {
-	return (
-		<h3 class={`font-semibold text-base leading-tight ${props.class ?? ""}`}>{props.children}</h3>
-	);
+	return <h3 class={cn("font-semibold text-base leading-tight", props.class)}>{props.children}</h3>;
 }
 
 export function SectionLabel(props: { children: JSX.Element; class?: string }) {
 	return (
 		<p
-			class={`px-1 font-medium text-[10px] text-muted-foreground uppercase tracking-wider ${props.class ?? ""}`}
+			class={cn(
+				"px-1 font-medium text-[10px] text-muted-foreground uppercase tracking-wider",
+				props.class,
+			)}
 		>
 			{props.children}
 		</p>
@@ -148,7 +155,7 @@ export function SectionLabel(props: { children: JSX.Element; class?: string }) {
 }
 
 export function SectionMeta(props: { children: JSX.Element; class?: string }) {
-	return <p class={`text-muted-foreground text-xs ${props.class ?? ""}`}>{props.children}</p>;
+	return <p class={cn("text-muted-foreground text-xs", props.class)}>{props.children}</p>;
 }
 
 export function SectionRowSkeleton(props: { class?: string }) {

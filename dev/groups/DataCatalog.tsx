@@ -12,6 +12,7 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
+	CountPill,
 	Empty,
 	EmptyContent,
 	EmptyDescription,
@@ -271,6 +272,28 @@ export function DataCatalog() {
 				<CatalogNote>
 					Also: SectionIcon, SectionLabel, SectionMeta, SectionSubtitle, SectionRowSkeleton. dash
 					injects its performant-blur engine via the glass prop; hub uses the frosted default.
+				</CatalogNote>
+			</CatalogItem>
+
+			<CatalogItem
+				name="SectionCard readable register"
+				hint="desk tools: text-sm meta via class merge"
+				span={3}
+			>
+				<SectionCard
+					title="Review queue depth"
+					subtitle="meta at text-sm through subtitleClass, for desk-distance surfaces"
+					subtitleClass="text-sm"
+					count={3}
+				>
+					<div class="flex items-center gap-3">
+						<CountPill class="text-sm">12</CountPill>
+						<SectionMeta class="text-sm">SectionMeta upsized the same way</SectionMeta>
+					</div>
+				</SectionCard>
+				<CatalogNote>
+					Text chrome merges caller classes via cn, so `class="text-sm"` is the sanctioned size door
+					(same as Badge). Default register stays text-xs.
 				</CatalogNote>
 			</CatalogItem>
 
