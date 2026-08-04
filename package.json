@@ -53,7 +53,8 @@
 		"src/astro",
 		"src/lib",
 		"src/styles",
-		"scripts"
+		"scripts",
+		"SPEC.md"
 	],
 	"scripts": {
 		"build": "rm -rf dist && vite build && tsc",
