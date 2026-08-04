@@ -18,6 +18,25 @@ Hand-written; drop this section once release-please cuts the version from the co
 
 * **input-classes:** add `FIELD_CHROME`, the recipe SPEC.md already documented. Toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) wear it and stay keyed to `--input` in both themes, so they keep reading as empty wells now that fields do not.
 
+## [1.2.0](https://github.com/glasshome/ui/compare/v1.1.2...v1.2.0) (2026-08-04)
+
+
+### Features
+
+* **alert-dialog:** variant prop on AlertDialogAction ([e45fc0a](https://github.com/glasshome/ui/commit/e45fc0aee027a3ae25cc5308337f217633d5dfbc))
+* class-passthrough gate and structural-class lint ([f2c855f](https://github.com/glasshome/ui/commit/f2c855f6243d6a7cd6900a79d4d37cf01ff7e202))
+* **schema-form:** controlled recursive form with list and variants fields ([38728fd](https://github.com/glasshome/ui/commit/38728fd49cb559c40c34c2e8504f037b829e72e7))
+* **schema-form:** interaction polish and reusable list drag-reorder ([6e3a975](https://github.com/glasshome/ui/commit/6e3a975ce36ecd579f3b16a97eb72df45d42027b))
+* **section-card:** merge caller classes via cn, add subtitleClass ([b276b07](https://github.com/glasshome/ui/commit/b276b07a2e9620f7f1f8b0ec911a8bb2db5e07ca))
+* **slider:** thumbColors, fillTone, markers, minStepsBetweenThumbs ([577ed42](https://github.com/glasshome/ui/commit/577ed429026594f19d82377219a282ee6c37a00d))
+
+
+### Bug Fixes
+
+* **build:** keep type declarations during watch builds ([07f9abd](https://github.com/glasshome/ui/commit/07f9abdacc326b9c103898ebdf39fd08e9a8588f))
+* make the light theme legible, and stop an off switch reading as on ([5f8f071](https://github.com/glasshome/ui/commit/5f8f0712b35d560a92b017b1b89285ee63c399d3))
+* **schema-form:** clear drop transforms without transition ([6168d58](https://github.com/glasshome/ui/commit/6168d585ae6807553a312d515e68d81fa236f833))
+
 ## [1.1.2](https://github.com/glasshome/ui/compare/v1.1.1...v1.1.2) (2026-07-29)
 
 
