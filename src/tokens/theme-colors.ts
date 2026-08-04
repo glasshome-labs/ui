@@ -94,7 +94,10 @@ export function resolveThemeColors(base: ThemeBaseColors, mode: "light" | "dark"
 		input:
 			mode === "light" ? adjustLightness(base.border, 0.01) : adjustLightness(base.border, 0.04),
 		ring: base.accent,
-		destructive: mode === "light" ? "oklch(0.629 0.1902 23.0704)" : "oklch(0.7106 0.1661 22.2162)",
+		/* Fixed per mode, not derived: destructive is read as text and as a filled
+		 * surface with white on it, so both ends are contrast-tuned against the
+		 * theme's ground rather than against whatever accent the preset picked. */
+		destructive: mode === "light" ? "oklch(0.54 0.19 23.0704)" : "oklch(0.7106 0.1661 22.2162)",
 	};
 }
 

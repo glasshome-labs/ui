@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { Checkbox as CheckboxPrimitive } from "@kobalte/core/checkbox";
 import { type Component, type ComponentProps, type JSX, splitProps } from "solid-js";
-import { INPUT_SURFACE } from "../lib/input-classes.js";
+import { FIELD_CHROME } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
 
 const Checkbox: Component<ComponentProps<typeof CheckboxPrimitive>> = (props) => {
@@ -20,7 +20,7 @@ const Checkbox: Component<ComponentProps<typeof CheckboxPrimitive>> = (props) =>
 							"box-border inline-flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-[5px] shadow-xs transition-all duration-200 ease-out group-active:scale-90 peer-focus-visible:border-ring peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50",
 							state.checked()
 								? "glass glass-tint text-foreground [--glass-tone:var(--primary)]"
-								: INPUT_SURFACE,
+								: FIELD_CHROME,
 							props.disabled && "cursor-not-allowed border-dashed opacity-40",
 							local.class,
 						)}

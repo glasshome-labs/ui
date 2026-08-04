@@ -1,7 +1,7 @@
 import { Slider as KSlider } from "@kobalte/core/slider";
 import type { Component } from "solid-js";
 import { Index, splitProps } from "solid-js";
-import { INPUT_SURFACE } from "../lib/input-classes.js";
+import { FIELD_CHROME } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
 
 const THUMB_SIZE = 28;
@@ -73,10 +73,10 @@ const Slider: Component<SliderProps> = (props) => {
 			onChange={local.onChange}
 			onChangeEnd={local.onChangeEnd}
 			class={cn(
-				// The rail wears the shared recessed input surface, so the track reads
-				// as the same dug-out glass as every Input/Select field.
+				// The rail wears the shared toggle/rail chrome, so it reads as an empty
+				// well in both themes (a field's light-theme fill rises to the card).
 				"relative flex w-full touch-none select-none items-center rounded-xl",
-				INPUT_SURFACE,
+				FIELD_CHROME,
 				local.disabled && "cursor-not-allowed opacity-50",
 				local.class,
 			)}

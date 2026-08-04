@@ -69,8 +69,27 @@ tone desaturates without swinging yellow — `glassToneText()`).
 | `OVERLAY_SURFACE` | lib/overlay-classes.ts | anything floating: menus, dialogs, sheets, tooltips |
 | `SCRIM_CLASS` | lib/overlay-classes.ts | modal backdrop (BottomSheet keeps its unblurred scrim for mobile perf) |
 | `INPUT_SURFACE` / `INPUT_CLASS` | lib/input-classes.ts | text fields + pickers (concave) |
-| `FIELD_CHROME` | lib/input-classes.ts | toggle-family chrome (checkbox box, radio ring, switch track) |
+| `FIELD_CHROME` | lib/input-classes.ts | toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) |
 | `TRACK_SURFACE` | lib/card-classes.ts | segmented tracks (tabs, toggle groups) |
+
+**Fields are not symmetric across the themes.** The recess is `.glass-sink`'s
+rim, which is theme independent; the fill under it is not. On the dark ground a
+field sits a touch ABOVE its card (card 0.17, `--input` 0.19) and reads as
+dug-out. Applying the same idea downward in the light theme puts a 0.9 fill
+under a 0.995 card — a nine-point drop, which is the cue this library (and every
+browser) spends on `disabled`, so a form of nine fields reads switched off. So
+`INPUT_SURFACE` takes its knobs from a theme-owned pair, `--field` /
+`--field-edge`: light fields sit AT the card with a solid `--border` edge (the
+boundary still measures 1.33:1 against the card, exactly what the fill drop used
+to carry), dark fields keep `--input` and the formula's soft 60% edge. Controls
+that must read as an *empty well* rather than a fillable field — the toggle
+chrome and rails — stay on `--input` in both themes via `FIELD_CHROME`.
+
+Semantic roles (`--success`, `--warning`, `--destructive`, `--ring`) are one
+value each, worn as fill and as text, so each theme tunes its own: the light
+values are darker than their dark-theme counterparts, not the same color. Every
+role clears 4.5:1 against `--background`/`--card`/`--popover`/`--muted` (3:1 for
+`--ring`, a focus indicator), enforced by `tests/tokens/contrast.test.ts`.
 
 ## One door per concept
 

@@ -68,8 +68,11 @@ export const THEME_PRESETS: ThemePreset[] = [
 				muted: "oklch(0.9702 0.008 250)",
 				mutedForeground: "oklch(0.34 0 0)",
 				input: "oklch(0.9 0.012 250)",
-				ring: "oklch(0.6 0.2 195)",
-				destructive: "oklch(0.629 0.1902 23.0704)",
+				// Darker than --accent, which they used to share: on a light ground the
+				// accent's own lightness leaves the focus ring and the destructive fill
+				// short of contrast. See the light block of styles/theme.css.
+				ring: "oklch(0.53 0.18 195)",
+				destructive: "oklch(0.54 0.19 23.0704)",
 			},
 			dark: {
 				primary: "oklch(0.48 0.2 215.221)",

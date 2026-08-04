@@ -39,7 +39,7 @@ export {
 	carouselTrack,
 } from "./lib/carousel-classes.js";
 export { glassToneText, toneTextMix } from "./lib/glass-tone.js";
-export { INPUT_CLASS, INPUT_SURFACE } from "./lib/input-classes.js";
+export { FIELD_CHROME, INPUT_CLASS, INPUT_SURFACE } from "./lib/input-classes.js";
 export {
 	LOGO_DEFAULT_SIZE,
 	LOGO_DEFAULT_SRC,

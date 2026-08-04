@@ -10,7 +10,7 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
-import { INPUT_SURFACE } from "../lib/input-classes.js";
+import { FIELD_CHROME, INPUT_SURFACE } from "../lib/input-classes.js";
 import { OVERLAY_SURFACE } from "../lib/overlay-classes.js";
 import {
 	BottomSheet,
@@ -479,7 +479,7 @@ export function EntitySelector(props: EntitySelectorProps) {
 							class={`flex size-4 shrink-0 items-center justify-center overflow-hidden rounded-[5px] border shadow-xs transition-all duration-200 ease-out ${
 								selected()
 									? "glass border-transparent text-foreground [--glass-tone:var(--primary)]"
-									: INPUT_SURFACE
+									: FIELD_CHROME
 							}`}
 							aria-hidden="true"
 						>

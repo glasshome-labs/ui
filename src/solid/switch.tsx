@@ -1,5 +1,5 @@
 import { type Component, splitProps } from "solid-js";
-import { INPUT_SURFACE } from "../lib/input-classes.js";
+import { FIELD_CHROME } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
 
 const TRACK_HEIGHT = 28;
@@ -38,7 +38,7 @@ const Switch: Component<SwitchProps> = (props) => {
 				// the slider rail; checked matches the slider fill. A `border-input`
 				// utility here would beat `:where(.glass)` and flatten the rim.
 				"peer relative inline-flex shrink-0 cursor-pointer items-center rounded-xl outline-none transition-all duration-200 ease-out focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
-				local.checked ? "glass glass-tint [--glass-tone:var(--primary)]" : INPUT_SURFACE,
+				local.checked ? "glass glass-tint [--glass-tone:var(--primary)]" : FIELD_CHROME,
 				local.class,
 			)}
 			style={{
@@ -53,7 +53,11 @@ const Switch: Component<SwitchProps> = (props) => {
 				style={{
 					width: `${THUMB_SIZE}px`,
 					height: `${THUMB_SIZE}px`,
-					background: "var(--primary)",
+					// Only ON wears the accent. A knob painted --primary in both states
+					// makes an off switch read as on, which is the one thing a switch
+					// has to say; off takes the neutral the rest of the system uses for
+					// inert chrome. Inline, so a caller cannot fix it with a class.
+					background: local.checked ? "var(--primary)" : "var(--muted-foreground)",
 					"box-shadow":
 						"0 2px 5px oklch(0 0 0 / 0.35), inset 0 1px 0 oklch(1 0 0 / 0.35), inset 0 -2px 3px oklch(0 0 0 / 0.2)",
 					transform: `translateX(${local.checked ? THUMB_TRAVEL : 0}px)`,

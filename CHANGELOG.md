@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+Hand-written; drop this section once release-please cuts the version from the commits.
+
+
+### Bug Fixes
+
+* **theme:** relight the light-theme semantic roles to pass WCAG AA. `--success`, `--warning`, `--destructive` and `--ring` were high-lightness values tuned for the dark ground, measuring 2.81:1, 2.09:1, 3.59:1 and 3.50:1 against the light `--background` — under the 4.5:1 text floor (3:1 for a focus indicator). Hue held, lightness dropped: now 5.24:1, 5.17:1, 5.21:1 and 4.68:1 (5.56 / 5.49 / 5.53 / 4.97 against `--card`), and white on the destructive fill goes 3.85:1 to 5.59:1. Dark theme unchanged.
+
+* **switch:** stop an off switch reading as on. The thumb was painted `var(--primary)` in both states, so an unchecked switch showed a filled accent knob; off now takes `--muted-foreground`.
+
+* **input:** stop light-theme fields reading as disabled. A field fill of L=0.9 under an L=0.995 card is the nine-point drop this library spends on `disabled`, and the 60%-alpha edge left nothing else to read the boundary by. `INPUT_SURFACE` now takes its fill and edge from a theme-owned `--field` / `--field-edge` pair: light fields sit at the card with a solid `--border` edge, dark fields keep the dug-out `--input` fill and the soft edge, and `.glass-sink` still supplies the recess in both.
+
+
+### Features
+
+* **input-classes:** add `FIELD_CHROME`, the recipe SPEC.md already documented. Toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) wear it and stay keyed to `--input` in both themes, so they keep reading as empty wells now that fields do not.
+
 ## [1.1.2](https://github.com/glasshome/ui/compare/v1.1.1...v1.1.2) (2026-07-29)
 
 
