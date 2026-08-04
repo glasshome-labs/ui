@@ -101,7 +101,7 @@ const AlertDialogDescription: Component<ComponentProps<typeof AlertDialogPrimiti
  *  side, leaving the later stylesheet rule to win. */
 const AlertDialogAction: Component<
 	ComponentProps<typeof AlertDialogPrimitive.CloseButton> &
-		Pick<VariantProps<typeof buttonVariants>, "variant" | "size">
+		Partial<Pick<VariantProps<typeof buttonVariants>, "variant" | "size">>
 > = (props) => {
 	const [local, rest] = splitProps(props, ["class", "variant", "size"] as const);
 	return (
