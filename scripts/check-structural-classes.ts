@@ -1,4 +1,4 @@
-// Gate B3 (sdk-2.md): a package class string may not depend on the consumer's
+// Gate B3 (sdk-contract-hardening.md): a package class string may not depend on the consumer's
 // Tailwind scanning package source. Arbitrary variants like `[&>svg]:` are the
 // tell: unlike plain utilities, no consumer's own code coincidentally
 // generates them, so they silently vanish for any consumer whose build never
