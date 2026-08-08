@@ -34,11 +34,12 @@ Two-tone surfaces add `.glass-edge-gradient`: border-color cannot gradient, so
 the class swaps the border for a masked 1px ring running tone-1→tone-2 at the
 `.glass-tint` edge alpha (element must be positioned).
 | `--glass-light` | number | 0.05 | top-left white sheen (`.glass-tint` raises to 0.16) |
+| `--glass-sheen` | `<x> <y>` | 120% 120% | sheen ellipse size; pin lengths on edge-anchored panels, where a percentage stretches into a blob over a flat field (side sheets use `600px 300px`) |
 | `--glass-shade` | number | 0 | bottom-right dark shade (light-theme depth) |
 | `--glass-glow` | % | 16% | inner tone glow |
 | `--glass-drop` | % | 20% | tone drop shadow |
-| `--glass-lift` | number | 0 | elevation shadow (cards 0.45, overlays 0.55) |
-| `--glass-rim` | number | 1 | bevel strength 0..1 (cards/overlays 0.3) |
+| `--glass-lift` | number | 0 | elevation shadow (cards 0.45, overlays 0.6) |
+| `--glass-rim` | number | 1 | bevel strength 0..1 (cards 0.3, overlays 1) |
 | `--glass-text` | % | 65% | tinted text mix, used by `.glass-tint` only |
 
 `.glass` also publishes `--surface-tone`, an ordinary **inheriting** property
@@ -52,9 +53,12 @@ The `.glass` formula is deliberately **unlayered**, so it owns
 border/background/box-shadow on the element: `bg-*`, `border-*`, and `shadow-*`
 utilities on a glass element are no-ops. Tune via knobs instead.
 
-`backdrop-blur` is not part of the formula. Cards add `CARD_BLUR`
-(`--glass-blur` px knob); toasts and other transform-animated surfaces must not
-blur (Chromium renders black mid-animation).
+`backdrop-blur` is not part of the formula. Cards add `CARD_BLUR` and overlays
+`OVERLAY_BLUR` (both read the `--glass-blur` px knob); toasts and other
+transform-animated surfaces must not blur (Chromium renders black
+mid-animation), and a surface that skips the blur takes an opaque fill
+(`CARD_SURFACE_OPAQUE`, `OVERLAY_SURFACE_OPAQUE`) — a translucent fill with
+nothing blurred behind it is just see-through.
 
 Mixing rules: tone washes mix in **srgb** (oklch drags a tone mixed toward
 transparent down to mud); tinted text mixes in **oklab** (no hue channel, so a
@@ -67,6 +71,8 @@ tone desaturates without swinging yellow — `glassToneText()`).
 | `CARD_SURFACE` / `CARD_SURFACE_OPAQUE` | lib/card-classes.ts | panels; via `<Card>` |
 | `CARD_SURFACE_BASE` + `CARD_BLUR` | lib/card-classes.ts | perf-blur gating (dash SectionCard) |
 | `OVERLAY_SURFACE` | lib/overlay-classes.ts | anything floating: menus, dialogs, sheets, tooltips |
+| `OVERLAY_SURFACE_BASE` + `OVERLAY_BLUR` | lib/overlay-classes.ts | perf-blur gating, same split as the card recipe |
+| `OVERLAY_SURFACE_OPAQUE` | lib/overlay-classes.ts | drag-animated overlays that cannot blur (BottomSheet) |
 | `SCRIM_CLASS` | lib/overlay-classes.ts | modal backdrop (BottomSheet keeps its unblurred scrim for mobile perf) |
 | `INPUT_SURFACE` / `INPUT_CLASS` | lib/input-classes.ts | text fields + pickers (concave) |
 | `FIELD_CHROME` | lib/input-classes.ts | toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) |
