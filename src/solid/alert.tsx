@@ -1,4 +1,12 @@
-import { type Component, type ComponentProps, type JSX, Show, splitProps } from "solid-js";
+import {
+	type Component,
+	type ComponentProps,
+	createContext,
+	type JSX,
+	Show,
+	splitProps,
+	useContext,
+} from "solid-js";
 import {
 	ALERT_CLASS,
 	ALERT_CONTENT_CLASS,
@@ -21,6 +29,13 @@ type AlertProps = ComponentProps<"div"> & {
 	title?: JSX.Element;
 	action?: JSX.Element;
 };
+
+// Lets `AlertTitle`, used as a child, pick up the same tone colour the
+// `title` prop gets. Without this an `<AlertTitle>` inside an `<Alert
+// tone="destructive">` rendered in plain foreground: same markup, same slot,
+// same size class, but colourless, because it had no way to see the tone its
+// parent had already resolved.
+const AlertToneContext = createContext<() => string>();
 
 const Alert: Component<AlertProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "tone", "icon", "title", "action", "children"]);
@@ -54,20 +69,22 @@ const Alert: Component<AlertProps> = (props) => {
 				</Show>
 			</span>
 			<div class={ALERT_CONTENT_CLASS}>
-				<Show when={local.title}>
-					<p
-						data-slot="alert-title"
-						class={ALERT_TITLE_CLASS}
-						style={{ color: glassToneText(tone().color) }}
-					>
-						{local.title}
-					</p>
-				</Show>
-				<Show when={local.children}>
-					<div data-slot="alert-description" class={ALERT_DESCRIPTION_CLASS}>
-						{local.children}
-					</div>
-				</Show>
+				<AlertToneContext.Provider value={() => tone().color}>
+					<Show when={local.title}>
+						<p
+							data-slot="alert-title"
+							class={ALERT_TITLE_CLASS}
+							style={{ color: glassToneText(tone().color) }}
+						>
+							{local.title}
+						</p>
+					</Show>
+					<Show when={local.children}>
+						<div data-slot="alert-description" class={ALERT_DESCRIPTION_CLASS}>
+							{local.children}
+						</div>
+					</Show>
+				</AlertToneContext.Provider>
 			</div>
 			<Show when={local.action}>
 				<div class="flex shrink-0 items-center">{local.action}</div>
@@ -78,7 +95,15 @@ const Alert: Component<AlertProps> = (props) => {
 
 const AlertTitle: Component<ComponentProps<"div">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
-	return <div data-slot="alert-title" class={cn(ALERT_TITLE_CLASS, local.class)} {...rest} />;
+	const toneColor = useContext(AlertToneContext);
+	return (
+		<div
+			data-slot="alert-title"
+			class={cn(ALERT_TITLE_CLASS, local.class)}
+			style={toneColor ? { color: glassToneText(toneColor()) } : undefined}
+			{...rest}
+		/>
+	);
 };
 
 const AlertDescription: Component<ComponentProps<"div">> = (props) => {
