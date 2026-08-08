@@ -18,6 +18,21 @@ Hand-written; drop this section once release-please cuts the version from the co
 
 * **input-classes:** add `FIELD_CHROME`, the recipe SPEC.md already documented. Toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) wear it and stay keyed to `--input` in both themes, so they keep reading as empty wells now that fields do not.
 
+## [1.3.0](https://github.com/glasshome/ui/compare/v1.2.0...v1.3.0) (2026-08-08)
+
+
+### Features
+
+* **glass:** add a --glass-sheen knob for the sheen ellipse size ([9506d7c](https://github.com/glasshome/ui/commit/9506d7cfc94fce7c416d3c0fa615a08cca48b702))
+
+
+### Bug Fixes
+
+* **alert-dialog:** make variant and size optional on AlertDialogAction ([c1c26be](https://github.com/glasshome/ui/commit/c1c26be722c417fd55fbdabe2f538fce9a484f32))
+* **alert:** colour AlertTitle by the tone its parent resolved ([26d4e63](https://github.com/glasshome/ui/commit/26d4e632ded79ae9c62f8323b6e4f2470ad1d74d))
+* **overlay:** blur behind the translucent overlay fill ([506c5be](https://github.com/glasshome/ui/commit/506c5be2cdb84334a154692c19b3ecff86af955e))
+* **sheet:** float the side panel and match the dialog's chrome ([b64125c](https://github.com/glasshome/ui/commit/b64125cc19336bc8b266f03f877f2873572046e9))
+
 ## [1.2.0](https://github.com/glasshome/ui/compare/v1.1.2...v1.2.0) (2026-08-04)
 
 
