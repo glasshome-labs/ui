@@ -1,4 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
+import { createSignal } from "solid-js";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -13,6 +14,7 @@ import {
 	BottomSheetBody,
 	BottomSheetContent,
 	BottomSheetDescription,
+	BottomSheetHandle,
 	BottomSheetHeader,
 	BottomSheetTitle,
 	BottomSheetTrigger,
@@ -63,15 +65,30 @@ import {
 } from "../../src/solid";
 import { CatalogGroup, CatalogItem } from "../CatalogKit";
 
+/* Dev-only: keeps a specimen open across HMR full-reloads (any edit to a
+ * shared lib constant like OVERLAY_SURFACE reloads the whole gallery, which
+ * would otherwise close every open overlay and lose scroll position). */
+function usePersistentOpen(key: string) {
+	const storageKey = `impeccable-open:${key}`;
+	const [open, setOpenSignal] = createSignal(sessionStorage.getItem(storageKey) === "1");
+	const setOpen = (value: boolean) => {
+		setOpenSignal(value);
+		sessionStorage.setItem(storageKey, value ? "1" : "0");
+	};
+	return [open, setOpen] as const;
+}
+
 export function OverlaysCatalog() {
+	const [dialogOpen, setDialogOpen] = usePersistentOpen("dialog");
+	const [sheetOpen, setSheetOpen] = usePersistentOpen("sheet");
 	return (
 		<CatalogGroup id="cat-overlays" title="Overlays">
 			<CatalogItem name="Dialog" hint="modal · click to open">
-				<Dialog>
+				<Dialog open={dialogOpen()} onOpenChange={setDialogOpen}>
 					<DialogTrigger as={Button} variant="outline">
 						Open dialog
 					</DialogTrigger>
-					<DialogContent class="border-border/50 bg-background/85 backdrop-blur-md">
+					<DialogContent>
 						<DialogHeader>
 							<DialogTitle>Package dialog</DialogTitle>
 							<DialogDescription>Confirm actions, edit records, link devices.</DialogDescription>
@@ -107,7 +124,7 @@ export function OverlaysCatalog() {
 			</CatalogItem>
 
 			<CatalogItem name="Sheet" hint="side panel · click to open">
-				<Sheet>
+				<Sheet open={sheetOpen()} onOpenChange={setSheetOpen}>
 					<SheetTrigger as={Button} variant="outline">
 						Open sheet
 					</SheetTrigger>
@@ -126,6 +143,7 @@ export function OverlaysCatalog() {
 						Open bottom sheet
 					</BottomSheetTrigger>
 					<BottomSheetContent>
+						<BottomSheetHandle />
 						<BottomSheetHeader>
 							<BottomSheetTitle>Bottom sheet</BottomSheetTitle>
 							<BottomSheetDescription>
@@ -158,7 +176,7 @@ export function OverlaysCatalog() {
 					<DropdownMenuTrigger as={Button} variant="outline">
 						Actions
 					</DropdownMenuTrigger>
-					<DropdownMenuContent class="border-border/50 bg-popover/85 backdrop-blur-md">
+					<DropdownMenuContent>
 						<DropdownMenuLabel>Widget</DropdownMenuLabel>
 						<DropdownMenuItem>
 							<Icon icon="lucide:pencil" width={16} height={16} /> Edit
@@ -180,7 +198,7 @@ export function OverlaysCatalog() {
 					<ContextMenuTrigger class="flex h-16 w-full items-center justify-center rounded-md border border-border/60 border-dashed bg-muted/20 text-muted-foreground text-xs">
 						Right-click me
 					</ContextMenuTrigger>
-					<ContextMenuContent class="border-border/50 bg-popover/85 backdrop-blur-md">
+					<ContextMenuContent>
 						<ContextMenuLabel>Widget</ContextMenuLabel>
 						<ContextMenuItem>
 							<Icon icon="lucide:pencil" width={16} height={16} /> Edit

@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { Dialog as DialogPrimitive } from "@kobalte/core/dialog";
 import {
 	type Component,
@@ -41,6 +40,9 @@ const SheetContent: ParentComponent<
 	const [local, rest] = splitProps(props, ["class", "children", "side", "above"]);
 	const side = () => local.side ?? "right";
 	const isBottom = () => side() === "bottom";
+	/* A viewport-tall panel would stretch the percentage-sized sheen into a small
+	 * blob over a flat field; pinned lengths match the ellipse a dialog gets. */
+	const surface = `${OVERLAY_SURFACE} [--glass-sheen:600px_300px]`;
 
 	return (
 		<DialogPrimitive.Portal>
@@ -50,11 +52,11 @@ const SheetContent: ParentComponent<
 				class={cn(
 					"fixed z-50 flex transition ease-in-out focus:outline-none focus-visible:outline-none data-[closed]:animate-out data-[expanded]:animate-in data-[closed]:duration-300 data-[expanded]:duration-500",
 					side() === "right" &&
-						`data-[closed]:slide-out-to-right data-[expanded]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 ${OVERLAY_SURFACE} sm:max-w-sm`,
+						`data-[closed]:slide-out-to-right data-[expanded]:slide-in-from-right inset-y-3 right-3 w-3/4 ${surface} rounded-lg sm:max-w-sm`,
 					side() === "left" &&
-						`data-[closed]:slide-out-to-left data-[expanded]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 ${OVERLAY_SURFACE} sm:max-w-sm`,
+						`data-[closed]:slide-out-to-left data-[expanded]:slide-in-from-left inset-y-3 left-3 w-3/4 ${surface} rounded-lg sm:max-w-sm`,
 					side() === "top" &&
-						`data-[closed]:slide-out-to-top data-[expanded]:slide-in-from-top inset-x-0 top-0 h-auto ${OVERLAY_SURFACE}`,
+						`data-[closed]:slide-out-to-top data-[expanded]:slide-in-from-top inset-x-3 top-3 h-auto ${surface} rounded-lg`,
 					side() === "bottom" &&
 						"data-[closed]:slide-out-to-bottom data-[expanded]:slide-in-from-bottom inset-x-0 bottom-0 flex h-auto max-h-[85vh] flex-col p-0",
 					local.class,
@@ -70,16 +72,12 @@ const SheetContent: ParentComponent<
 				<div
 					class={cn(
 						"relative flex flex-col",
-						isBottom() && `w-full overflow-hidden rounded-t-lg ${OVERLAY_SURFACE}`,
+						isBottom() && `w-full overflow-hidden rounded-t-lg ${surface}`,
 					)}
 				>
 					<div class={cn("flex min-h-0 flex-1 flex-col", isBottom() && "overflow-y-auto")}>
 						{local.children}
 					</div>
-					<DialogPrimitive.CloseButton class="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[expanded]:bg-secondary">
-						<Icon icon="lucide:x" width={16} height={16} class="size-4" />
-						<span class="sr-only">Close</span>
-					</DialogPrimitive.CloseButton>
 				</div>
 			</DialogPrimitive.Content>
 		</DialogPrimitive.Portal>
@@ -89,11 +87,7 @@ const SheetContent: ParentComponent<
 const SheetHeader: Component<ComponentProps<"div">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	return (
-		<div
-			data-slot="sheet-header"
-			class={cn("flex flex-col gap-1.5 px-4 py-4 sm:px-6", local.class)}
-			{...rest}
-		/>
+		<div data-slot="sheet-header" class={cn("flex flex-col gap-2 p-6", local.class)} {...rest} />
 	);
 };
 
@@ -102,7 +96,7 @@ const SheetFooter: Component<ComponentProps<"div">> = (props) => {
 	return (
 		<div
 			data-slot="sheet-footer"
-			class={cn("mt-auto flex flex-col gap-2 px-4 py-4 sm:px-6", local.class)}
+			class={cn("mt-auto flex flex-col-reverse gap-2 p-6 sm:flex-row sm:justify-end", local.class)}
 			{...rest}
 		/>
 	);
@@ -113,7 +107,7 @@ const SheetTitle: Component<ComponentProps<typeof DialogPrimitive.Title>> = (pro
 	return (
 		<DialogPrimitive.Title
 			data-slot="sheet-title"
-			class={cn("font-semibold text-foreground", local.class)}
+			class={cn("font-semibold text-lg leading-none tracking-tight", local.class)}
 			{...rest}
 		/>
 	);
