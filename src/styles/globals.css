@@ -26,6 +26,15 @@
 	inherits: false;
 	initial-value: 0.05;
 }
+/* Size of the top-left sheen ellipse, `<x> <y>`. Percentages scale with the
+ * element, which is right for cards but leaves an edge-anchored panel (a side
+ * sheet is narrow and viewport-tall) with a small blob over a flat matte field.
+ * Such surfaces pin absolute lengths so the highlight reads the same as on a
+ * dialog. Untyped: two values, so no single @property syntax fits. */
+@property --glass-sheen {
+	syntax: "*";
+	inherits: false;
+}
 @property --glass-shade {
 	syntax: "<number>";
 	inherits: false;
@@ -122,7 +131,11 @@
 	 * would put the frost above the fill. Layer order top→bottom: light, shade,
 	 * tone wash, base fill, frost. */
 	background:
-		radial-gradient(120% 120% at 22% 8%, oklch(1 0 0 / var(--glass-light)), transparent 58%),
+		radial-gradient(
+			var(--glass-sheen, 120% 120%) at 22% 8%,
+			oklch(1 0 0 / var(--glass-light)),
+			transparent 58%
+		),
 		radial-gradient(120% 120% at 82% 100%, oklch(0 0 0 / var(--glass-shade)), transparent 58%),
 		linear-gradient(
 			var(--glass-wash-angle),
