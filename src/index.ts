@@ -53,7 +53,13 @@ export {
 	LOGO_SUB_CLASS,
 	type LogoSize,
 } from "./lib/logo-lockup.js";
-export { OVERLAY_SURFACE, SCRIM_CLASS } from "./lib/overlay-classes.js";
+export {
+	OVERLAY_BLUR,
+	OVERLAY_SURFACE,
+	OVERLAY_SURFACE_BASE,
+	OVERLAY_SURFACE_OPAQUE,
+	SCRIM_CLASS,
+} from "./lib/overlay-classes.js";
 export {
 	SECTION_INNER_RADIUS,
 	SECTION_OUTER_RADIUS,
