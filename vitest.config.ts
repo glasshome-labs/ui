@@ -9,5 +9,9 @@ export default defineConfig({
 	test: {
 		environment: "happy-dom",
 		include: ["tests/**/*.test.{ts,tsx}"],
+		// Bound workers and per-worker heap: a leaking suite must fail with a heap
+		// error, not exhaust system memory (unbounded forks each default to ~4GB).
+		maxWorkers: 2,
+		execArgv: ["--max-old-space-size=2048"],
 	},
 });
