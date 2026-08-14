@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, mergeProps, Show } from "solid-js";
 import { cn } from "../lib/utils.js";
+import { Badge } from "./badge.js";
 import { ScopeIndicator } from "./scope-indicator.js";
 import { SectionIcon, SectionSubtitle } from "./section-card.js";
 import { WidgetTrustBadge } from "./widget-trust-badge.js";
@@ -21,6 +22,11 @@ export interface WidgetSummary {
 	description?: string | null;
 	isOfficial?: boolean;
 	isUnlisted?: boolean;
+	/** Newest version never finished publishing (bundle upload never confirmed,
+	 *  or no version row at all), so nothing is installable. Distinct from
+	 *  `isUnlisted`, which is a published widget hidden from search.
+	 *  Owner-facing surfaces set it; public ones leave it off. */
+	isUnpublished?: boolean;
 	downloadCount?: number;
 	latestVersion?: string | null;
 	versionCount?: number;
@@ -38,14 +44,6 @@ export function formatWidgetCount(n: number | null | undefined): string {
 	if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
 	if (v >= 1000) return `${(v / 1000).toFixed(1)}k`;
 	return v.toString();
-}
-
-function UnlistedMark() {
-	return (
-		<span class="shrink-0 rounded-full bg-foreground/10 px-1.5 py-0.5 font-medium text-[10px] text-muted-foreground uppercase tracking-wide">
-			Unlisted
-		</span>
-	);
 }
 
 type WidgetIdentityProps = {
@@ -81,7 +79,10 @@ export function WidgetIdentity(_props: WidgetIdentityProps) {
 					<WidgetTrustBadge isOfficial={!!props.widget.isOfficial} />
 
 					<Show when={props.widget.isUnlisted}>
-						<UnlistedMark />
+						<Badge tone="var(--warning)">Unlisted</Badge>
+					</Show>
+					<Show when={props.widget.isUnpublished}>
+						<Badge tone="var(--destructive)">Not published</Badge>
 					</Show>
 				</div>
 				<div class="mt-0.5 flex min-w-0 flex-wrap items-center gap-1.5">

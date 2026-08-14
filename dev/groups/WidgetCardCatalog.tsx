@@ -29,6 +29,20 @@ const COMMUNITY_WIDGET: WidgetSummary = {
 	versionCount: 3,
 };
 
+const UNLISTED_WIDGET: WidgetSummary = {
+	...COMMUNITY_WIDGET,
+	name: "house-sitter",
+	displayName: "House Sitter",
+	isUnlisted: true,
+};
+
+const UNPUBLISHED_WIDGET: WidgetSummary = {
+	...COMMUNITY_WIDGET,
+	name: "solar-forecast",
+	displayName: "Solar Forecast",
+	isUnpublished: true,
+};
+
 export function WidgetCardCatalog() {
 	return (
 		<CatalogGroup id="cat-widget-card" title="Widget card">
@@ -67,6 +81,22 @@ export function WidgetCardCatalog() {
 				</div>
 				<CatalogNote>
 					meta stays pinned to the footer even when descriptions differ in length
+				</CatalogNote>
+			</CatalogItem>
+
+			<CatalogItem
+				name="WidgetCard · state markers"
+				hint="owner-facing lists — visibility and publish state ride next to the name"
+				span={3}
+			>
+				<div class="w-full max-w-xl space-y-2">
+					<WidgetCard widget={UNLISTED_WIDGET} onClick={() => {}} showVersions />
+					<WidgetCard widget={UNPUBLISHED_WIDGET} onClick={() => {}} showVersions />
+				</div>
+				<CatalogNote>
+					unlisted = published but hidden from search (warning); not published = newest version
+					never finished uploading, nothing installable (destructive). Both are owner-only, public
+					surfaces leave the flags off
 				</CatalogNote>
 			</CatalogItem>
 		</CatalogGroup>
