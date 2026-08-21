@@ -116,19 +116,25 @@ const Dock: Component<DockProps> = (props) => {
 
 	onMount(() => {
 		const timeoutId = setTimeout(checkOverflow, 100);
+		// disconnect() stops further callbacks but not one already scheduled, so the
+		// pending id is held to be cleared on cleanup.
+		let resizeTimeoutId: ReturnType<typeof setTimeout> | undefined;
 		const resizeObserver = new ResizeObserver(() => {
-			setTimeout(checkOverflow, 50);
+			clearTimeout(resizeTimeoutId);
+			resizeTimeoutId = setTimeout(checkOverflow, 50);
 		});
 		resizeObserver.observe(containerRef);
 		onCleanup(() => {
 			clearTimeout(timeoutId);
+			clearTimeout(resizeTimeoutId);
 			resizeObserver.disconnect();
 		});
 	});
 
 	createEffect(() => {
 		local.items.length;
-		setTimeout(checkOverflow, 150);
+		const timeoutId = setTimeout(checkOverflow, 150);
+		onCleanup(() => clearTimeout(timeoutId));
 	});
 
 	return (
