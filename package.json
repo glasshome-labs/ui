@@ -59,6 +59,8 @@
 	"scripts": {
 		"build": "rm -rf dist && vite build && tsc",
 		"check:structural": "bun scripts/check-structural-classes.ts",
+		"check:dead": "fallow dead-code --fail-on-issues",
+		"check:styling": "fallow health --css",
 		"check:tokens": "bun scripts/check-tokens.ts",
 		"check:types": "tsc --noEmit -p tsconfig.test.json",
 		"check:publish": "publint && attw --pack . --profile esm-only --exclude-entrypoints ./styles ./styles/theme",
@@ -92,6 +94,7 @@
 		"@tailwindcss/vite": "^4.1.13",
 		"@types/json-schema": "^7.0.15",
 		"@types/node": "^25.2.2",
+		"fallow": "3.17.0",
 		"happy-dom": "^20.11.0",
 		"publint": "^0.3.21",
 		"tailwindcss": "^4.1.13",

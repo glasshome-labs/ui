@@ -1,0 +1,5 @@
+{
+	"$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+	"entry": ["dev/main.tsx", "scripts/*.{ts,mjs}", "src/astro/*.astro"],
+	"ignoreDependencies": ["@arethetypeswrong/cli"]
+}
