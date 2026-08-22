@@ -196,6 +196,7 @@ export {
 	FieldLegend,
 	FieldSeparator,
 	FieldSet,
+	FieldSubGroup,
 	FieldTitle,
 } from "./field.js";
 export {

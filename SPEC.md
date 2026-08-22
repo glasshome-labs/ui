@@ -106,6 +106,8 @@ role clears 4.5:1 against `--background`/`--card`/`--popover`/`--muted` (3:1 for
 | a modal | `<ResponsiveDialog>` (desktop dialog + mobile bottom sheet), `<Dialog>` for desktop-only | `<Sheet side="bottom">` as a modal |
 | a status chip | `<Badge tone="var(--success)">` | `rounded-full bg-green-500/10` |
 | a callout | `<Alert tone="warning">` | `border-amber-500/30 bg-amber-500/10` |
+| a titled group of form rows | `<FieldSet>` + `<FieldLegend>` (+ `<FieldDescription>`) | a tracked uppercase `SectionLabel` eyebrow |
+| rows that belong to the row above them | `<FieldSubGroup>` | a bare `<Separator>` and a left pad |
 | picking one of a few described choices | `<OptionCardGroup>` + `<OptionCard>` | a hand-rolled `role="radio"` card list |
 | picking one area, or several | `<AreaPicker>` (`values` + `onValuesChange` for multi) | a hand-rolled checkbox list of areas |
 | position inside a multi-step flow | `<StepIndicator count index>` | a hand-rolled row of dots |

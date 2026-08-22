@@ -49,7 +49,9 @@ const ToggleGroup: ParentComponent<
 				value={{ variant: local.variant, size: local.size, sliding: sliding() }}
 			>
 				<Show when={sliding()} fallback={local.children}>
-					<SlidingIndicator activeSelector="[data-pressed]" class="flex w-fit items-center">
+					{/* w-full, not w-fit: a shrink-to-fit root still sizes to content, and a
+					    `class="w-full"` root can finally let its flex-1 items share the width. */}
+					<SlidingIndicator activeSelector="[data-pressed]" class="flex w-full items-center">
 						{local.children}
 					</SlidingIndicator>
 				</Show>

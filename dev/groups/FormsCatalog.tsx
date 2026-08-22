@@ -12,6 +12,7 @@ import {
 	FieldLegend,
 	FieldSeparator,
 	FieldSet,
+	FieldSubGroup,
 	FieldTitle,
 	Form,
 	FormControl,
@@ -45,6 +46,7 @@ import {
 	SelectValue,
 	Slider,
 	Switch,
+	SwitchRow,
 	Textarea,
 } from "../../src/solid";
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
@@ -157,6 +159,33 @@ export function FormsCatalog() {
 							<FieldError errors={[{ message: "Enter a valid email address." }]} />
 						</Field>
 					</FieldGroup>
+				</FieldSet>
+			</CatalogItem>
+
+			<CatalogItem name="FieldSubGroup" hint="rows owned by the row above" span={2}>
+				<FieldSet class="w-full">
+					<FieldLegend>Control</FieldLegend>
+					<SwitchRow
+						label="Can control devices"
+						description="Off = can only watch"
+						checked={fieldSwitch()}
+						onChange={setFieldSwitch}
+					/>
+					<FieldSubGroup>
+						<SwitchRow
+							label="Door locks"
+							checked={false}
+							disabled={!fieldSwitch()}
+							onChange={() => {}}
+						/>
+						<SwitchRow
+							label="Cameras"
+							checked={false}
+							disabled={!fieldSwitch()}
+							onChange={() => {}}
+						/>
+						<FieldDescription>Sensitive things stay off until you turn them on.</FieldDescription>
+					</FieldSubGroup>
 				</FieldSet>
 			</CatalogItem>
 

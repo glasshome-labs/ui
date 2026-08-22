@@ -18,7 +18,7 @@ const FieldSet: Component<ComponentProps<"fieldset">> = (props) => {
 		<fieldset
 			data-slot="field-set"
 			class={cn(
-				"flex flex-col gap-6",
+				"flex flex-col gap-3",
 				"has-[>[data-slot=checkbox-group]]:gap-3 has-[>[data-slot=radio-group]]:gap-3",
 				local.class,
 			)}
@@ -33,13 +33,14 @@ const FieldLegend: Component<ComponentProps<"legend"> & { variant?: "legend" | "
 	const [local, rest] = splitProps(props, ["class", "variant"] as const);
 	const variant = () => local.variant ?? "legend";
 	return (
+		// No bottom margin: FieldSet's gap owns the space under a legend.
 		<legend
 			data-slot="field-legend"
 			data-variant={variant()}
 			class={cn(
-				"mb-3 font-medium",
-				"data-[variant=legend]:text-base",
-				"data-[variant=label]:text-sm",
+				"leading-tight",
+				"data-[variant=legend]:font-semibold data-[variant=legend]:text-base",
+				"data-[variant=label]:font-medium data-[variant=label]:text-sm",
 				local.class,
 			)}
 			{...rest}
@@ -147,9 +148,23 @@ const FieldDescription: Component<ComponentProps<"p">> = (props) => {
 			class={cn(
 				"font-normal text-muted-foreground text-sm leading-normal group-has-[[data-orientation=horizontal]]/field:text-balance",
 				"nth-last-2:-mt-1 last:mt-0 [[data-variant=legend]+&]:-mt-1.5",
+				// Dims with its title, else a disabled row reads as description-first.
+				"group-data-[disabled=true]/field:opacity-50",
 				"[&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4",
 				local.class,
 			)}
+			{...rest}
+		/>
+	);
+};
+
+/** Rows that belong to the control above them: indented, hung off a hairline rule. */
+const FieldSubGroup: Component<ComponentProps<"div">> = (props) => {
+	const [local, rest] = splitProps(props, ["class"]);
+	return (
+		<div
+			data-slot="field-sub-group"
+			class={cn("ml-1 flex flex-col gap-1 border-border/60 border-l pl-4", local.class)}
 			{...rest}
 		/>
 	);
@@ -237,5 +252,6 @@ export {
 	FieldLegend,
 	FieldSeparator,
 	FieldSet,
+	FieldSubGroup,
 	FieldTitle,
 };
