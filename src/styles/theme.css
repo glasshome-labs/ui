@@ -261,10 +261,6 @@
 	label:has(> input:is([type="checkbox"], [type="radio"]):not(:disabled)) {
 		cursor: pointer;
 	}
-	/* Old embedded WebViews (Shelly Wall Display) native-paint appearance:button as a gray box. */
-	button {
-		appearance: none;
-	}
 }
 
 /* Utility classes */
