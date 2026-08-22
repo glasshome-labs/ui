@@ -18,6 +18,19 @@ Hand-written; drop this section once release-please cuts the version from the co
 
 * **input-classes:** add `FIELD_CHROME`, the recipe SPEC.md already documented. Toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) wear it and stay keyed to `--input` in both themes, so they keep reading as empty wells now that fields do not.
 
+## [1.4.0](https://github.com/glasshome/ui/compare/v1.3.0...v1.4.0) (2026-08-22)
+
+
+### Features
+
+* **widget-identity:** mark widgets whose publish never completed ([e5652a0](https://github.com/glasshome/ui/commit/e5652a02f5731ddf9810a4891c6cf78becaef7fa))
+
+
+### Bug Fixes
+
+* **dock:** clear the overflow timers on cleanup ([b3b99a7](https://github.com/glasshome/ui/commit/b3b99a73cf0ad0c27c629104a30e54eac3cf561d))
+* **theme:** reset button appearance so old WebViews stop native-painting raw buttons ([67e480e](https://github.com/glasshome/ui/commit/67e480e9e37f9d2fedc14c901e6f49139c616391))
+
 ## [1.3.0](https://github.com/glasshome/ui/compare/v1.2.0...v1.3.0) (2026-08-08)
 
 
