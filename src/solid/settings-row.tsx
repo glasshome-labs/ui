@@ -110,12 +110,14 @@ export function SwitchRow(props: {
 			class="py-2"
 			data-disabled={props.disabled ? "true" : undefined}
 		>
-			<FieldContent>
-				<FieldTitle>{props.label}</FieldTitle>
-				<Show when={props.description}>
-					{(description) => <FieldDescription class="text-xs">{description()}</FieldDescription>}
-				</Show>
-			</FieldContent>
+			<Show when={props.description} fallback={<FieldTitle>{props.label}</FieldTitle>}>
+				{(description) => (
+					<FieldContent>
+						<FieldTitle>{props.label}</FieldTitle>
+						<FieldDescription class="text-xs">{description()}</FieldDescription>
+					</FieldContent>
+				)}
+			</Show>
 			<Switch
 				checked={props.checked}
 				disabled={props.disabled}

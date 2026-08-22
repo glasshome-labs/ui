@@ -1,6 +1,3 @@
-/* SwitchRow is the one door for a labelled toggle row, so the two things a
- * caller cannot rebuild without forking it get asserted: the muted sub-line and
- * the disabled state, which must both dim the row and refuse the toggle. */
 import { cleanup, fireEvent, render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it } from "vitest";
@@ -36,6 +33,20 @@ describe("SwitchRow", () => {
 		));
 
 		expect(container.querySelector('[data-slot="field-description"]')).toBeNull();
+	});
+
+	it("only wraps in FieldContent when there is a description, so bare rows stay centred", () => {
+		const bare = render(() => <SwitchRow label="Show in Dock" checked onChange={() => {}} />);
+		expect(
+			bare.container.querySelector('[data-slot="field"] > [data-slot="field-content"]'),
+		).toBeNull();
+
+		const described = render(() => (
+			<SwitchRow label="Weekly digest" description="Every Monday." checked onChange={() => {}} />
+		));
+		expect(
+			described.container.querySelector('[data-slot="field"] > [data-slot="field-content"]'),
+		).not.toBeNull();
 	});
 
 	it("names the switch by its label", () => {
