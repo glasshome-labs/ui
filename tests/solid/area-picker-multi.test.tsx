@@ -123,6 +123,39 @@ describe("AreaPicker multi mode", () => {
 	});
 });
 
+describe("AreaPicker disabled", () => {
+	it("keeps the trigger shut and the value unchanged", () => {
+		const [values, setValues] = createSignal<string[]>(["kitchen"]);
+		const { container } = render(() => (
+			<EntityDataContext.Provider value={adapter}>
+				<AreaPicker values={values()} onValuesChange={setValues} disabled />
+			</EntityDataContext.Provider>
+		));
+
+		const trigger = triggerOf(container);
+		expect(trigger.hasAttribute("disabled")).toBe(true);
+		expect(trigger.className).toContain("disabled:opacity-50");
+		expect(trigger.textContent).toContain("Kitchen");
+
+		fireEvent.click(trigger);
+		expect(isOpen()).toBe(false);
+		expect(values()).toEqual(["kitchen"]);
+	});
+
+	it("ignores a row click in single mode", () => {
+		const [value, setValue] = createSignal("kitchen");
+		const { container } = render(() => (
+			<EntityDataContext.Provider value={adapter}>
+				<AreaPicker value={value()} onChange={setValue} disabled />
+			</EntityDataContext.Provider>
+		));
+
+		fireEvent.click(triggerOf(container));
+		expect(document.querySelector('[data-slot="area-picker-row"]')).toBeNull();
+		expect(value()).toBe("kitchen");
+	});
+});
+
 describe("AreaPicker single mode", () => {
 	it("reports one id and closes the popover", () => {
 		const [value, setValue] = createSignal("");

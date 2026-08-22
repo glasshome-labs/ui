@@ -186,6 +186,15 @@ export function PickersCatalog() {
 					<CatalogNote>options come from EntityDataContext (static demo adapter here)</CatalogNote>
 				</CatalogItem>
 
+				<CatalogItem name="AreaPicker (disabled)" hint="read-only, still shows the value" span={2}>
+					<div class="w-full max-w-sm">
+						<AreaPicker value={area()} onChange={setArea} disabled />
+					</div>
+					<CatalogNote>
+						a read-only caller renders the real picker dimmed, never a text line
+					</CatalogNote>
+				</CatalogItem>
+
 				<CatalogItem name="AreaPicker (multi)" hint="values / onValuesChange" span={2}>
 					<div class="w-full max-w-sm">
 						<AreaPicker values={rooms()} onValuesChange={setRooms} placeholder="Whole home" />

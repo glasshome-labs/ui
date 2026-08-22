@@ -11,6 +11,7 @@ interface AreaPickerBaseProps {
 	placeholder?: string;
 	class?: string;
 	allowClear?: boolean;
+	disabled?: boolean;
 }
 
 interface AreaPickerSingleProps extends AreaPickerBaseProps {
@@ -93,12 +94,14 @@ export function AreaPicker(props: AreaPickerProps) {
 	const activeIndex = () => hovered() ?? selectedIndex();
 
 	const selectArea = (areaId: string) => {
+		if (props.disabled) return;
 		props.onChange?.(areaId);
 		setOpen(false);
 		setSearch("");
 	};
 
 	const toggleArea = (areaId: string) => {
+		if (props.disabled) return;
 		const current = selected();
 		props.onValuesChange?.(
 			current.includes(areaId) ? current.filter((id) => id !== areaId) : [...current, areaId],
@@ -106,6 +109,7 @@ export function AreaPicker(props: AreaPickerProps) {
 	};
 
 	const clear = () => {
+		if (props.disabled) return;
 		props.onChange?.("");
 		setOpen(false);
 		setSearch("");
@@ -127,7 +131,8 @@ export function AreaPicker(props: AreaPickerProps) {
 			<PopoverAnchor as="div" class={props.class}>
 				<button
 					type="button"
-					class={`flex h-9 w-full items-center gap-2 rounded-md ${INPUT_SURFACE} px-3 py-2 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 hover:[--glass-light:0.09]`}
+					class={`flex h-9 w-full items-center gap-2 rounded-md ${INPUT_SURFACE} px-3 py-2 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 hover:[--glass-light:0.09] disabled:hover:[--glass-light:0.05]`}
+					disabled={props.disabled}
 					onClick={() => setOpen(!open())}
 				>
 					<Show
