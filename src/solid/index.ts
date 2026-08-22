@@ -368,6 +368,7 @@ export { SlidingIndicator } from "./sliding-indicator.js";
 // Wave 4: React-Library Alternatives - Simpler
 export { GlassToast, Toaster, toast } from "./sonner.js";
 export { Spinner } from "./spinner.js";
+export { StepIndicator } from "./step-indicator.js";
 export { Switch } from "./switch.js";
 export {
 	Table,

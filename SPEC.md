@@ -106,6 +106,8 @@ role clears 4.5:1 against `--background`/`--card`/`--popover`/`--muted` (3:1 for
 | a modal | `<ResponsiveDialog>` (desktop dialog + mobile bottom sheet), `<Dialog>` for desktop-only | `<Sheet side="bottom">` as a modal |
 | a status chip | `<Badge tone="var(--success)">` | `rounded-full bg-green-500/10` |
 | a callout | `<Alert tone="warning">` | `border-amber-500/30 bg-amber-500/10` |
+| picking one area, or several | `<AreaPicker>` (`values` + `onValuesChange` for multi) | a hand-rolled checkbox list of areas |
+| position inside a multi-step flow | `<StepIndicator count index>` | a hand-rolled row of dots |
 | tinted text alone | `glassToneText(tone)` | ad-hoc color-mix |
 | a metallic tier chip | `<TierBadge>` | gradients by hand |
 

@@ -18,6 +18,7 @@ import {
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
+	StepIndicator,
 	Tabs,
 	TabsContent,
 	TabsList,
@@ -115,6 +116,10 @@ export function NavCatalog() {
 						</PaginationItem>
 					</PaginationContent>
 				</Pagination>
+			</CatalogItem>
+
+			<CatalogItem name="StepIndicator" hint="step 2 of 4">
+				<StepIndicator count={4} index={1} />
 			</CatalogItem>
 		</CatalogGroup>
 	);
