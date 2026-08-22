@@ -43,6 +43,14 @@ describe("Switch", () => {
 		expect(parts(on.container).thumb.style.transform).not.toBe("translateX(0px)");
 	});
 
+	it("carries an accessible name through to the role=switch element", () => {
+		const labelled = render(() => <Switch checked aria-label="Away mode" />);
+		expect(parts(labelled.container).root.getAttribute("aria-label")).toBe("Away mode");
+
+		const described = render(() => <Switch checked aria-labelledby="away-mode-title" />);
+		expect(parts(described.container).root.getAttribute("aria-labelledby")).toBe("away-mode-title");
+	});
+
 	it("repaints the thumb when the controlled value flips", () => {
 		const [checked, setChecked] = createSignal(false);
 		const { container } = render(() => (

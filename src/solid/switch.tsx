@@ -1,4 +1,4 @@
-import { type Component, splitProps } from "solid-js";
+import { type Component, type ComponentProps, splitProps } from "solid-js";
 import { FIELD_CHROME } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
 
@@ -7,17 +7,14 @@ const THUMB_SIZE = 28;
 const TRACK_WIDTH = THUMB_SIZE * 2;
 const THUMB_TRAVEL = TRACK_WIDTH - THUMB_SIZE;
 
-interface SwitchProps {
+type SwitchProps = Omit<ComponentProps<"button">, "onChange" | "children"> & {
 	checked?: boolean;
 	defaultChecked?: boolean;
 	onChange?: (checked: boolean) => void;
-	disabled?: boolean;
-	class?: string;
-	name?: string;
-}
+};
 
 const Switch: Component<SwitchProps> = (props) => {
-	const [local] = splitProps(props, [
+	const [local, rest] = splitProps(props, [
 		"class",
 		"checked",
 		"defaultChecked",
@@ -28,6 +25,7 @@ const Switch: Component<SwitchProps> = (props) => {
 
 	return (
 		<button
+			{...rest}
 			type="button"
 			role="switch"
 			aria-checked={local.checked ?? false}
