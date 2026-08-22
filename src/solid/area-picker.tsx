@@ -7,13 +7,27 @@ import { Input } from "./input.js";
 import { anchorToTriggerTop, Popover, PopoverAnchor } from "./popover.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
 
-interface AreaPickerProps {
-	value: string;
-	onChange: (value: string) => void;
+interface AreaPickerBaseProps {
 	placeholder?: string;
 	class?: string;
 	allowClear?: boolean;
 }
+
+interface AreaPickerSingleProps extends AreaPickerBaseProps {
+	value: string;
+	onChange: (value: string) => void;
+	values?: undefined;
+	onValuesChange?: undefined;
+}
+
+interface AreaPickerMultiProps extends AreaPickerBaseProps {
+	values: string[];
+	onValuesChange: (values: string[]) => void;
+	value?: undefined;
+	onChange?: undefined;
+}
+
+type AreaPickerProps = AreaPickerSingleProps | AreaPickerMultiProps;
 
 export function AreaPicker(props: AreaPickerProps) {
 	const data = useEntityData();
@@ -39,10 +53,29 @@ export function AreaPicker(props: AreaPickerProps) {
 		);
 	});
 
-	const selectedLabel = createMemo(() => {
-		const v = props.value;
-		if (!v) return undefined;
-		return areaList().find((a) => a.id === v);
+	const multi = () => props.values !== undefined;
+	// Only ids the home still has: a stale grant shows as its own greyed row and
+	// leaves the value on the next toggle.
+	const selected = createMemo(() => {
+		const ids = props.values ?? [];
+		return ids.filter((id) => areaList().some((a) => a.id === id));
+	});
+	const missing = createMemo(() => {
+		const q = search().trim().toLowerCase();
+		return (props.values ?? [])
+			.filter((id) => !areaList().some((a) => a.id === id))
+			.filter((id) => !q || id.toLowerCase().includes(q));
+	});
+	const isSelected = (areaId: string) =>
+		multi() ? selected().includes(areaId) : props.value === areaId;
+
+	const triggerArea = createMemo(() => {
+		if (!multi()) {
+			const v = props.value;
+			return v ? areaList().find((a) => a.id === v) : undefined;
+		}
+		const only = selected();
+		return only.length === 1 ? areaList().find((a) => a.id === only[0]) : undefined;
 	});
 
 	// One glass pill (SlidingIndicator) tracks the active row and animates between
@@ -60,13 +93,20 @@ export function AreaPicker(props: AreaPickerProps) {
 	const activeIndex = () => hovered() ?? selectedIndex();
 
 	const selectArea = (areaId: string) => {
-		props.onChange(areaId);
+		props.onChange?.(areaId);
 		setOpen(false);
 		setSearch("");
 	};
 
+	const toggleArea = (areaId: string) => {
+		const current = selected();
+		props.onValuesChange?.(
+			current.includes(areaId) ? current.filter((id) => id !== areaId) : [...current, areaId],
+		);
+	};
+
 	const clear = () => {
-		props.onChange("");
+		props.onChange?.("");
 		setOpen(false);
 		setSearch("");
 	};
@@ -91,11 +131,18 @@ export function AreaPicker(props: AreaPickerProps) {
 					onClick={() => setOpen(!open())}
 				>
 					<Show
-						when={selectedLabel()}
+						when={triggerArea()}
 						fallback={
-							<span class="flex-1 text-left text-muted-foreground">
-								{props.placeholder ?? "Select area..."}
-							</span>
+							<Show
+								when={selected().length > 1}
+								fallback={
+									<span class="flex-1 text-left text-muted-foreground">
+										{props.placeholder ?? (multi() ? "Select areas..." : "Select area...")}
+									</span>
+								}
+							>
+								<span class="flex-1 truncate text-left">{selected().length} rooms</span>
+							</Show>
 						}
 					>
 						{(area) => (
@@ -133,9 +180,20 @@ export function AreaPicker(props: AreaPickerProps) {
 							/>
 						</div>
 						<div class="max-h-[280px] overflow-y-auto">
-							<Show when={filtered().length === 0}>
+							<Show when={filtered().length === 0 && missing().length === 0}>
 								<div class="py-4 text-center text-muted-foreground text-sm">No areas found</div>
 							</Show>
+							<For each={missing()}>
+								{(areaId) => (
+									<div
+										data-slot="area-picker-missing"
+										class="flex w-full items-center gap-2 px-3 py-1.5 text-muted-foreground/60 text-sm"
+									>
+										<span class="truncate">{areaId}</span>
+										<span class="shrink-0 text-xs">no longer exists</span>
+									</div>
+								)}
+							</For>
 							<SlidingIndicator
 								orientation="vertical"
 								active={activeIndex()}
@@ -164,12 +222,14 @@ export function AreaPicker(props: AreaPickerProps) {
 									{(area, j) => (
 										<button
 											type="button"
+											data-slot="area-picker-row"
+											aria-pressed={multi() ? isSelected(area.id) : undefined}
 											class="group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
 											classList={{
-												"text-foreground": props.value === area.id,
+												"text-foreground": isSelected(area.id),
 											}}
 											onMouseEnter={() => setHovered(j() + (showClear() ? 1 : 0))}
-											onClick={() => selectArea(area.id)}
+											onClick={() => (multi() ? toggleArea(area.id) : selectArea(area.id))}
 										>
 											<div class="flex size-[18px] shrink-0 items-center justify-center">
 												<Icon icon={area.icon || "mdi:home-floor-1"} width={18} height={18} />
@@ -180,11 +240,18 @@ export function AreaPicker(props: AreaPickerProps) {
 											<span
 												class="shrink-0 text-muted-foreground text-xs group-hover:text-foreground/60"
 												classList={{
-													"!text-foreground/60": props.value === area.id,
+													"!text-foreground/60": isSelected(area.id),
 												}}
 											>
 												{area.entityCount} entities
 											</span>
+											<Show when={multi()}>
+												<div class="flex size-4 shrink-0 items-center justify-center">
+													<Show when={isSelected(area.id)}>
+														<Icon icon="lucide:check" width={16} height={16} class="text-primary" />
+													</Show>
+												</div>
+											</Show>
 										</button>
 									)}
 								</For>

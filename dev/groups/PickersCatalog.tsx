@@ -132,6 +132,7 @@ export function PickersCatalog() {
 	// AreaPicker / EntitySelector selection state.
 	const [icon, setIcon] = createSignal("mdi:lightbulb");
 	const [area, setArea] = createSignal<string>("");
+	const [rooms, setRooms] = createSignal<string[]>([]);
 	const [lightIds, setLightIds] = createSignal<string[]>([]);
 	const [imageId, setImageId] = createSignal("demo-1");
 
@@ -183,6 +184,16 @@ export function PickersCatalog() {
 						<AreaPicker value={area()} onChange={setArea} placeholder="Select area..." />
 					</div>
 					<CatalogNote>options come from EntityDataContext (static demo adapter here)</CatalogNote>
+				</CatalogItem>
+
+				<CatalogItem name="AreaPicker (multi)" hint="values / onValuesChange" span={2}>
+					<div class="w-full max-w-sm">
+						<AreaPicker values={rooms()} onValuesChange={setRooms} placeholder="Whole home" />
+					</div>
+					<CatalogNote>
+						rows toggle instead of closing; the trigger counts them ("2 rooms"). A selected id the
+						home no longer has stays listed, greyed, until the next change drops it.
+					</CatalogNote>
 				</CatalogItem>
 
 				<CatalogItem name="EntitySelector" hint="entity combobox (EntityDataContext)" span={2}>
