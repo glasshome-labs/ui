@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show } from "solid-js";
 import { Button } from "./button.js";
+import { Field, FieldContent, FieldDescription, FieldTitle } from "./field.js";
 import { IconPicker, type IconPickerProps } from "./icon-picker.js";
 import { Input } from "./input.js";
 import { Switch } from "./switch.js";
@@ -98,13 +99,29 @@ export function LabeledInput(props: {
 
 export function SwitchRow(props: {
 	label: string;
+	description?: string;
 	checked: boolean;
+	disabled?: boolean;
 	onChange: (value: boolean) => void;
 }) {
 	return (
-		<div class="flex items-center justify-between py-2">
-			<p class="font-medium text-sm">{props.label}</p>
-			<Switch checked={props.checked} onChange={props.onChange} />
-		</div>
+		<Field
+			orientation="horizontal"
+			class="py-2"
+			data-disabled={props.disabled ? "true" : undefined}
+		>
+			<FieldContent>
+				<FieldTitle>{props.label}</FieldTitle>
+				<Show when={props.description}>
+					{(description) => <FieldDescription class="text-xs">{description()}</FieldDescription>}
+				</Show>
+			</FieldContent>
+			<Switch
+				checked={props.checked}
+				disabled={props.disabled}
+				onChange={props.onChange}
+				aria-label={props.label}
+			/>
+		</Field>
 	);
 }

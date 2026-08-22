@@ -20,6 +20,7 @@ import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
 
 export function AppKitCatalog() {
 	const [on, setOn] = createSignal(true);
+	const [digest, setDigest] = createSignal(false);
 	const [text, setText] = createSignal("");
 	const [search, setSearch] = createSignal("");
 	const [filter, setFilter] = createSignal("All");
@@ -46,10 +47,24 @@ export function AppKitCatalog() {
 				</CatalogNote>
 			</CatalogItem>
 
-			<CatalogItem name="SwitchRow" hint="label + switch">
+			<CatalogItem name="SwitchRow" hint="label + optional description + switch">
 				<div class="w-full">
 					<SwitchRow label="Enable notifications" checked={on()} onChange={setOn} />
+					<SwitchRow
+						label="Weekly digest"
+						description="One summary of everything that happened at home."
+						checked={digest()}
+						onChange={setDigest}
+					/>
+					<SwitchRow
+						label="Away mode"
+						description="Only a household admin can change this."
+						checked
+						disabled
+						onChange={() => {}}
+					/>
 				</div>
+				<CatalogNote>disabled dims the row and freezes the switch</CatalogNote>
 			</CatalogItem>
 
 			<CatalogItem name="LabeledField / LabeledInput">
