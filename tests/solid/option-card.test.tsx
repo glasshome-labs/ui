@@ -1,0 +1,133 @@
+import { cleanup, fireEvent, render } from "@solidjs/testing-library";
+import { createSignal } from "solid-js";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+// The real iconify-icon custom element schedules render timers that fire after
+// this file's happy-dom window is torn down.
+vi.mock("@iconify-icon/solid", () => ({
+	Icon: (props: { icon?: string; class?: string; "data-slot"?: string }) => (
+		<span class={props.class} data-icon={props.icon} data-slot={props["data-slot"]} />
+	),
+}));
+
+import { OptionCard, OptionCardGroup } from "../../src/solid/option-card.js";
+
+afterEach(cleanup);
+
+function radios(container: HTMLElement) {
+	return Array.from(container.querySelectorAll<HTMLInputElement>('input[type="radio"]'));
+}
+
+function radioAt(container: HTMLElement, index: number) {
+	const found = radios(container)[index];
+	if (!found) throw new Error(`option card ${index} rendered no radio`);
+	return found;
+}
+
+describe("OptionCard", () => {
+	it("renders one named radio per card", () => {
+		const { container, getByLabelText } = render(() => (
+			<OptionCardGroup value={null} onChange={() => {}} aria-label="How they sign in">
+				<OptionCard value="invite" title="Send an invite" description="They pick a password." />
+				<OptionCard value="code" title="Share a code" />
+			</OptionCardGroup>
+		));
+
+		expect(container.querySelector('[role="radiogroup"]')?.getAttribute("aria-label")).toBe(
+			"How they sign in",
+		);
+		expect(radios(container).map((radio) => radio.value)).toEqual(["invite", "code"]);
+		expect(getByLabelText(/Send an invite/)).toBe(radios(container)[0]);
+		expect(getByLabelText("Share a code")).toBe(radios(container)[1]);
+	});
+
+	it("reports the picked value once per click and marks the card checked", () => {
+		const onChange = vi.fn();
+		const [value, setValue] = createSignal<string | null>(null);
+		const { container } = render(() => (
+			<OptionCardGroup
+				value={value()}
+				onChange={(next) => {
+					onChange(next);
+					setValue(next);
+				}}
+			>
+				<OptionCard value="invite" title="Send an invite" />
+				<OptionCard value="code" title="Share a code" />
+			</OptionCardGroup>
+		));
+
+		fireEvent.click(radioAt(container, 1));
+
+		expect(onChange).toHaveBeenCalledTimes(1);
+		expect(onChange).toHaveBeenCalledWith("code");
+		const items = container.querySelectorAll('[data-slot="radio-group-item"]');
+		expect(items[1]?.hasAttribute("data-checked")).toBe(true);
+		expect(items[0]?.hasAttribute("data-checked")).toBe(false);
+	});
+
+	// Arrow-key roving is the browser's own native radio-group behaviour, which
+	// happy-dom does not implement; what the cards owe it is one shared input
+	// name, so that is what is asserted here.
+	it("keeps every card on one native radio name, so arrow keys rove", () => {
+		const { container } = render(() => (
+			<OptionCardGroup value="invite" onChange={() => {}}>
+				<OptionCard value="invite" title="Send an invite" />
+				<OptionCard value="code" title="Share a code" />
+			</OptionCardGroup>
+		));
+
+		const names = new Set(radios(container).map((radio) => radio.name));
+		expect(names.size).toBe(1);
+		expect([...names][0]).toBeTruthy();
+		expect(radios(container).every((radio) => radio.tabIndex >= 0)).toBe(true);
+	});
+
+	it("does not pick a disabled card", () => {
+		const [value, setValue] = createSignal<string | null>(null);
+		const { container } = render(() => (
+			<OptionCardGroup value={value()} onChange={setValue}>
+				<OptionCard value="invite" title="Send an invite" disabled />
+			</OptionCardGroup>
+		));
+
+		expect(radioAt(container, 0).disabled).toBe(true);
+
+		fireEvent.click(radioAt(container, 0));
+
+		expect(value()).toBeNull();
+	});
+
+	it("renders the children slot outside the radio item", () => {
+		const { container, getByTestId } = render(() => (
+			<OptionCardGroup value="person" onChange={() => {}}>
+				<OptionCard value="person" title="A person">
+					<button type="button" data-testid="slot">
+						Pick a person
+					</button>
+				</OptionCard>
+			</OptionCardGroup>
+		));
+
+		const slot = getByTestId("slot");
+		expect(container.querySelector('[data-slot="option-card"]')?.contains(slot)).toBe(true);
+		expect(container.querySelector('[data-slot="radio-group-item"]')?.contains(slot)).toBe(false);
+	});
+
+	it("stacks the description under the title inside the card", () => {
+		const { container } = render(() => (
+			<OptionCardGroup value={null} onChange={() => {}}>
+				<OptionCard value="invite" title="Send an invite" description="They pick a password." />
+			</OptionCardGroup>
+		));
+
+		const item = container.querySelector('[data-slot="radio-group-item"]');
+		expect(item?.querySelector('[data-slot="option-card-title"]')?.textContent).toBe(
+			"Send an invite",
+		);
+		expect(item?.querySelector('[data-slot="option-card-description"]')?.textContent).toBe(
+			"They pick a password.",
+		);
+		expect(item?.className).toContain("data-[checked]:border-primary");
+	});
+});

@@ -277,6 +277,7 @@ export {
 } from "./media-store.js";
 export { MediaTile, type MediaTileProps } from "./media-tile.js";
 export { NumberField } from "./number-field.js";
+export { OptionCard, OptionCardGroup } from "./option-card.js";
 export { Overlay } from "./overlay.js";
 export { PageHeader } from "./page-header.js";
 export {

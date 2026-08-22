@@ -33,6 +33,8 @@ import {
 	InputOTPSlot,
 	Label,
 	NumberField,
+	OptionCard,
+	OptionCardGroup,
 	RadioGroup,
 	RadioGroupItem,
 	SchemaForm,
@@ -86,6 +88,7 @@ const flowNodesSchema: ExtendedJSONSchema = {
 export function FormsCatalog() {
 	const [checked, setChecked] = createSignal(true);
 	const [radio, setRadio] = createSignal("comfortable");
+	const [door, setDoor] = createSignal<string | null>("invite");
 	const [switchOn, setSwitchOn] = createSignal(true);
 	const [fieldSwitch, setFieldSwitch] = createSignal(true);
 	const [slider, setSlider] = createSignal([60]);
@@ -215,6 +218,43 @@ export function FormsCatalog() {
 					<RadioGroupItem value="comfortable">Comfortable</RadioGroupItem>
 					<RadioGroupItem value="compact">Compact</RadioGroupItem>
 				</RadioGroup>
+			</CatalogItem>
+
+			<CatalogItem name="OptionCard" hint={`value: ${door() ?? "none"}`}>
+				<OptionCardGroup value={door()} onChange={setDoor} aria-label="How they sign in">
+					<OptionCard
+						value="invite"
+						icon="lucide:mail"
+						title="Send an invite"
+						description="They set their own password from a link."
+					/>
+					<OptionCard
+						value="code"
+						icon="lucide:key-round"
+						title="Share a code"
+						description="Good for someone standing next to you."
+					>
+						<Select
+							options={["Six digits", "Eight digits"]}
+							placeholder="Code length"
+							itemComponent={(itemProps) => (
+								<SelectItem item={itemProps.item}>{itemProps.item.rawValue}</SelectItem>
+							)}
+						>
+							<SelectTrigger>
+								<SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
+							</SelectTrigger>
+							<SelectContent />
+						</Select>
+					</OptionCard>
+					<OptionCard
+						value="managed"
+						icon="lucide:lock"
+						title="Managed elsewhere"
+						description="Not available on this home."
+						disabled
+					/>
+				</OptionCardGroup>
 			</CatalogItem>
 
 			<CatalogItem name="Switch" hint={switchOn() ? "on" : "off"}>
