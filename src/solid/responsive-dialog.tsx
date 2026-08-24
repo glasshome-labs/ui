@@ -211,7 +211,7 @@ const DesktopContent: ParentComponent<ComponentProps<"div">> = (props) => {
 							aria-modal="true"
 							tabIndex={-1}
 							class={cn(
-								`relative flex max-h-[70vh] w-full max-w-lg flex-col overflow-y-auto rounded-lg ${OVERLAY_SURFACE} p-6 outline-none transition-all duration-50 ease-out`,
+								`gh-scroll relative flex max-h-[70vh] w-full max-w-lg flex-col overflow-y-auto rounded-lg ${OVERLAY_SURFACE} p-6 outline-none transition-all duration-50 ease-out`,
 								isClosing() || isOpening() ? "scale-95 opacity-0" : "scale-100 opacity-100",
 								local.class,
 							)}

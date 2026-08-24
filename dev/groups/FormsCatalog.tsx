@@ -36,6 +36,7 @@ import {
 	NumberField,
 	OptionCard,
 	OptionCardGroup,
+	PasswordInput,
 	RadioGroup,
 	RadioGroupItem,
 	SchemaForm,
@@ -118,6 +119,15 @@ export function FormsCatalog() {
 				<Input placeholder="you@example.com" />
 				<Input value="disabled" disabled />
 				<Input aria-invalid="true" value="invalid" />
+			</CatalogItem>
+
+			<CatalogItem name="PasswordInput" hint="eye toggle, optional leading icon">
+				<PasswordInput placeholder="Password" aria-label="Password" />
+				<PasswordInput
+					leading={<Icon icon="lucide:lock" width={22} aria-hidden="true" />}
+					placeholder="Password"
+					aria-label="Password"
+				/>
 			</CatalogItem>
 
 			<CatalogItem name="NumberField" hint="themed stepper, no native spinner">

@@ -192,28 +192,29 @@
 }
 
 /**
- * Consistent, theme-aware thin scrollbar across browsers. Firefox uses
- * scrollbar-width/color; Chromium/WebKit use the ::-webkit-scrollbar pseudos.
- * Applied by the <ScrollArea> component so every scroll surface reads the same.
+ * Consistent, theme-aware overlay scrollbar across browsers. Firefox uses
+ * scrollbar-width/color; Chromium/WebKit use the ::-webkit-scrollbar pseudos
+ * (no stepper-button pseudo is declared, so none render). Applied by every
+ * scroll surface that isn't a bare page — <ScrollArea>, dialogs, sheets.
  */
 .gh-scroll {
 	scrollbar-width: thin;
-	scrollbar-color: var(--border) transparent;
+	scrollbar-color: color-mix(in srgb, var(--foreground) 22%, transparent) transparent;
 	&::-webkit-scrollbar {
-		width: 10px;
-		height: 10px;
+		width: 8px;
+		height: 8px;
 	}
 	&::-webkit-scrollbar-track {
 		background: transparent;
 	}
 	&::-webkit-scrollbar-thumb {
-		background: var(--border);
+		background: color-mix(in srgb, var(--foreground) 22%, transparent);
 		border-radius: 9999px;
 		border: 2px solid transparent;
 		background-clip: padding-box;
 	}
 	&::-webkit-scrollbar-thumb:hover {
-		background: var(--muted-foreground);
+		background: color-mix(in srgb, var(--foreground) 38%, transparent);
 	}
 }
 

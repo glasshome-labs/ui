@@ -290,6 +290,7 @@ export {
 	PaginationNext,
 	PaginationPrevious,
 } from "./pagination.js";
+export { PasswordInput } from "./password-input.js";
 export {
 	Popover,
 	PopoverAnchor,

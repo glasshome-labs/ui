@@ -18,8 +18,8 @@ const FieldSet: Component<ComponentProps<"fieldset">> = (props) => {
 		<fieldset
 			data-slot="field-set"
 			class={cn(
-				"flex flex-col gap-3",
-				"has-[>[data-slot=checkbox-group]]:gap-3 has-[>[data-slot=radio-group]]:gap-3",
+				"flex flex-col gap-4",
+				"has-[>[data-slot=checkbox-group]]:gap-4 has-[>[data-slot=radio-group]]:gap-4",
 				local.class,
 			)}
 			{...rest}
@@ -63,7 +63,7 @@ const FieldGroup: Component<ComponentProps<"div">> = (props) => {
 };
 
 const fieldVariants = cva({
-	base: "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
+	base: "group/field flex w-full gap-4 data-[invalid=true]:text-destructive",
 	variants: {
 		orientation: {
 			vertical: ["flex-col [&>*]:w-full [&>.sr-only]:w-auto"],

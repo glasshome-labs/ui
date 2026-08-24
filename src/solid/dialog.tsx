@@ -18,7 +18,7 @@ const DialogContent: ParentComponent<ComponentProps<typeof DialogPrimitive.Conte
 				data-slot="dialog-content"
 				class={cn(
 					OVERLAY_SURFACE,
-					"data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 p-6 duration-200 data-[closed]:animate-out data-[expanded]:animate-in sm:rounded-lg",
+					"gh-scroll data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 fixed top-1/2 left-1/2 z-50 grid max-h-[85vh] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 overflow-y-auto p-6 duration-200 data-[closed]:animate-out data-[expanded]:animate-in sm:rounded-lg",
 					local.class,
 				)}
 				{...others}

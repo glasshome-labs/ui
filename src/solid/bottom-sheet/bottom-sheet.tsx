@@ -377,7 +377,7 @@ const BottomSheetBody: Component<ComponentProps<"div">> = (props) => {
 		<div
 			data-sheet-scroll=""
 			class={cn(
-				"flex min-h-0 flex-1 touch-pan-y flex-col overflow-y-auto overscroll-contain px-6 pb-6",
+				"gh-scroll flex min-h-0 flex-1 touch-pan-y flex-col overflow-y-auto overscroll-contain px-6 pb-6",
 				local.class,
 			)}
 			{...rest}
