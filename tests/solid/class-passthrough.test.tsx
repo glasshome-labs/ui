@@ -481,6 +481,7 @@ const CASES: Record<string, () => JSX.Element> = {
 			onSelect={noop}
 			onBroken={noop}
 		/>
+	),
 	OptionCard: () => (
 		<solid.OptionCardGroup value={null} onChange={noop}>
 			<solid.OptionCard class="probe" value="a" title="A" />

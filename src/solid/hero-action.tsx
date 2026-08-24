@@ -32,8 +32,9 @@ interface HeroActionContentProps {
 	recommended?: boolean;
 	recommendedHint?: string;
 	/** "arrow" is the go-somewhere-else watermark (setup); "check" is the
-	 *  picked-state glyph for a grouped radio item (People dialogs). */
-	ornament: "arrow" | "check";
+	 *  picked-state glyph for a grouped radio item; "none" suits a picker whose
+	 *  click already moves the step on. */
+	ornament: "arrow" | "check" | "none";
 }
 
 function HeroActionContent(props: HeroActionContentProps) {
@@ -159,6 +160,11 @@ export function HeroOption(props: {
 	/** Neutral by default — People's pickers don't carry setup's per-option
 	 *  brand colors. */
 	accentVar?: string;
+	/** Drop the tick when picking the card is itself the next step. */
+	ornament?: "check" | "none";
+	/** Fires on every click, including a re-pick of the already-checked card,
+	 *  which `onChange` alone never reports. */
+	onPick?: () => void;
 	disabled?: boolean;
 	/** Content revealed under the card when it's the picked option (e.g. a
 	 *  nested field), same slot `OptionCard` offers. */
@@ -172,6 +178,7 @@ export function HeroOption(props: {
 				value={props.value}
 				disabled={props.disabled}
 				showControl={false}
+				onClick={() => !props.disabled && props.onPick?.()}
 				class={cn(
 					HERO_ACTION_CHROME,
 					"min-w-0 cursor-pointer data-[checked]:border-primary",
@@ -185,7 +192,7 @@ export function HeroOption(props: {
 					title={props.title}
 					description={props.description}
 					accentVar={accentVar()}
-					ornament="check"
+					ornament={props.ornament ?? "check"}
 				/>
 			</RadioGroupItem>
 			{props.children}
