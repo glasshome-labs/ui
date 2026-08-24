@@ -173,12 +173,14 @@ export function FormsCatalog() {
 					/>
 					<FieldSubGroup>
 						<SwitchRow
+							icon="lucide:lock"
 							label="Door locks"
 							checked={false}
 							disabled={!fieldSwitch()}
 							onChange={() => {}}
 						/>
 						<SwitchRow
+							icon="lucide:video"
 							label="Cameras"
 							checked={false}
 							disabled={!fieldSwitch()}

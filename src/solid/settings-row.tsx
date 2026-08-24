@@ -100,6 +100,8 @@ export function LabeledInput(props: {
 export function SwitchRow(props: {
 	label: string;
 	description?: string;
+	/** Iconify id shown before the label (sensitive-device rows, platform toggles). */
+	icon?: string;
 	checked: boolean;
 	disabled?: boolean;
 	onChange: (value: boolean) => void;
@@ -110,6 +112,17 @@ export function SwitchRow(props: {
 			class="py-2"
 			data-disabled={props.disabled ? "true" : undefined}
 		>
+			<Show when={props.icon}>
+				{(icon) => (
+					<Icon
+						icon={icon()}
+						width={16}
+						height={16}
+						aria-hidden="true"
+						class="shrink-0 text-muted-foreground"
+					/>
+				)}
+			</Show>
 			<Show when={props.description} fallback={<FieldTitle>{props.label}</FieldTitle>}>
 				{(description) => (
 					<FieldContent>
