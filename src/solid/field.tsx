@@ -37,12 +37,12 @@ const FieldLegend: Component<ComponentProps<"legend"> & { variant?: "legend" | "
 	const [local, rest] = splitProps(props, ["class", "variant"] as const);
 	const variant = () => local.variant ?? "legend";
 	return (
-		// No bottom margin: FieldSet's gap owns the space under a legend.
+		// A native legend is out of flow, so FieldSet's gap never applies under it: it owns its own space.
 		<legend
 			data-slot="field-legend"
 			data-variant={variant()}
 			class={cn(
-				"leading-tight",
+				"mb-4 leading-tight",
 				"data-[variant=legend]:font-semibold data-[variant=legend]:text-base",
 				"data-[variant=label]:font-medium data-[variant=label]:text-sm",
 				local.class,
@@ -162,15 +162,11 @@ const FieldDescription: Component<ComponentProps<"p">> = (props) => {
 	);
 };
 
-/** Rows that belong to the control above them: indented, hung off a hairline rule. */
+/** Rows that belong to the control above them: stacked flush, grouped by proximity alone. */
 const FieldSubGroup: Component<ComponentProps<"div">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	return (
-		<div
-			data-slot="field-sub-group"
-			class={cn("ml-1 flex flex-col gap-1 border-border/60 border-l pl-4", local.class)}
-			{...rest}
-		/>
+		<div data-slot="field-sub-group" class={cn("flex flex-col gap-1", local.class)} {...rest} />
 	);
 };
 

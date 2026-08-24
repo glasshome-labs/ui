@@ -52,7 +52,7 @@ describe("FieldDescription", () => {
 });
 
 describe("FieldSubGroup", () => {
-	it("hangs its rows off an indented hairline", () => {
+	it("stacks its rows flush with the row they hang off", () => {
 		const { container } = render(() => (
 			<FieldSubGroup>
 				<span>Door locks</span>
@@ -60,8 +60,8 @@ describe("FieldSubGroup", () => {
 		));
 
 		const group = container.querySelector<HTMLElement>('[data-slot="field-sub-group"]');
-		expect(group?.className).toContain("border-l");
-		expect(group?.className).toContain("pl-4");
+		expect(group?.className).not.toContain("border-l");
+		expect(group?.className).not.toContain("pl-4");
 		expect(group?.textContent).toBe("Door locks");
 	});
 
