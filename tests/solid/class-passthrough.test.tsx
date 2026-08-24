@@ -439,6 +439,21 @@ const CASES: Record<string, () => JSX.Element> = {
 			</solid.DropdownMenuContent>
 		</solid.DropdownMenu>
 	),
+	HeroAction: () => (
+		<solid.HeroAction
+			class="probe"
+			icon="lucide:house"
+			title="t"
+			description="d"
+			accentVar="var(--primary)"
+			onClick={noop}
+		/>
+	),
+	HeroOption: () => (
+		<solid.OptionCardGroup value={null} onChange={noop}>
+			<solid.HeroOption class="probe" value="a" icon="lucide:house" title="t" description="d" />
+		</solid.OptionCardGroup>
+	),
 	HoverCardTrigger: () => (
 		<solid.HoverCard>
 			<solid.HoverCardTrigger class="probe">t</solid.HoverCardTrigger>

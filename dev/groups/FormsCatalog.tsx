@@ -12,7 +12,6 @@ import {
 	FieldLegend,
 	FieldSeparator,
 	FieldSet,
-	FieldSubGroup,
 	FieldTitle,
 	Form,
 	FormControl,
@@ -21,6 +20,8 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
+	HeroAction,
+	HeroOption,
 	Input,
 	InputGroup,
 	InputGroupAddon,
@@ -36,7 +37,6 @@ import {
 	NumberField,
 	OptionCard,
 	OptionCardGroup,
-	PasswordInput,
 	RadioGroup,
 	RadioGroupItem,
 	SchemaForm,
@@ -47,7 +47,6 @@ import {
 	SelectValue,
 	Slider,
 	Switch,
-	SwitchRow,
 	Textarea,
 } from "../../src/solid";
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
@@ -122,15 +121,6 @@ export function FormsCatalog() {
 				<Input aria-invalid="true" value="invalid" />
 			</CatalogItem>
 
-			<CatalogItem name="PasswordInput" hint="eye toggle, optional leading icon">
-				<PasswordInput placeholder="Password" aria-label="Password" />
-				<PasswordInput
-					leading={<Icon icon="lucide:lock" width={22} aria-hidden="true" />}
-					placeholder="Password"
-					aria-label="Password"
-				/>
-			</CatalogItem>
-
 			<CatalogItem name="NumberField" hint="themed stepper, no native spinner">
 				<NumberField value={3} min={0} max={10} />
 				<NumberField value={1.5} step="any" />
@@ -170,35 +160,6 @@ export function FormsCatalog() {
 							<FieldError errors={[{ message: "Enter a valid email address." }]} />
 						</Field>
 					</FieldGroup>
-				</FieldSet>
-			</CatalogItem>
-
-			<CatalogItem name="FieldSubGroup" hint="rows owned by the row above" span={2}>
-				<FieldSet class="w-full">
-					<FieldLegend>Control</FieldLegend>
-					<SwitchRow
-						label="Can control devices"
-						description="Off = can only watch"
-						checked={fieldSwitch()}
-						onChange={setFieldSwitch}
-					/>
-					<FieldSubGroup>
-						<SwitchRow
-							icon="lucide:lock"
-							label="Door locks"
-							checked={false}
-							disabled={!fieldSwitch()}
-							onChange={() => {}}
-						/>
-						<SwitchRow
-							icon="lucide:video"
-							label="Cameras"
-							checked={false}
-							disabled={!fieldSwitch()}
-							onChange={() => {}}
-						/>
-						<FieldDescription>Sensitive things stay off until you turn them on.</FieldDescription>
-					</FieldSubGroup>
 				</FieldSet>
 			</CatalogItem>
 
@@ -299,17 +260,34 @@ export function FormsCatalog() {
 				</OptionCardGroup>
 			</CatalogItem>
 
-			<CatalogItem name="OptionCard size=hero" hint={`value: ${heroDoor() ?? "none"}`}>
+			<CatalogItem name="HeroAction" hint="one-shot navigation, setup wizard" span={2}>
+				<HeroAction
+					icon="simple-icons:homeassistant"
+					title="Home Assistant"
+					description="Sign in once. We never store your password."
+					accentVar="oklch(0.75 0.13 226)"
+					recommended
+					recommendedHint="Works best when you're home"
+					onClick={() => {}}
+				/>
+				<HeroAction
+					icon="mdi:play-circle"
+					title="Demo mode"
+					description="Sample devices, no setup needed."
+					accentVar="var(--primary)"
+					onClick={() => {}}
+				/>
+			</CatalogItem>
+
+			<CatalogItem name="HeroOption" hint={`value: ${heroDoor() ?? "none"}`} span={2}>
 				<OptionCardGroup value={heroDoor()} onChange={setHeroDoor} aria-label="How they sign in">
-					<OptionCard
-						size="hero"
+					<HeroOption
 						value="invite"
 						icon="lucide:link-2"
 						title="Invite link"
 						description="They open it and pick a password"
 					/>
-					<OptionCard
-						size="hero"
+					<HeroOption
 						value="ha"
 						icon="simple-icons:homeassistant"
 						title="Home Assistant sign-in"

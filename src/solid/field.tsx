@@ -18,7 +18,11 @@ const FieldSet: Component<ComponentProps<"fieldset">> = (props) => {
 		<fieldset
 			data-slot="field-set"
 			class={cn(
-				"flex flex-col gap-4",
+				// min-w-0: a native <fieldset> computes its own min-content width
+				// from its widest child and ignores descendant min-w-0 overrides,
+				// so wide unwrapped content (a card title) can push it past a flex
+				// parent's width instead of shrinking with it.
+				"flex min-w-0 flex-col gap-4",
 				"has-[>[data-slot=checkbox-group]]:gap-4 has-[>[data-slot=radio-group]]:gap-4",
 				local.class,
 			)}
