@@ -92,6 +92,7 @@ export function FormsCatalog() {
 	const [checked, setChecked] = createSignal(true);
 	const [radio, setRadio] = createSignal("comfortable");
 	const [door, setDoor] = createSignal<string | null>("invite");
+	const [heroDoor, setHeroDoor] = createSignal<string | null>("invite");
 	const [switchOn, setSwitchOn] = createSignal(true);
 	const [fieldSwitch, setFieldSwitch] = createSignal(true);
 	const [slider, setSlider] = createSignal([60]);
@@ -294,6 +295,25 @@ export function FormsCatalog() {
 						title="Managed elsewhere"
 						description="Not available on this home."
 						disabled
+					/>
+				</OptionCardGroup>
+			</CatalogItem>
+
+			<CatalogItem name="OptionCard size=hero" hint={`value: ${heroDoor() ?? "none"}`}>
+				<OptionCardGroup value={heroDoor()} onChange={setHeroDoor} aria-label="How they sign in">
+					<OptionCard
+						size="hero"
+						value="invite"
+						icon="lucide:link-2"
+						title="Invite link"
+						description="They open it and pick a password"
+					/>
+					<OptionCard
+						size="hero"
+						value="ha"
+						icon="simple-icons:homeassistant"
+						title="Home Assistant sign-in"
+						description="For people who already have a Home Assistant account"
 					/>
 				</OptionCardGroup>
 			</CatalogItem>
