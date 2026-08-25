@@ -88,7 +88,35 @@ export function LayoutCatalog() {
 				</div>
 				<CatalogNote>
 					transition="wipe" | "fade" | "slide"; autoplay pauses on interaction and is skipped under
-					prefers-reduced-motion
+					prefers-reduced-motion. Known: wipe stacks its slides in one grid cell, which collapses
+					every scroll snap onto one point, so wipe cannot be dragged. Autoplay, arrows and dots
+					drive it by index and do work.
+				</CatalogNote>
+			</CatalogItem>
+
+			<CatalogItem name="Carousel fade" hint="cross-fade · autoplay 2s · dots">
+				<div class="w-full px-12">
+					<Carousel transition="fade" autoplay={2000} opts={{ loop: true }} class="w-full">
+						<CarouselContent>
+							<For each={["one", "two", "three"]}>
+								{(slide, i) => (
+									<CarouselItem>
+										<div
+											class="flex h-24 items-center justify-center rounded-md border border-border/50 font-semibold text-2xl text-foreground"
+											style={{ background: `var(--chart-${i() + 1})` }}
+										>
+											{slide}
+										</div>
+									</CarouselItem>
+								)}
+							</For>
+						</CarouselContent>
+						<CarouselDots class="mt-3" />
+					</Carousel>
+				</div>
+				<CatalogNote>
+					three dots, cross-fading one → two → three every 2s on its own, and draggable. Anything
+					less means the fade track lost embla's scroll snaps.
 				</CatalogNote>
 			</CatalogItem>
 

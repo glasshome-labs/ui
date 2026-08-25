@@ -11,9 +11,9 @@ import {
 	type Component,
 	type ComponentProps,
 	createContext,
+	createEffect,
 	createSignal,
 	onCleanup,
-	onMount,
 	type ParentComponent,
 	splitProps,
 	useContext,
@@ -89,17 +89,20 @@ const Carousel: ParentComponent<
 		viewportEl = el;
 	};
 
-	onMount(() => {
+	// Tracks autoplay: a widget whose config changes the interval (or supplies one
+	// after the first mount) gets a re-initialised engine, old timers destroyed.
+	createEffect(() => {
+		const delay = local.autoplay;
 		if (!viewportEl) return;
 		// Reduced motion keeps the carousel usable but stops it moving on its own.
 		const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 		const plugins = [...(local.plugins ?? [])];
 		if (transition() !== "slide") plugins.push(Fade());
-		if (local.autoplay && !reduced) {
+		if (delay && !reduced) {
 			// Manual nav should not kill autoplay for good; hover/focus pauses it.
 			plugins.push(
 				Autoplay({
-					delay: local.autoplay,
+					delay,
 					stopOnInteraction: false,
 					stopOnMouseEnter: true,
 					stopOnFocusIn: true,
@@ -108,10 +111,7 @@ const Carousel: ParentComponent<
 		}
 		const embla = EmblaCarousel(
 			viewportEl,
-			{
-				...(transition() === "slide" ? { axis: orientation() === "horizontal" ? "x" : "y" } : {}),
-				...local.opts,
-			},
+			{ axis: orientation() === "horizontal" ? "x" : "y", ...local.opts },
 			plugins,
 		);
 		setApi(embla);

@@ -233,7 +233,7 @@
 	margin-top: 0.125rem;
 }
 
-/* Stacked carousel modes (fade, wipe) put every slide in one grid cell. This is
+/* Carousel `wipe` puts every slide in one grid cell. This is
  * structural, so it ships as real CSS: a Tailwind arbitrary variant written in
  * package source never reaches a consumer, because Tailwind skips node_modules
  * when scanning for class names. */
