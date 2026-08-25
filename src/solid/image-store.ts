@@ -2,7 +2,6 @@ import { createContext, useContext } from "solid-js";
 
 export type StoredImage = {
 	id: string;
-	url: string;
 	width: number;
 	height: number;
 	size: number;
@@ -40,9 +39,14 @@ export class ImageStoreError extends Error {
 	}
 }
 
+/** One gallery open, one query: the server counts usage in the same scan. */
+export type ImageIndex = {
+	images: StoredImage[];
+	usage: ImageQuotaUsage;
+};
+
 export interface ImageStore {
-	list(): Promise<StoredImage[]>;
-	usage(): Promise<ImageQuotaUsage>;
+	index(): Promise<ImageIndex>;
 	upload(file: File): Promise<StoredImage>;
 	remove(id: string): Promise<void>;
 	url(id: string): string;

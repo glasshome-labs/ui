@@ -74,14 +74,15 @@ export function ImagePicker(props: ImagePickerProps) {
 	}
 
 	const [open, setOpen] = createSignal(false);
+	const [everOpened, setEverOpened] = createSignal(false);
 	const [error, setError] = createSignal<ImageStoreError>();
 	const [pendingDelete, setPendingDelete] = createSignal<StoredImage>();
 	const [thumbBroken, setThumbBroken] = createSignal(false);
+	const [brokenTiles, setBrokenTiles] = createSignal<readonly string[]>([]);
 	let fileInput: HTMLInputElement | undefined;
 
-	const [images, { refetch }] = createResource(() => store.list());
-	const [usage, { refetch: refetchUsage }] = createResource(() => store.usage());
-	const sorted = createMemo(() => sortImages(images() ?? []));
+	const [index, { refetch }] = createResource(everOpened, () => store.index());
+	const sorted = createMemo(() => sortImages(index()?.images ?? []));
 	const deleteDescription = createMemo(() => {
 		const used = pendingDelete()?.usedBy ?? 0;
 		return used === 0
@@ -89,35 +90,49 @@ export function ImagePicker(props: ImagePickerProps) {
 			: `This image is used in ${used} widget${used === 1 ? "" : "s"}. Deleting it will leave those widgets without an image.`;
 	});
 
+	const openGallery = (next: boolean) => {
+		if (next) setEverOpened(true);
+		setOpen(next);
+	};
+
+	// A store rejection is picker state, never an unhandled rejection escaping the tree.
+	const fail = (cause: unknown) =>
+		setError(cause instanceof ImageStoreError ? cause : new ImageStoreError("upload_failed"));
+
 	const handleUpload = async (file: File) => {
 		setError(undefined);
 		try {
 			const uploaded = await store.upload(file);
-			await Promise.all([refetch(), refetchUsage()]);
+			await refetch();
 			props.onChange(uploaded.id);
 		} catch (cause) {
-			if (cause instanceof ImageStoreError) setError(cause);
-			else throw cause;
+			fail(cause);
 		}
 	};
 
 	const confirmDelete = async () => {
 		const target = pendingDelete();
 		if (!target) return;
-		await store.remove(target.id);
-		setPendingDelete(undefined);
-		await Promise.all([refetch(), refetchUsage()]);
+		setError(undefined);
+		try {
+			await store.remove(target.id);
+			await refetch();
+		} catch (cause) {
+			fail(cause);
+		} finally {
+			setPendingDelete(undefined);
+		}
 	};
 
 	return (
 		<div data-slot="image-picker" class={cn(props.class)}>
-			<Popover open={open()} onOpenChange={setOpen}>
+			<Popover open={open()} onOpenChange={openGallery}>
 				<PopoverAnchor as="div">
 					<Button
 						type="button"
 						variant="outline"
 						data-slot="image-picker-trigger"
-						onClick={() => setOpen(!open())}
+						onClick={() => openGallery(!open())}
 					>
 						<Show
 							when={!thumbBroken() && props.value}
@@ -142,7 +157,7 @@ export function ImagePicker(props: ImagePickerProps) {
 						)}
 					</Show>
 					<Show
-						when={!images.loading}
+						when={index()}
 						fallback={
 							<div class="grid grid-cols-3 gap-2">
 								<For each={[0, 1, 2, 3, 4, 5]}>{() => <Skeleton class="aspect-square" />}</For>
@@ -180,11 +195,21 @@ export function ImagePicker(props: ImagePickerProps) {
 													setOpen(false);
 												}}
 											>
-												<img
-													src={image.url}
-													alt={`Stored ${image.id}`}
-													class="size-full object-cover"
-												/>
+												<Show
+													when={!brokenTiles().includes(image.id)}
+													fallback={<span class="block size-full bg-muted" />}
+												>
+													<img
+														src={store.url(image.id)}
+														alt={`Stored ${image.id}`}
+														class="size-full object-cover"
+														onError={() =>
+															setBrokenTiles((ids) =>
+																ids.includes(image.id) ? ids : [...ids, image.id],
+															)
+														}
+													/>
+												</Show>
 											</button>
 											<div class="flex items-center justify-between gap-1">
 												<span data-testid="image-usage" class="text-muted-foreground text-xs">
@@ -205,7 +230,7 @@ export function ImagePicker(props: ImagePickerProps) {
 								</For>
 							</div>
 						</Show>
-						<Show when={usage()}>
+						<Show when={index()?.usage}>
 							{(u) => (
 								<SectionMeta>
 									{formatBytes(u().bytes)} of {formatBytes(u().limitBytes)} · {u().files} of{" "}

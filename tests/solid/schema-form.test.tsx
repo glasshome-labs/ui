@@ -332,11 +332,12 @@ describe("extractItemDefaults", () => {
 describe("formType image-picker", () => {
 	it("renders an ImagePicker for formType image-picker", () => {
 		const stubImageStore = {
-			list: async () => [],
-			usage: async () => ({ bytes: 0, limitBytes: 1024, files: 0, limitFiles: 10 }),
+			index: async () => ({
+				images: [],
+				usage: { bytes: 0, limitBytes: 1024, files: 0, limitFiles: 10 },
+			}),
 			upload: async () => ({
 				id: "test",
-				url: "/api/images/test",
 				width: 100,
 				height: 100,
 				size: 1000,

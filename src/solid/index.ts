@@ -216,6 +216,7 @@ export {
 export { IconPicker, type IconPickerProps } from "./icon-picker.js";
 export { ImagePicker, type ImagePickerProps } from "./image-picker.js";
 export {
+	type ImageIndex,
 	type ImageQuotaUsage,
 	type ImageStore,
 	ImageStoreContext,

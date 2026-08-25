@@ -67,48 +67,29 @@ const DEMO_BY_ID = new Map(DEMO_ENTITIES.map((e) => [e.id, e]));
 // delete and quota-error paths interactive without a real backend.
 function createDemoImageStore(): ImageStore {
 	let images = [
-		{
-			id: "demo-1",
-			url: "https://placehold.co/96x64/png",
-			width: 96,
-			height: 64,
-			size: 42_000,
-			usedBy: 0,
-		},
-		{
-			id: "demo-2",
-			url: "https://placehold.co/96x64/png",
-			width: 96,
-			height: 64,
-			size: 88_000,
-			usedBy: 1,
-		},
+		{ id: "demo-1", width: 96, height: 64, size: 42_000, usedBy: 0 },
+		{ id: "demo-2", width: 96, height: 64, size: 88_000, usedBy: 1 },
 	];
 	let nextId = 3;
 	return {
-		list: async () => images,
-		usage: async () => ({
-			bytes: images.reduce((sum, image) => sum + image.size, 0),
-			limitBytes: 262_144_000,
-			files: images.length,
-			limitFiles: 200,
+		index: async () => ({
+			images,
+			usage: {
+				bytes: images.reduce((sum, image) => sum + image.size, 0),
+				limitBytes: 262_144_000,
+				files: images.length,
+				limitFiles: 200,
+			},
 		}),
 		upload: async (file) => {
-			const stored = {
-				id: `demo-${nextId++}`,
-				url: "https://placehold.co/96x64/png",
-				width: 96,
-				height: 64,
-				size: file.size,
-				usedBy: 0,
-			};
+			const stored = { id: `demo-${nextId++}`, width: 96, height: 64, size: file.size, usedBy: 0 };
 			images = [...images, stored];
 			return stored;
 		},
 		remove: async (id) => {
 			images = images.filter((image) => image.id !== id);
 		},
-		url: (id) => images.find((image) => image.id === id)?.url ?? "",
+		url: () => "https://placehold.co/96x64/png",
 	};
 }
 
