@@ -1,5 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, createResource, createSignal, For, Show } from "solid-js";
+import { FIELD_CHROME, INPUT_CLASS } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
 import { Alert } from "./alert.js";
 import {
@@ -126,29 +127,53 @@ export function ImagePicker(props: ImagePickerProps) {
 
 	return (
 		<div data-slot="image-picker" class={cn(props.class)}>
-			<Popover open={open()} onOpenChange={openGallery}>
+			<Popover open={open()} onOpenChange={openGallery} modal>
 				<PopoverAnchor as="div">
-					<Button
+					<button
 						type="button"
-						variant="outline"
 						data-slot="image-picker-trigger"
+						class={cn(INPUT_CLASS, "items-center gap-2 text-sm")}
 						onClick={() => openGallery(!open())}
 					>
 						<Show
 							when={!thumbBroken() && props.value}
-							fallback={<span class="size-6 shrink-0 rounded bg-muted" />}
+							fallback={
+								<>
+									<Icon
+										icon={thumbBroken() ? "lucide:image-off" : "lucide:image"}
+										width={18}
+										height={18}
+										class="shrink-0 text-muted-foreground"
+									/>
+									<span class="flex-1 truncate text-left text-muted-foreground">
+										{thumbBroken() ? "Image unavailable" : "Choose image"}
+									</span>
+								</>
+							}
 						>
 							<img
 								src={store.url(props.value)}
 								alt=""
-								class="size-6 shrink-0 rounded object-cover"
+								width={24}
+								height={24}
+								decoding="async"
+								class="size-6 shrink-0 rounded-sm object-cover"
 								onError={() => setThumbBroken(true)}
 							/>
+							<span class="flex-1 truncate text-left">Image selected</span>
 						</Show>
-						Choose image
-					</Button>
+						<Icon
+							icon="mdi:chevron-down"
+							width={16}
+							height={16}
+							class="shrink-0 text-muted-foreground"
+						/>
+					</button>
 				</PopoverAnchor>
-				<PopoverContent class="flex w-80 flex-col gap-3" onInteractOutside={() => setOpen(false)}>
+				<PopoverContent
+					class="flex w-[var(--kb-popper-anchor-width)] min-w-72 flex-col gap-3"
+					onInteractOutside={() => setOpen(false)}
+				>
 					<Show when={error()}>
 						{(err) => (
 							<Alert tone="destructive" role="alert">
@@ -186,7 +211,8 @@ export function ImagePicker(props: ImagePickerProps) {
 												type="button"
 												data-testid="image-tile"
 												class={cn(
-													"relative aspect-square overflow-hidden rounded-md border border-border/60",
+													FIELD_CHROME,
+													"relative aspect-square w-full overflow-hidden rounded-md",
 													props.value === image.id && "ring-2 ring-primary",
 												)}
 												onClick={() => {
@@ -197,12 +223,23 @@ export function ImagePicker(props: ImagePickerProps) {
 											>
 												<Show
 													when={brokenTiles()[image.id] !== store.url(image.id)}
-													fallback={<span class="block size-full bg-muted" />}
+													fallback={
+														<span
+															data-testid="image-tile-broken"
+															class="absolute inset-0 flex items-center justify-center text-muted-foreground"
+														>
+															<Icon icon="lucide:image-off" width={20} height={20} />
+														</span>
+													}
 												>
 													<img
 														src={store.url(image.id)}
 														alt={`Stored ${image.id}`}
-														class="size-full object-cover"
+														width={image.width}
+														height={image.height}
+														loading="lazy"
+														decoding="async"
+														class="absolute inset-0 h-full w-full object-cover"
 														onError={() =>
 															setBrokenTiles((broken) => ({
 																...broken,
@@ -213,13 +250,17 @@ export function ImagePicker(props: ImagePickerProps) {
 												</Show>
 											</button>
 											<div class="flex items-center justify-between gap-1">
-												<span data-testid="image-usage" class="text-muted-foreground text-xs">
+												<span
+													data-testid="image-usage"
+													class="min-w-0 truncate text-muted-foreground text-xs"
+												>
 													{usageLabel(image.usedBy)}
 												</span>
 												<Button
 													type="button"
 													variant="ghost"
-													size="icon"
+													size="none"
+													class="size-6"
 													aria-label="Delete image"
 													onClick={() => setPendingDelete(image)}
 												>

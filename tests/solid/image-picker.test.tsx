@@ -43,7 +43,19 @@ const withStore = (store: ImageStore, ui: () => unknown) =>
 		<ImageStoreContext.Provider value={store}>{ui() as never}</ImageStoreContext.Provider>
 	));
 
-const openGallery = () => fireEvent.click(screen.getByRole("button", { name: /choose image/i }));
+const trigger = () =>
+	document.querySelector('[data-slot="image-picker-trigger"]') as HTMLButtonElement;
+
+const gallery = () => document.querySelector('[data-slot="popover-content"][data-expanded]');
+
+const openGallery = () => fireEvent.click(trigger());
+
+/** Kobalte dismisses on a capture-phase pointerdown, so a press is not just a click. */
+const press = (el: Element) => {
+	fireEvent.pointerDown(el);
+	fireEvent.pointerUp(el);
+	fireEvent.click(el);
+};
 
 const uploadFile = () => {
 	const input = screen.getByTestId("image-upload-input") as HTMLInputElement;
@@ -59,6 +71,46 @@ describe("ImagePicker", () => {
 	it("renders a notice when no store is available", () => {
 		render(() => <ImagePicker value="" onChange={() => {}} />);
 		expect(screen.getByText(/dashboard cannot store images/i)).toBeTruthy();
+	});
+
+	it("wears a full-width recessed field, not a raised auto-width button", () => {
+		withStore(storeWith(), () => <ImagePicker value="" onChange={() => {}} />);
+		expect(trigger().className).toContain("w-full");
+		expect(trigger().className).toContain("glass-sink");
+	});
+
+	it("opens, closes, and opens again", async () => {
+		withStore(storeWith(), () => <ImagePicker value="" onChange={() => {}} />);
+
+		press(trigger());
+		await waitFor(() => expect(gallery()).not.toBeNull());
+		// Modal is what keeps the press that dismisses from also re-firing the trigger's toggle.
+		expect(document.body.style.pointerEvents).toBe("none");
+
+		press(trigger());
+		await waitFor(() => expect(gallery()).toBeNull());
+
+		press(trigger());
+		await waitFor(() => expect(gallery()).not.toBeNull());
+	});
+
+	it("reads as an empty field when nothing is chosen", () => {
+		withStore(storeWith(), () => <ImagePicker value="" onChange={() => {}} />);
+		expect(trigger().querySelector("img")).toBeNull();
+		expect(trigger().textContent).toMatch(/choose image/i);
+		expect(trigger().querySelector(".text-muted-foreground")).not.toBeNull();
+	});
+
+	it("marks a broken tile with a glyph, not a grey fill a loading tile shares", async () => {
+		withStore(storeWith(), () => <ImagePicker value="" onChange={() => {}} />);
+		openGallery();
+		await waitFor(() => screen.getAllByTestId("image-tile"));
+		expect(screen.queryByTestId("image-tile-broken")).toBeNull();
+
+		fireEvent.error(
+			screen.getAllByTestId("image-tile")[0].querySelector("img") as HTMLImageElement,
+		);
+		await waitFor(() => expect(screen.getAllByTestId("image-tile-broken").length).toBe(1));
 	});
 
 	it("queries the index once, and only after the gallery is opened", async () => {
