@@ -149,7 +149,7 @@ export function ImagePicker(props: ImagePickerProps) {
 								<Empty>
 									<EmptyHeader>
 										<EmptyMedia variant="icon">
-											<span aria-hidden="true">🖼️</span>
+											<Icon icon="lucide:image" width={24} height={24} />
 										</EmptyMedia>
 										<EmptyTitle>No images yet</EmptyTitle>
 										<EmptyDescription>Upload one to use it here.</EmptyDescription>

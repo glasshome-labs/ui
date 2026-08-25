@@ -10,6 +10,7 @@ import { Card } from "./card.js";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible.js";
 import { EntitySelector } from "./entity-selector.js";
 import { IconPicker, type IconPickerProps } from "./icon-picker.js";
+import { ImagePicker } from "./image-picker.js";
 import { Input } from "./input.js";
 import { Label } from "./label.js";
 import { createListReorder } from "./list-reorder.js";
@@ -40,7 +41,13 @@ export interface ExtendedJSONSchema extends JSONSchema7 {
  * schemas with formTypes it predates). Kept in lockstep with the SDK's field
  * helpers by dash's formType parity test.
  */
-export const SCHEMA_FORM_FORM_TYPES = ["icon-picker", "area-picker", "list", "variants"] as const;
+export const SCHEMA_FORM_FORM_TYPES = [
+	"icon-picker",
+	"image-picker",
+	"area-picker",
+	"list",
+	"variants",
+] as const;
 
 const warnedLegacyAreaKeys = new Set<string>();
 
@@ -263,6 +270,9 @@ function FieldControl(props: FieldProps) {
 					onChange={(val) => props.onChange(val)}
 					searchIcons={props.searchIcons}
 				/>
+			</Match>
+			<Match when={props.prop.formType === "image-picker"}>
+				<ImagePicker value={String(current() ?? "")} onChange={(val) => props.onChange(val)} />
 			</Match>
 			<Match
 				when={props.prop.formType === "area-picker" || isLegacyAreaKey(props.name, props.prop)}
