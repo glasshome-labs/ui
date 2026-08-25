@@ -17,8 +17,8 @@ vi.mock("@iconify-icon/solid", () => ({
 }));
 
 import { type EntityDataAdapter, EntityDataContext } from "../../src/solid/entity-data.js";
-import { ImageStoreContext } from "../../src/solid/image-store.js";
 import { dragTargetIndex } from "../../src/solid/list-reorder.js";
+import { MediaStoreContext } from "../../src/solid/media-store.js";
 import {
 	type ExtendedJSONSchema,
 	extractItemDefaults,
@@ -331,13 +331,14 @@ describe("extractItemDefaults", () => {
 
 describe("formType image-picker", () => {
 	it("renders an ImagePicker for formType image-picker", () => {
-		const stubImageStore = {
+		const stubMediaStore = {
 			index: async () => ({
 				images: [],
 				usage: { bytes: 0, limitBytes: 1024, files: 0, limitFiles: 10 },
 			}),
 			upload: async () => ({
 				id: "test",
+				mimeType: "image/png",
 				width: 100,
 				height: 100,
 				size: 1000,
@@ -347,7 +348,7 @@ describe("formType image-picker", () => {
 			url: (id: string) => `/api/images/${id}`,
 		};
 		const { container } = render(() => (
-			<ImageStoreContext.Provider value={stubImageStore}>
+			<MediaStoreContext.Provider value={stubMediaStore}>
 				<SchemaForm
 					schema={{
 						type: "object",
@@ -356,7 +357,7 @@ describe("formType image-picker", () => {
 					data={{}}
 					onChange={() => {}}
 				/>
-			</ImageStoreContext.Provider>
+			</MediaStoreContext.Provider>
 		));
 		expect(container.querySelector('[data-slot="image-picker"]')).toBeTruthy();
 		expect(container.querySelector('[data-slot="schema-form-unknown"]')).toBeNull();

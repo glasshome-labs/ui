@@ -16,8 +16,8 @@ vi.mock("@iconify-icon/solid", () => ({
 }));
 
 import type { EntityDataAdapter } from "../../src/solid/entity-data.js";
-import type { ImageStore } from "../../src/solid/image-store.js";
 import * as solid from "../../src/solid/index.js";
+import type { MediaStore } from "../../src/solid/media-store.js";
 
 const stubEntityData: EntityDataAdapter = {
 	entityIdsByDomain: () => ({ sensor: ["sensor.a"] }),
@@ -26,7 +26,7 @@ const stubEntityData: EntityDataAdapter = {
 	useAreas: () => () => [],
 };
 
-const stubImageStore: ImageStore = {
+const stubMediaStore: MediaStore = {
 	index: async () => ({ images: [], usage: { bytes: 0, limitBytes: 0, files: 0, limitFiles: 0 } }),
 	upload: async () => {
 		throw new Error("unused");
@@ -69,7 +69,7 @@ const SKIP: Record<string, string> = {
 	Tooltip: "renderless context root (kobalte Tooltip), no DOM element of its own",
 	AvatarImage:
 		"kobalte Image renders the img element only after a successful load; happy-dom never loads images",
-	ImageStoreError: "error class, not a component: no class prop to pass through",
+	MediaStoreError: "error class, not a component: no class prop to pass through",
 	// Pre-existing passthrough gaps (no class prop today; close by adding one)
 	BarList: "no class prop (pre-existing passthrough gap)",
 	EntitySelector: "no class prop (pre-existing passthrough gap)",
@@ -452,9 +452,9 @@ const CASES: Record<string, () => JSX.Element> = {
 	),
 	IconPicker: () => <solid.IconPicker class="probe" value="mdi:home" onChange={noop} />,
 	ImagePicker: () => (
-		<solid.ImageStoreContext.Provider value={stubImageStore}>
+		<solid.MediaStoreContext.Provider value={stubMediaStore}>
 			<solid.ImagePicker class="probe" value="" onChange={noop} />
-		</solid.ImageStoreContext.Provider>
+		</solid.MediaStoreContext.Provider>
 	),
 	PopoverTrigger: () => (
 		<solid.Popover>

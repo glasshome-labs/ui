@@ -11,8 +11,8 @@ import {
 	type EntityViewLike,
 	IconPicker,
 	ImagePicker,
-	type ImageStore,
-	ImageStoreContext,
+	type MediaStore,
+	MediaStoreContext,
 	parseColor,
 } from "../../src/solid";
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
@@ -63,12 +63,12 @@ const DEMO_ENTITIES: EntityViewLike[] = [
 
 const DEMO_BY_ID = new Map(DEMO_ENTITIES.map((e) => [e.id, e]));
 
-// In-memory stand-in for the host's image store: keeps the picker's upload,
+// In-memory stand-in for the host's media store: keeps the picker's upload,
 // delete and quota-error paths interactive without a real backend.
-function createDemoImageStore(): ImageStore {
+function createDemoMediaStore(): MediaStore {
 	let images = [
-		{ id: "demo-1", width: 96, height: 64, size: 42_000, usedBy: 0 },
-		{ id: "demo-2", width: 96, height: 64, size: 88_000, usedBy: 1 },
+		{ id: "demo-1", mimeType: "image/png", width: 96, height: 64, size: 42_000, usedBy: 0 },
+		{ id: "demo-2", mimeType: "image/png", width: 96, height: 64, size: 88_000, usedBy: 1 },
 	];
 	let nextId = 3;
 	return {
@@ -82,7 +82,14 @@ function createDemoImageStore(): ImageStore {
 			},
 		}),
 		upload: async (file) => {
-			const stored = { id: `demo-${nextId++}`, width: 96, height: 64, size: file.size, usedBy: 0 };
+			const stored = {
+				id: `demo-${nextId++}`,
+				mimeType: file.type,
+				width: 96,
+				height: 64,
+				size: file.size,
+				usedBy: 0,
+			};
 			images = [...images, stored];
 			return stored;
 		},
@@ -93,7 +100,7 @@ function createDemoImageStore(): ImageStore {
 	};
 }
 
-const demoImageStore = createDemoImageStore();
+const demoMediaStore = createDemoMediaStore();
 
 // Static in-memory stand-in for the host's sync-layer adapter, so the pickers
 // render live options without the design system depending on the HA runtime.
@@ -182,14 +189,14 @@ export function PickersCatalog() {
 					</CatalogNote>
 				</CatalogItem>
 
-				<CatalogItem name="ImagePicker" hint="household gallery (ImageStoreContext)" span={2}>
-					<ImageStoreContext.Provider value={demoImageStore}>
+				<CatalogItem name="ImagePicker" hint="household gallery (MediaStoreContext)" span={2}>
+					<MediaStoreContext.Provider value={demoMediaStore}>
 						<div class="w-full max-w-sm">
 							<ImagePicker value={imageId()} onChange={setImageId} />
 						</div>
-					</ImageStoreContext.Provider>
+					</MediaStoreContext.Provider>
 					<CatalogNote>
-						options come from ImageStoreContext (in-memory demo store here); upload and delete are
+						options come from MediaStoreContext (in-memory demo store here); upload and delete are
 						both live against it
 					</CatalogNote>
 				</CatalogItem>

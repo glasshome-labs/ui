@@ -215,18 +215,6 @@ export {
 } from "./hover-card.js";
 export { IconPicker, type IconPickerProps } from "./icon-picker.js";
 export { ImagePicker, type ImagePickerProps } from "./image-picker.js";
-export {
-	type ImageIndex,
-	type ImageQuotaUsage,
-	type ImageStore,
-	ImageStoreContext,
-	ImageStoreError,
-	type ImageStoreErrorKind,
-	imageUrl,
-	provideImageStore,
-	type StoredImage,
-	useImageStore,
-} from "./image-store.js";
 export { Input } from "./input.js";
 export {
 	InputGroup,
@@ -263,6 +251,19 @@ export {
 	type ListReorderOptions,
 } from "./list-reorder.js";
 export { Logo } from "./logo.js";
+export {
+	imageUrl,
+	type MediaIndex,
+	type MediaQuotaUsage,
+	type MediaStore,
+	MediaStoreContext,
+	MediaStoreError,
+	type MediaStoreErrorKind,
+	mediaUrl,
+	provideMediaStore,
+	type StoredMedia,
+	useMediaStore,
+} from "./media-store.js";
 export { NumberField } from "./number-field.js";
 export { Overlay } from "./overlay.js";
 export { PageHeader } from "./page-header.js";

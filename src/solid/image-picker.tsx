@@ -24,12 +24,12 @@ import {
 	EmptyTitle,
 } from "./empty.js";
 import {
-	type ImageQuotaUsage,
-	ImageStoreError,
-	type ImageStoreErrorKind,
-	type StoredImage,
-	useImageStore,
-} from "./image-store.js";
+	type MediaQuotaUsage,
+	MediaStoreError,
+	type MediaStoreErrorKind,
+	type StoredMedia,
+	useMediaStore,
+} from "./media-store.js";
 import { anchorToTriggerTop, Popover, PopoverAnchor, PopoverContent } from "./popover.js";
 import { SectionMeta } from "./section-card.js";
 import { Skeleton } from "./skeleton.js";
@@ -40,7 +40,7 @@ export interface ImagePickerProps {
 	class?: string;
 }
 
-const ERROR_COPY: Record<ImageStoreErrorKind, (usage?: ImageQuotaUsage) => string> = {
+const ERROR_COPY: Record<MediaStoreErrorKind, (usage?: MediaQuotaUsage) => string> = {
 	file_too_large: () => "That file is too large to upload.",
 	image_too_large: () => "That image's dimensions are too large.",
 	not_an_image: () => "That file isn't an image.",
@@ -59,34 +59,36 @@ const ERROR_COPY: Record<ImageStoreErrorKind, (usage?: ImageQuotaUsage) => strin
 	upload_failed: () => "That didn't work. Try again, and sign in again if it keeps failing.",
 };
 
-const INDEX_ERROR_COPY: Partial<Record<ImageStoreErrorKind, string>> = {
+const INDEX_ERROR_COPY: Partial<Record<MediaStoreErrorKind, string>> = {
 	no_active_household: "No household is active, so your images can't be loaded right now.",
 };
 
-function indexErrorCopy(error: ImageStoreError): string {
+function indexErrorCopy(error: MediaStoreError): string {
 	return (
 		INDEX_ERROR_COPY[error.kind] ??
 		"Your images couldn't be loaded. The dashboard may have lost the server."
 	);
 }
 
-function toStoreError(cause: unknown): ImageStoreError {
-	return cause instanceof ImageStoreError ? cause : new ImageStoreError("upload_failed");
+function toStoreError(cause: unknown): MediaStoreError {
+	return cause instanceof MediaStoreError ? cause : new MediaStoreError("upload_failed");
 }
 
 function usageLabel(usedBy: number): string {
 	return usedBy === 0 ? "not used" : `used in ${usedBy} widget${usedBy === 1 ? "" : "s"}`;
 }
 
-function sortImages(images: StoredImage[]): StoredImage[] {
-	return [...images].sort((a, b) => {
-		if ((a.usedBy === 0) !== (b.usedBy === 0)) return a.usedBy === 0 ? -1 : 1;
-		return a.id.localeCompare(b.id);
-	});
+function sortImages(images: StoredMedia[]): StoredMedia[] {
+	return images
+		.filter((item) => item.mimeType.startsWith("image/"))
+		.sort((a, b) => {
+			if ((a.usedBy === 0) !== (b.usedBy === 0)) return a.usedBy === 0 ? -1 : 1;
+			return a.id.localeCompare(b.id);
+		});
 }
 
 export function ImagePicker(props: ImagePickerProps) {
-	const store = useImageStore();
+	const store = useMediaStore();
 
 	if (!store) {
 		return (
@@ -98,8 +100,8 @@ export function ImagePicker(props: ImagePickerProps) {
 
 	const [open, setOpen] = createSignal(false);
 	const [everOpened, setEverOpened] = createSignal(false);
-	const [error, setError] = createSignal<ImageStoreError>();
-	const [pendingDelete, setPendingDelete] = createSignal<StoredImage>();
+	const [error, setError] = createSignal<MediaStoreError>();
+	const [pendingDelete, setPendingDelete] = createSignal<StoredMedia>();
 	const [thumbBroken, setThumbBroken] = createSignal(false);
 	const [brokenTiles, setBrokenTiles] = createSignal<Readonly<Record<string, string>>>({});
 	let fileInput: HTMLInputElement | undefined;
