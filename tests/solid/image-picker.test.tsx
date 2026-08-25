@@ -24,8 +24,8 @@ const image = (id: string, usedBy = 0): StoredMedia => ({
 	usedBy,
 });
 
-const indexOf = (images: StoredMedia[]): MediaIndex => ({
-	images,
+const indexOf = (media: StoredMedia[]): MediaIndex => ({
+	media,
 	usage: { bytes: 104_857_600, limitBytes: 524_288_000, files: 3, limitFiles: 50 },
 });
 
@@ -216,7 +216,7 @@ describe("ImagePicker", () => {
 			index,
 			upload: async () => {
 				index.mockResolvedValueOnce({
-					images: [image("a"), image("c")],
+					media: [image("a"), image("c")],
 					usage: { bytes: 209_715_200, limitBytes: 524_288_000, files: 4, limitFiles: 50 },
 				});
 				return image("c");

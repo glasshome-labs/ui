@@ -27,7 +27,7 @@ const stubEntityData: EntityDataAdapter = {
 };
 
 const stubMediaStore: MediaStore = {
-	index: async () => ({ images: [], usage: { bytes: 0, limitBytes: 0, files: 0, limitFiles: 0 } }),
+	index: async () => ({ media: [], usage: { bytes: 0, limitBytes: 0, files: 0, limitFiles: 0 } }),
 	upload: async () => {
 		throw new Error("unused");
 	},

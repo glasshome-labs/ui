@@ -333,7 +333,7 @@ describe("formType image-picker", () => {
 	it("renders an ImagePicker for formType image-picker", () => {
 		const stubMediaStore = {
 			index: async () => ({
-				images: [],
+				media: [],
 				usage: { bytes: 0, limitBytes: 1024, files: 0, limitFiles: 10 },
 			}),
 			upload: async () => ({

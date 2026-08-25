@@ -113,7 +113,7 @@ export function ImagePicker(props: ImagePickerProps) {
 		index.error === undefined ? undefined : toStoreError(index.error),
 	);
 	const loaded = () => (index.error === undefined ? index() : undefined);
-	const sorted = createMemo(() => sortImages(loaded()?.images ?? []));
+	const sorted = createMemo(() => sortImages(loaded()?.media ?? []));
 	const deleteDescription = createMemo(() => {
 		const used = pendingDelete()?.usedBy ?? 0;
 		return used === 0

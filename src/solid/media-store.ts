@@ -42,7 +42,7 @@ export class MediaStoreError extends Error {
 
 /** One gallery open, one query: the server counts usage in the same scan. */
 export type MediaIndex = {
-	images: StoredMedia[];
+	media: StoredMedia[];
 	usage: MediaQuotaUsage;
 };
 

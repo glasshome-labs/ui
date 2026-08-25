@@ -12,7 +12,7 @@ import {
 function stubStore(prefix: string): MediaStore {
 	return {
 		index: async () => ({
-			images: [],
+			media: [],
 			usage: { bytes: 0, limitBytes: 0, files: 0, limitFiles: 0 },
 		}),
 		upload: async () => {
