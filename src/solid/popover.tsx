@@ -1,5 +1,6 @@
 import { Popover as PopoverPrimitive } from "@kobalte/core/popover";
 import { type Component, type ComponentProps, splitProps } from "solid-js";
+import { INPUT_SURFACE } from "../lib/input-classes.js";
 import { OVERLAY_SURFACE } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 
@@ -9,15 +10,30 @@ const PopoverTrigger: Component<ComponentProps<typeof PopoverPrimitive.Trigger>>
 	return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
 };
 
-const PopoverContent: Component<ComponentProps<typeof PopoverPrimitive.Content>> = (props) => {
-	const [local, rest] = splitProps(props, ["class"]);
+const OVERLAY_MOTION =
+	"data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[closed]:animate-out data-[expanded]:animate-in";
+
+/* Paired with gutter={0} + anchorToTriggerTop, the clip-path reveal is what makes
+ * the panel read as the field expanding rather than a box dropping in. */
+const FIELD_MOTION = "data-[closed]:animate-select-out data-[expanded]:animate-select-in";
+
+type PopoverContentProps = ComponentProps<typeof PopoverPrimitive.Content> & {
+	/** "field" wears the concave input surface, the way SelectContent does. */
+	surface?: "overlay" | "field";
+};
+
+const PopoverContent: Component<PopoverContentProps> = (props) => {
+	const [local, rest] = splitProps(props, ["class", "surface"]);
+	const surface = () => local.surface ?? "overlay";
 	return (
 		<PopoverPrimitive.Portal>
 			<PopoverPrimitive.Content
 				data-slot="popover-content"
+				data-surface={surface()}
 				class={cn(
-					OVERLAY_SURFACE,
-					"data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-72 rounded-md p-4 text-popover-foreground outline-hidden data-[closed]:animate-out data-[expanded]:animate-in",
+					surface() === "field" ? INPUT_SURFACE : OVERLAY_SURFACE,
+					surface() === "field" ? FIELD_MOTION : OVERLAY_MOTION,
+					"relative z-50 w-72 rounded-md p-4 text-popover-foreground outline-hidden",
 					local.class,
 				)}
 				{...rest}

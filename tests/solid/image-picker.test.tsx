@@ -236,6 +236,62 @@ describe("ImagePicker", () => {
 		await waitFor(() => expect(index.mock.calls.length).toBeGreaterThan(1));
 	});
 
+	it("opens as the field expanding, not a raised floating panel", async () => {
+		withStore(storeWith(), () => <ImagePicker value="" onChange={() => {}} />);
+		press(trigger());
+		await waitFor(() => expect(gallery()).not.toBeNull());
+		const content = gallery() as HTMLElement;
+		expect(content.dataset.surface).toBe("field");
+		expect(content.className).toContain("glass-sink");
+	});
+
+	it("shows a retryable failure, not skeletons or the empty state, when the index rejects", async () => {
+		const store = storeWith({
+			index: async () => {
+				throw new ImageStoreError("upload_failed");
+			},
+		});
+		withStore(store, () => <ImagePicker value="" onChange={() => {}} />);
+		openGallery();
+
+		await waitFor(() => expect(screen.getByText(/your images couldn't be loaded/i)).toBeTruthy());
+		expect(document.querySelector('[data-slot="image-picker-loading"]')).toBeNull();
+		expect(screen.queryByText(/no images yet/i)).toBeNull();
+		expect(screen.queryAllByTestId("image-tile").length).toBe(0);
+	});
+
+	it("retries a failed index and recovers to tiles", async () => {
+		let failing = true;
+		const index = vi.fn(async () => {
+			if (failing) throw new ImageStoreError("upload_failed");
+			return indexOf([image("a")]);
+		});
+		withStore(storeWith({ index }), () => <ImagePicker value="" onChange={() => {}} />);
+		openGallery();
+		await waitFor(() => screen.getByRole("button", { name: /try again/i }));
+
+		failing = false;
+		fireEvent.click(screen.getByRole("button", { name: /try again/i }));
+		await waitFor(() => expect(screen.getAllByTestId("image-tile").length).toBe(1));
+		expect(index.mock.calls.length).toBeGreaterThan(1);
+	});
+
+	it("still reopens after the index rejected", async () => {
+		const store = storeWith({
+			index: async () => {
+				throw new ImageStoreError("upload_failed");
+			},
+		});
+		withStore(store, () => <ImagePicker value="" onChange={() => {}} />);
+		press(trigger());
+		await waitFor(() => expect(screen.getByRole("button", { name: /try again/i })).toBeTruthy());
+
+		press(trigger());
+		await waitFor(() => expect(gallery()).toBeNull());
+		press(trigger());
+		await waitFor(() => expect(gallery()).not.toBeNull());
+	});
+
 	it("surfaces a rejecting remove and closes the confirmation", async () => {
 		const store = storeWith({
 			remove: async () => {

@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { createMemo, createResource, createSignal, For, Show } from "solid-js";
+import { createMemo, createResource, createSignal, For, Match, Show, Switch } from "solid-js";
 import { FIELD_CHROME, INPUT_CLASS } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
 import { Alert } from "./alert.js";
@@ -23,7 +23,7 @@ import {
 	type StoredImage,
 	useImageStore,
 } from "./image-store.js";
-import { Popover, PopoverAnchor, PopoverContent } from "./popover.js";
+import { anchorToTriggerTop, Popover, PopoverAnchor, PopoverContent } from "./popover.js";
 import { SectionMeta } from "./section-card.js";
 import { Skeleton } from "./skeleton.js";
 
@@ -51,6 +51,21 @@ const ERROR_COPY: Record<ImageStoreErrorKind, (usage?: ImageQuotaUsage) => strin
 	no_active_household: () => "No household is active, so images can't be uploaded right now.",
 	upload_failed: () => "That didn't work. Try again, and sign in again if it keeps failing.",
 };
+
+const INDEX_ERROR_COPY: Partial<Record<ImageStoreErrorKind, string>> = {
+	no_active_household: "No household is active, so your images can't be loaded right now.",
+};
+
+function indexErrorCopy(error: ImageStoreError): string {
+	return (
+		INDEX_ERROR_COPY[error.kind] ??
+		"Your images couldn't be loaded. The dashboard may have lost the server."
+	);
+}
+
+function toStoreError(cause: unknown): ImageStoreError {
+	return cause instanceof ImageStoreError ? cause : new ImageStoreError("upload_failed");
+}
 
 function usageLabel(usedBy: number): string {
 	return usedBy === 0 ? "not used" : `used in ${usedBy} widget${usedBy === 1 ? "" : "s"}`;
@@ -83,7 +98,13 @@ export function ImagePicker(props: ImagePickerProps) {
 	let fileInput: HTMLInputElement | undefined;
 
 	const [index, { refetch }] = createResource(everOpened, () => store.index());
-	const sorted = createMemo(() => sortImages(index()?.images ?? []));
+	// Reading index() on a rejected resource rethrows, which crashes the popover's
+	// portal and leaves its overlay swallowing clicks. Every read goes through this.
+	const indexError = createMemo(() =>
+		index.error === undefined ? undefined : toStoreError(index.error),
+	);
+	const loaded = () => (index.error === undefined ? index() : undefined);
+	const sorted = createMemo(() => sortImages(loaded()?.images ?? []));
 	const deleteDescription = createMemo(() => {
 		const used = pendingDelete()?.usedBy ?? 0;
 		return used === 0
@@ -97,8 +118,7 @@ export function ImagePicker(props: ImagePickerProps) {
 	};
 
 	// A store rejection is picker state, never an unhandled rejection escaping the tree.
-	const fail = (cause: unknown) =>
-		setError(cause instanceof ImageStoreError ? cause : new ImageStoreError("upload_failed"));
+	const fail = (cause: unknown) => setError(toStoreError(cause));
 
 	const handleUpload = async (file: File) => {
 		setError(undefined);
@@ -127,7 +147,13 @@ export function ImagePicker(props: ImagePickerProps) {
 
 	return (
 		<div data-slot="image-picker" class={cn(props.class)}>
-			<Popover open={open()} onOpenChange={openGallery} modal>
+			<Popover
+				open={open()}
+				onOpenChange={openGallery}
+				modal
+				gutter={0}
+				getAnchorRect={anchorToTriggerTop}
+			>
 				<PopoverAnchor as="div">
 					<button
 						type="button"
@@ -171,6 +197,7 @@ export function ImagePicker(props: ImagePickerProps) {
 					</button>
 				</PopoverAnchor>
 				<PopoverContent
+					surface="field"
 					class="flex w-[var(--kb-popper-anchor-width)] min-w-72 flex-col gap-3"
 					onInteractOutside={() => setOpen(false)}
 				>
@@ -181,106 +208,127 @@ export function ImagePicker(props: ImagePickerProps) {
 							</Alert>
 						)}
 					</Show>
-					<Show
-						when={index()}
+					<Switch
 						fallback={
-							<div class="grid grid-cols-3 gap-2">
+							<div data-slot="image-picker-loading" class="grid grid-cols-3 gap-2">
 								<For each={[0, 1, 2, 3, 4, 5]}>{() => <Skeleton class="aspect-square" />}</For>
 							</div>
 						}
 					>
-						<Show
-							when={sorted().length > 0}
-							fallback={
-								<Empty>
-									<EmptyHeader>
-										<EmptyMedia variant="icon">
-											<Icon icon="lucide:image" width={24} height={24} />
-										</EmptyMedia>
-										<EmptyTitle>No images yet</EmptyTitle>
-										<EmptyDescription>Upload one to use it here.</EmptyDescription>
-									</EmptyHeader>
-								</Empty>
-							}
-						>
-							<div class="grid grid-cols-3 gap-2">
-								<For each={sorted()}>
-									{(image) => (
-										<div class="flex flex-col gap-1">
-											<button
-												type="button"
-												data-testid="image-tile"
-												class={cn(
-													FIELD_CHROME,
-													"relative aspect-square w-full overflow-hidden rounded-md",
-													props.value === image.id && "ring-2 ring-primary",
-												)}
-												onClick={() => {
-													props.onChange(image.id);
-													setThumbBroken(false);
-													setOpen(false);
-												}}
-											>
-												<Show
-													when={brokenTiles()[image.id] !== store.url(image.id)}
-													fallback={
-														<span
-															data-testid="image-tile-broken"
-															class="absolute inset-0 flex items-center justify-center text-muted-foreground"
-														>
-															<Icon icon="lucide:image-off" width={20} height={20} />
-														</span>
-													}
-												>
-													<img
-														src={store.url(image.id)}
-														alt={`Stored ${image.id}`}
-														width={image.width}
-														height={image.height}
-														loading="lazy"
-														decoding="async"
-														class="absolute inset-0 h-full w-full object-cover"
-														onError={() =>
-															setBrokenTiles((broken) => ({
-																...broken,
-																[image.id]: store.url(image.id),
-															}))
-														}
-													/>
-												</Show>
-											</button>
-											<div class="flex items-center justify-between gap-1">
-												<span
-													data-testid="image-usage"
-													class="min-w-0 truncate text-muted-foreground text-xs"
-												>
-													{usageLabel(image.usedBy)}
-												</span>
-												<Button
-													type="button"
-													variant="ghost"
-													size="none"
-													class="size-6"
-													aria-label="Delete image"
-													onClick={() => setPendingDelete(image)}
-												>
-													<Icon icon="lucide:trash-2" width={16} height={16} />
-												</Button>
-											</div>
-										</div>
-									)}
-								</For>
-							</div>
-						</Show>
-						<Show when={index()?.usage}>
-							{(u) => (
-								<SectionMeta>
-									{formatBytes(u().bytes)} of {formatBytes(u().limitBytes)} · {u().files} of{" "}
-									{u().limitFiles} images
-								</SectionMeta>
+						<Match when={indexError()}>
+							{(failure) => (
+								<Alert
+									tone="destructive"
+									action={
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											data-slot="image-picker-retry"
+											onClick={() => void refetch()}
+										>
+											Try again
+										</Button>
+									}
+								>
+									{indexErrorCopy(failure())}
+								</Alert>
 							)}
-						</Show>
-					</Show>
+						</Match>
+						<Match when={loaded()}>
+							<Show
+								when={sorted().length > 0}
+								fallback={
+									<Empty>
+										<EmptyHeader>
+											<EmptyMedia variant="icon">
+												<Icon icon="lucide:image" width={24} height={24} />
+											</EmptyMedia>
+											<EmptyTitle>No images yet</EmptyTitle>
+											<EmptyDescription>Upload one to use it here.</EmptyDescription>
+										</EmptyHeader>
+									</Empty>
+								}
+							>
+								<div class="grid grid-cols-3 gap-2">
+									<For each={sorted()}>
+										{(image) => (
+											<div class="flex flex-col gap-1">
+												<button
+													type="button"
+													data-testid="image-tile"
+													class={cn(
+														FIELD_CHROME,
+														"relative aspect-square w-full overflow-hidden rounded-md",
+														props.value === image.id && "ring-2 ring-primary",
+													)}
+													onClick={() => {
+														props.onChange(image.id);
+														setThumbBroken(false);
+														setOpen(false);
+													}}
+												>
+													<Show
+														when={brokenTiles()[image.id] !== store.url(image.id)}
+														fallback={
+															<span
+																data-testid="image-tile-broken"
+																class="absolute inset-0 flex items-center justify-center text-muted-foreground"
+															>
+																<Icon icon="lucide:image-off" width={20} height={20} />
+															</span>
+														}
+													>
+														<img
+															src={store.url(image.id)}
+															alt={`Stored ${image.id}`}
+															width={image.width}
+															height={image.height}
+															loading="lazy"
+															decoding="async"
+															class="absolute inset-0 h-full w-full object-cover"
+															onError={() =>
+																setBrokenTiles((broken) => ({
+																	...broken,
+																	[image.id]: store.url(image.id),
+																}))
+															}
+														/>
+													</Show>
+												</button>
+												<div class="flex items-center justify-between gap-1">
+													<span
+														data-testid="image-usage"
+														class="min-w-0 truncate text-muted-foreground text-xs"
+													>
+														{usageLabel(image.usedBy)}
+													</span>
+													<Button
+														type="button"
+														variant="ghost"
+														size="none"
+														class="size-6"
+														aria-label="Delete image"
+														onClick={() => setPendingDelete(image)}
+													>
+														<Icon icon="lucide:trash-2" width={16} height={16} />
+													</Button>
+												</div>
+											</div>
+										)}
+									</For>
+								</div>
+							</Show>
+							<Show when={loaded()?.usage}>
+								{(u) => (
+									<SectionMeta>
+										{formatBytes(u().bytes)} of {formatBytes(u().limitBytes)} · {u().files} of{" "}
+										{u().limitFiles} images
+									</SectionMeta>
+								)}
+							</Show>
+						</Match>
+					</Switch>
 					<input
 						ref={fileInput}
 						type="file"
