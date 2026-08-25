@@ -133,6 +133,20 @@ describe("ImagePicker", () => {
 		expect(captions[1]).toMatch(/used in 2 widgets/i);
 	});
 
+	it("skips a row with no usable mime instead of crashing the gallery", async () => {
+		// A server short a field is what the type says cannot happen, and what shipped.
+		const mimeless = { id: "z", width: 100, height: 80, size: 1234, usedBy: 0 } as Omit<
+			StoredMedia,
+			"mimeType"
+		> as StoredMedia;
+		withStore(storeWith({ index: async () => indexOf([image("a", 2), mimeless]) }), () => (
+			<ImagePicker value="" onChange={() => {}} />
+		));
+		openGallery();
+		await waitFor(() => expect(screen.getAllByTestId("image-tile").length).toBe(1));
+		expect(gallery()).not.toBeNull();
+	});
+
 	it("resolves tile sources through the store, not a server-sent url", async () => {
 		withStore(storeWith({ url: (id) => `http://host:3123/api/images/${id}` }), () => (
 			<ImagePicker value="" onChange={() => {}} />

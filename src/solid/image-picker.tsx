@@ -78,13 +78,17 @@ function usageLabel(usedBy: number): string {
 	return usedBy === 0 ? "not used" : `used in ${usedBy} widget${usedBy === 1 ? "" : "s"}`;
 }
 
+/** A row whose mime is missing or not a string is not an image; a throw here would
+ *  take the popover and its overlay down with the gallery. */
+function isImageRow(item: StoredMedia): boolean {
+	return typeof item.mimeType === "string" && item.mimeType.startsWith("image/");
+}
+
 function sortImages(images: StoredMedia[]): StoredMedia[] {
-	return images
-		.filter((item) => item.mimeType.startsWith("image/"))
-		.sort((a, b) => {
-			if ((a.usedBy === 0) !== (b.usedBy === 0)) return a.usedBy === 0 ? -1 : 1;
-			return a.id.localeCompare(b.id);
-		});
+	return images.filter(isImageRow).sort((a, b) => {
+		if ((a.usedBy === 0) !== (b.usedBy === 0)) return a.usedBy === 0 ? -1 : 1;
+		return a.id.localeCompare(b.id);
+	});
 }
 
 export function ImagePicker(props: ImagePickerProps) {
