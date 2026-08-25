@@ -17,8 +17,8 @@ vi.mock("@iconify-icon/solid", () => ({
 }));
 
 import { type EntityDataAdapter, EntityDataContext } from "../../src/solid/entity-data.js";
-import { dragTargetIndex } from "../../src/solid/list-reorder.js";
 import { ImageStoreContext } from "../../src/solid/image-store.js";
+import { dragTargetIndex } from "../../src/solid/list-reorder.js";
 import {
 	type ExtendedJSONSchema,
 	extractItemDefaults,
@@ -334,7 +334,14 @@ describe("formType image-picker", () => {
 		const stubImageStore = {
 			list: async () => [],
 			usage: async () => ({ bytes: 0, limitBytes: 1024, files: 0, limitFiles: 10 }),
-			upload: async () => ({ id: "test", url: "/api/images/test", width: 100, height: 100, size: 1000, usedBy: 0 }),
+			upload: async () => ({
+				id: "test",
+				url: "/api/images/test",
+				width: 100,
+				height: 100,
+				size: 1000,
+				usedBy: 0,
+			}),
 			remove: async () => {},
 			url: (id: string) => `/api/images/${id}`,
 		};
