@@ -214,6 +214,17 @@ export {
 	HoverCardTrigger,
 } from "./hover-card.js";
 export { IconPicker, type IconPickerProps } from "./icon-picker.js";
+export {
+	type ImageQuotaUsage,
+	type ImageStore,
+	ImageStoreContext,
+	ImageStoreError,
+	type ImageStoreErrorKind,
+	imageUrl,
+	provideImageStore,
+	type StoredImage,
+	useImageStore,
+} from "./image-store.js";
 export { Input } from "./input.js";
 export {
 	InputGroup,
