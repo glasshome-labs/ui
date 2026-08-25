@@ -78,7 +78,7 @@ export function ImagePicker(props: ImagePickerProps) {
 	const [error, setError] = createSignal<ImageStoreError>();
 	const [pendingDelete, setPendingDelete] = createSignal<StoredImage>();
 	const [thumbBroken, setThumbBroken] = createSignal(false);
-	const [brokenTiles, setBrokenTiles] = createSignal<readonly string[]>([]);
+	const [brokenTiles, setBrokenTiles] = createSignal<Readonly<Record<string, string>>>({});
 	let fileInput: HTMLInputElement | undefined;
 
 	const [index, { refetch }] = createResource(everOpened, () => store.index());
@@ -196,7 +196,7 @@ export function ImagePicker(props: ImagePickerProps) {
 												}}
 											>
 												<Show
-													when={!brokenTiles().includes(image.id)}
+													when={brokenTiles()[image.id] !== store.url(image.id)}
 													fallback={<span class="block size-full bg-muted" />}
 												>
 													<img
@@ -204,9 +204,10 @@ export function ImagePicker(props: ImagePickerProps) {
 														alt={`Stored ${image.id}`}
 														class="size-full object-cover"
 														onError={() =>
-															setBrokenTiles((ids) =>
-																ids.includes(image.id) ? ids : [...ids, image.id],
-															)
+															setBrokenTiles((broken) => ({
+																...broken,
+																[image.id]: store.url(image.id),
+															}))
 														}
 													/>
 												</Show>

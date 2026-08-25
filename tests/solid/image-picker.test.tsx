@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
+import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@iconify-icon/solid", () => ({
@@ -97,6 +98,19 @@ describe("ImagePicker", () => {
 		const img = tile.querySelector("img") as HTMLImageElement;
 		fireEvent.error(img);
 		await waitFor(() => expect(tile.querySelector("img")).toBeNull());
+	});
+
+	it("recovers a tile once its resolved src changes", async () => {
+		const [src, setSrc] = createSignal("data:image/gif;base64,placeholder");
+		withStore(storeWith({ url: () => src() }), () => <ImagePicker value="" onChange={() => {}} />);
+		openGallery();
+		await waitFor(() => screen.getAllByTestId("image-tile"));
+		const tile = screen.getAllByTestId("image-tile")[0];
+		fireEvent.error(tile.querySelector("img") as HTMLImageElement);
+		await waitFor(() => expect(tile.querySelector("img")).toBeNull());
+
+		setSrc("blob:resolved");
+		await waitFor(() => expect(tile.querySelector("img")).not.toBeNull());
 	});
 
 	it("reports the chosen id", async () => {
