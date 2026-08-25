@@ -214,6 +214,7 @@ export {
 	HoverCardTrigger,
 } from "./hover-card.js";
 export { IconPicker, type IconPickerProps } from "./icon-picker.js";
+export { ImagePicker, type ImagePickerProps } from "./image-picker.js";
 export {
 	type ImageQuotaUsage,
 	type ImageStore,

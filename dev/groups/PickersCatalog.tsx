@@ -10,6 +10,9 @@ import {
 	EntitySelector,
 	type EntityViewLike,
 	IconPicker,
+	ImagePicker,
+	type ImageStore,
+	ImageStoreContext,
 	parseColor,
 } from "../../src/solid";
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
@@ -60,6 +63,51 @@ const DEMO_ENTITIES: EntityViewLike[] = [
 
 const DEMO_BY_ID = new Map(DEMO_ENTITIES.map((e) => [e.id, e]));
 
+// In-memory stand-in for the host's image store: keeps the picker's upload,
+// delete and quota-error paths interactive without a real backend.
+function createDemoImageStore(): ImageStore {
+	let images = [
+		{
+			id: "demo-1",
+			url: "https://placehold.co/96x64/png",
+			width: 96,
+			height: 64,
+			size: 42_000,
+			usedBy: 0,
+		},
+		{
+			id: "demo-2",
+			url: "https://placehold.co/96x64/png",
+			width: 96,
+			height: 64,
+			size: 88_000,
+			usedBy: 1,
+		},
+	];
+	let nextId = 3;
+	return {
+		list: async () => images,
+		upload: async (file) => {
+			const stored = {
+				id: `demo-${nextId++}`,
+				url: "https://placehold.co/96x64/png",
+				width: 96,
+				height: 64,
+				size: file.size,
+				usedBy: 0,
+			};
+			images = [...images, stored];
+			return stored;
+		},
+		remove: async (id) => {
+			images = images.filter((image) => image.id !== id);
+		},
+		url: (id) => images.find((image) => image.id === id)?.url ?? "",
+	};
+}
+
+const demoImageStore = createDemoImageStore();
+
 // Static in-memory stand-in for the host's sync-layer adapter, so the pickers
 // render live options without the design system depending on the HA runtime.
 const demoAdapter: EntityDataAdapter = {
@@ -86,6 +134,7 @@ export function PickersCatalog() {
 	const [icon, setIcon] = createSignal("mdi:lightbulb");
 	const [area, setArea] = createSignal<string>("");
 	const [lightIds, setLightIds] = createSignal<string[]>([]);
+	const [imageId, setImageId] = createSignal("demo-1");
 
 	return (
 		<EntityDataContext.Provider value={demoAdapter}>
@@ -143,6 +192,18 @@ export function PickersCatalog() {
 					</div>
 					<CatalogNote>
 						domain="light"; entities come from EntityDataContext (static demo adapter here)
+					</CatalogNote>
+				</CatalogItem>
+
+				<CatalogItem name="ImagePicker" hint="household gallery (ImageStoreContext)" span={2}>
+					<ImageStoreContext.Provider value={demoImageStore}>
+						<div class="w-full max-w-sm">
+							<ImagePicker value={imageId()} onChange={setImageId} />
+						</div>
+					</ImageStoreContext.Provider>
+					<CatalogNote>
+						options come from ImageStoreContext (in-memory demo store here); upload and delete are
+						both live against it
 					</CatalogNote>
 				</CatalogItem>
 			</CatalogGroup>
