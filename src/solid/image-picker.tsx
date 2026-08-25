@@ -15,7 +15,14 @@ import {
 } from "./alert-dialog.js";
 import { Button } from "./button.js";
 import { formatBytes } from "./charts.js";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "./empty.js";
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "./empty.js";
 import {
 	type ImageQuotaUsage,
 	ImageStoreError,
@@ -217,9 +224,16 @@ export function ImagePicker(props: ImagePickerProps) {
 					>
 						<Match when={indexError()}>
 							{(failure) => (
-								<Alert
-									tone="destructive"
-									action={
+								// role="status": the gallery is explaining itself, not raising an alarm.
+								<Empty role="status">
+									<EmptyHeader>
+										<EmptyMedia variant="icon">
+											<Icon icon="lucide:image-off" width={24} height={24} />
+										</EmptyMedia>
+										<EmptyTitle>Images unavailable</EmptyTitle>
+										<EmptyDescription>{indexErrorCopy(failure())}</EmptyDescription>
+									</EmptyHeader>
+									<EmptyContent>
 										<Button
 											type="button"
 											variant="outline"
@@ -229,10 +243,8 @@ export function ImagePicker(props: ImagePickerProps) {
 										>
 											Try again
 										</Button>
-									}
-								>
-									{indexErrorCopy(failure())}
-								</Alert>
+									</EmptyContent>
+								</Empty>
 							)}
 						</Match>
 						<Match when={loaded()}>

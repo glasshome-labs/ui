@@ -190,6 +190,9 @@ describe("ImagePicker", () => {
 		await waitFor(() => screen.getByTestId("image-upload-input"));
 		uploadFile();
 		await waitFor(() => expect(screen.getByRole("alert").textContent).toMatch(/238 MB of 250 MB/i));
+		// The upload surface stays an Alert; only the gallery-load failure is an empty state.
+		expect(screen.getByRole("alert").dataset.slot).toBe("alert");
+		expect(screen.queryByRole("status")).toBeNull();
 	});
 
 	it("templates an upload_failed refusal, distinct from the file-too-large copy", async () => {
@@ -258,6 +261,47 @@ describe("ImagePicker", () => {
 		expect(document.querySelector('[data-slot="image-picker-loading"]')).toBeNull();
 		expect(screen.queryByText(/no images yet/i)).toBeNull();
 		expect(screen.queryAllByTestId("image-tile").length).toBe(0);
+	});
+
+	it("renders the index failure as an empty state, not an alert", async () => {
+		const store = storeWith({
+			index: async () => {
+				throw new ImageStoreError("upload_failed");
+			},
+		});
+		withStore(store, () => <ImagePicker value="" onChange={() => {}} />);
+		openGallery();
+
+		const failure = await waitFor(() => screen.getByRole("status"));
+		expect(failure.dataset.slot).toBe("empty");
+		expect(failure.querySelector('[data-slot="empty-title"]')?.textContent).toMatch(
+			/images unavailable/i,
+		);
+		expect(failure.querySelector('[data-slot="empty-description"]')?.textContent).toMatch(
+			/your images couldn't be loaded/i,
+		);
+		expect(failure.querySelector('[data-slot="empty-icon"]')).toBeTruthy();
+		expect(
+			failure.querySelector('[data-slot="empty-content"] [data-slot="image-picker-retry"]'),
+		).toBeTruthy();
+		expect(screen.queryByRole("alert")).toBeNull();
+		expect(document.querySelector('[data-slot="alert"]')).toBeNull();
+	});
+
+	it("renders the no-household index failure as the same empty state", async () => {
+		const store = storeWith({
+			index: async () => {
+				throw new ImageStoreError("no_active_household");
+			},
+		});
+		withStore(store, () => <ImagePicker value="" onChange={() => {}} />);
+		openGallery();
+
+		await waitFor(() => expect(screen.getByRole("status")).toBeTruthy());
+		expect(
+			screen.getByText(/no household is active, so your images can't be loaded/i),
+		).toBeTruthy();
+		expect(screen.queryByRole("alert")).toBeNull();
 	});
 
 	it("retries a failed index and recovers to tiles", async () => {
