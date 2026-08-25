@@ -113,7 +113,12 @@ export function ImagePicker(props: ImagePickerProps) {
 		<div data-slot="image-picker" class={cn(props.class)}>
 			<Popover open={open()} onOpenChange={setOpen}>
 				<PopoverAnchor as="div">
-					<Button type="button" variant="outline" onClick={() => setOpen(!open())}>
+					<Button
+						type="button"
+						variant="outline"
+						data-slot="image-picker-trigger"
+						onClick={() => setOpen(!open())}
+					>
 						<Show
 							when={!thumbBroken() && props.value}
 							fallback={<span class="size-6 shrink-0 rounded bg-muted" />}
