@@ -1,8 +1,8 @@
 import { render } from "@solidjs/testing-library";
 import { describe, expect, it } from "vitest";
 import {
-	ImageStoreContext,
 	type ImageStore,
+	ImageStoreContext,
 	imageUrl,
 	provideImageStore,
 	useImageStore,
@@ -11,6 +11,7 @@ import {
 function stubStore(prefix: string): ImageStore {
 	return {
 		list: async () => [],
+		usage: async () => ({ bytes: 0, limitBytes: 0, files: 0, limitFiles: 0 }),
 		upload: async () => {
 			throw new Error("not used");
 		},

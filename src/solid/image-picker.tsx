@@ -79,6 +79,7 @@ export function ImagePicker(props: ImagePickerProps) {
 	let fileInput: HTMLInputElement | undefined;
 
 	const [images, { refetch }] = createResource(() => store.list());
+	const [usage, { refetch: refetchUsage }] = createResource(() => store.usage());
 	const sorted = createMemo(() => sortImages(images() ?? []));
 	const deleteDescription = createMemo(() => {
 		const used = pendingDelete()?.usedBy ?? 0;
@@ -91,7 +92,7 @@ export function ImagePicker(props: ImagePickerProps) {
 		setError(undefined);
 		try {
 			const uploaded = await store.upload(file);
-			await refetch();
+			await Promise.all([refetch(), refetchUsage()]);
 			props.onChange(uploaded.id);
 		} catch (cause) {
 			if (cause instanceof ImageStoreError) setError(cause);
@@ -104,7 +105,7 @@ export function ImagePicker(props: ImagePickerProps) {
 		if (!target) return;
 		await store.remove(target.id);
 		setPendingDelete(undefined);
-		await refetch();
+		await Promise.all([refetch(), refetchUsage()]);
 	};
 
 	return (
@@ -197,10 +198,14 @@ export function ImagePicker(props: ImagePickerProps) {
 									)}
 								</For>
 							</div>
-							<SectionMeta>
-								{sorted().length} image{sorted().length === 1 ? "" : "s"},{" "}
-								{formatBytes(sorted().reduce((sum, image) => sum + image.size, 0))}
-							</SectionMeta>
+						</Show>
+						<Show when={usage()}>
+							{(u) => (
+								<SectionMeta>
+									{formatBytes(u().bytes)} of {formatBytes(u().limitBytes)} · {u().files} of{" "}
+									{u().limitFiles} images
+								</SectionMeta>
+							)}
 						</Show>
 					</Show>
 					<input

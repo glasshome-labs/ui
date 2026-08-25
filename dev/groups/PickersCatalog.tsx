@@ -87,6 +87,12 @@ function createDemoImageStore(): ImageStore {
 	let nextId = 3;
 	return {
 		list: async () => images,
+		usage: async () => ({
+			bytes: images.reduce((sum, image) => sum + image.size, 0),
+			limitBytes: 262_144_000,
+			files: images.length,
+			limitFiles: 200,
+		}),
 		upload: async (file) => {
 			const stored = {
 				id: `demo-${nextId++}`,

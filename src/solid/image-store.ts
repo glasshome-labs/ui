@@ -41,6 +41,7 @@ export class ImageStoreError extends Error {
 
 export interface ImageStore {
 	list(): Promise<StoredImage[]>;
+	usage(): Promise<ImageQuotaUsage>;
 	upload(file: File): Promise<StoredImage>;
 	remove(id: string): Promise<void>;
 	url(id: string): string;

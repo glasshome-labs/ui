@@ -25,6 +25,7 @@ const image = (id: string, usedBy = 0): StoredImage => ({
 function storeWith(overrides: Partial<ImageStore> = {}): ImageStore {
 	return {
 		list: async () => [image("a", 2), image("b")],
+		usage: async () => ({ bytes: 104_857_600, limitBytes: 524_288_000, files: 3, limitFiles: 50 }),
 		upload: async () => image("c"),
 		remove: async () => {},
 		url: (id) => `/api/images/${id}`,
@@ -83,6 +84,36 @@ describe("ImagePicker", () => {
 		});
 		fireEvent.change(input);
 		await waitFor(() => expect(screen.getByRole("alert").textContent).toMatch(/238 MB of 250 MB/i));
+	});
+
+	it("renders the server-provided quota limits and refetches them after an upload", async () => {
+		const usage = vi.fn(async () => ({
+			bytes: 104_857_600,
+			limitBytes: 524_288_000,
+			files: 3,
+			limitFiles: 50,
+		}));
+		const store = storeWith({
+			usage,
+			upload: async () => {
+				usage.mockResolvedValueOnce({
+					bytes: 209_715_200,
+					limitBytes: 524_288_000,
+					files: 4,
+					limitFiles: 50,
+				});
+				return image("c");
+			},
+		});
+		withStore(store, () => <ImagePicker value="" onChange={() => {}} />);
+		fireEvent.click(screen.getByRole("button", { name: /choose image/i }));
+		await waitFor(() => expect(screen.getByText(/100 MB of 500 MB/i)).toBeTruthy());
+		const input = screen.getByTestId("image-upload-input") as HTMLInputElement;
+		Object.defineProperty(input, "files", {
+			value: [new File(["x"], "x.png", { type: "image/png" })],
+		});
+		fireEvent.change(input);
+		await waitFor(() => expect(screen.getByText(/200 MB of 500 MB/i)).toBeTruthy());
 	});
 
 	it("refetches the gallery after a delete", async () => {

@@ -28,6 +28,7 @@ const stubEntityData: EntityDataAdapter = {
 
 const stubImageStore: ImageStore = {
 	list: async () => [],
+	usage: async () => ({ bytes: 0, limitBytes: 0, files: 0, limitFiles: 0 }),
 	upload: async () => {
 		throw new Error("unused");
 	},
@@ -69,7 +70,7 @@ const SKIP: Record<string, string> = {
 	Tooltip: "renderless context root (kobalte Tooltip), no DOM element of its own",
 	AvatarImage:
 		"kobalte Image renders the img element only after a successful load; happy-dom never loads images",
-	ImageStoreError: "class export (Error subclass), not a component",
+	ImageStoreError: "error class, not a component: no class prop to pass through",
 	// Pre-existing passthrough gaps (no class prop today; close by adding one)
 	BarList: "no class prop (pre-existing passthrough gap)",
 	EntitySelector: "no class prop (pre-existing passthrough gap)",
