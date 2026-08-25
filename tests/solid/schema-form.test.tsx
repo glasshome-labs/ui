@@ -269,6 +269,44 @@ describe("formType list", () => {
 		fireEvent.click(getByRole("button", { name: "Solar", expanded: false }));
 		expect(container.querySelector('[data-slot="schema-form-variants"]')).toBeTruthy();
 	});
+
+	const groupList: ExtendedJSONSchema = {
+		type: "object",
+		properties: {
+			pictures: {
+				type: "array",
+				default: [],
+				formType: "list",
+				title: "Pictures",
+				addLabel: "Add picture",
+				items: {
+					type: "object",
+					title: "Picture",
+					properties: {
+						image: { type: "string", title: "Picture" },
+						crop: {
+							type: "object",
+							title: "Crop",
+							properties: { zoom: { type: "number", title: "Zoom" } },
+						},
+					},
+				},
+			},
+		},
+	};
+
+	it("an item's group root drops its own box and title, a group below it keeps them", () => {
+		const { container, getByRole } = render(() => (
+			<SchemaForm schema={groupList} data={{ pictures: [{}] }} onChange={() => {}} />
+		));
+		fireEvent.click(getByRole("button", { name: "Item 1", expanded: false }));
+		const item = container.querySelector('[data-slot="schema-form-list-item"]');
+		const groups = Array.from(item?.querySelectorAll('[data-slot="schema-form-object"]') ?? []);
+		expect(groups).toHaveLength(2);
+		expect(groups[0]?.className).not.toContain("border");
+		expect(groups[1]?.className).toContain("border");
+		expect(item?.textContent?.match(/Picture/g)).toHaveLength(1);
+	});
 });
 
 describe("formType variants", () => {

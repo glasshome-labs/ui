@@ -99,6 +99,10 @@ function isStringArray(prop: ExtendedJSONSchema): boolean {
 	return prop.type === "array" && itemsOf(prop).type === "string";
 }
 
+function isObjectGroup(prop: ExtendedJSONSchema): boolean {
+	return prop.type === "object" && prop.properties !== undefined && prop.formType === undefined;
+}
+
 function recordOf(value: unknown): Record<string, unknown> {
 	return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
 }
@@ -216,12 +220,22 @@ interface FieldProps {
 	value: unknown;
 	onChange: (value: unknown) => void;
 	searchIcons?: IconPickerProps["searchIcons"];
+	/**
+	 * This field is the root of a list item: the item Card is already its
+	 * container and its header row already captions it, so a group renders its
+	 * properties bare. Never forwarded down, so a group nested below the item
+	 * root keeps the box that delimits it.
+	 */
+	bare?: boolean;
 }
 
 function LabeledField(props: FieldProps) {
+	const groupRoot = () => props.bare === true && isObjectGroup(props.prop);
 	return (
 		<div class="flex flex-col gap-1.5" data-slot="schema-form-field">
-			<Label for={props.id}>{props.prop.title || props.name}</Label>
+			<Show when={!groupRoot()}>
+				<Label for={props.id}>{props.prop.title || props.name}</Label>
+			</Show>
 			<Show when={props.prop.description}>
 				<p class="text-muted-foreground text-xs">{props.prop.description}</p>
 			</Show>
@@ -321,9 +335,12 @@ function FieldControl(props: FieldProps) {
 					onChange={(val) => props.onChange(val)}
 				/>
 			</Match>
-			<Match when={props.prop.type === "object" && props.prop.properties}>
+			<Match when={isObjectGroup(props.prop)}>
 				<div
-					class="flex flex-col gap-3 rounded-lg border border-border p-3"
+					class={cn(
+						"flex flex-col gap-3",
+						props.bare !== true && "rounded-lg border border-border p-3",
+					)}
 					data-slot="schema-form-object"
 				>
 					<For each={propertiesOf(props.prop)}>
@@ -505,6 +522,7 @@ function ListControl(props: FieldProps) {
 										value={item()}
 										onChange={(value) => replaceAt(index, value)}
 										searchIcons={props.searchIcons}
+										bare
 									/>
 								</div>
 							</CollapsibleContent>
