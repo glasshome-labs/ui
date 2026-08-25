@@ -25,7 +25,8 @@ export type ImageStoreErrorKind =
 	| "quota_files_exceeded"
 	| "upload_rate_exceeded"
 	| "server_storage_full"
-	| "no_active_household";
+	| "no_active_household"
+	| "upload_failed";
 
 export class ImageStoreError extends Error {
 	readonly kind: ImageStoreErrorKind;

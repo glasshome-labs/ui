@@ -48,6 +48,7 @@ const ERROR_COPY: Record<ImageStoreErrorKind, (usage?: ImageQuotaUsage) => strin
 	server_storage_full: () =>
 		"The dashboard's image storage is full. Whoever runs this dashboard needs to free up space on the server.",
 	no_active_household: () => "No household is active, so images can't be uploaded right now.",
+	upload_failed: () => "That didn't work. Try again, and sign in again if it keeps failing.",
 };
 
 function usageLabel(usedBy: number): string {

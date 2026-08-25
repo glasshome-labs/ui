@@ -86,6 +86,24 @@ describe("ImagePicker", () => {
 		await waitFor(() => expect(screen.getByRole("alert").textContent).toMatch(/238 MB of 250 MB/i));
 	});
 
+	it("templates an upload_failed refusal, distinct from the file-too-large copy", async () => {
+		const store = storeWith({
+			upload: async () => {
+				throw new ImageStoreError("upload_failed");
+			},
+		});
+		withStore(store, () => <ImagePicker value="" onChange={() => {}} />);
+		fireEvent.click(screen.getByRole("button", { name: /choose image/i }));
+		await waitFor(() => screen.getByTestId("image-upload-input"));
+		const input = screen.getByTestId("image-upload-input") as HTMLInputElement;
+		Object.defineProperty(input, "files", {
+			value: [new File(["x"], "x.png", { type: "image/png" })],
+		});
+		fireEvent.change(input);
+		await waitFor(() => expect(screen.getByRole("alert").textContent).toMatch(/sign in again/i));
+		expect(screen.getByRole("alert").textContent).not.toMatch(/too large to upload/i);
+	});
+
 	it("renders the server-provided quota limits and refetches them after an upload", async () => {
 		const usage = vi.fn(async () => ({
 			bytes: 104_857_600,
