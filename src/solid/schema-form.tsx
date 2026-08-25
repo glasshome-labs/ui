@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import type { JSONSchema7 } from "json-schema";
 import { createMemo, createSignal, For, Index, Match, Show, Switch as SwitchFlow } from "solid-js";
+import { FIELD_CHROME } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
 import { Alert } from "./alert.js";
 import { AreaPicker } from "./area-picker.js";
@@ -14,6 +15,7 @@ import { ImagePicker } from "./image-picker.js";
 import { Input } from "./input.js";
 import { Label } from "./label.js";
 import { createListReorder } from "./list-reorder.js";
+import { useMediaStore } from "./media-store.js";
 import { NumberField } from "./number-field.js";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select.js";
 import { Switch } from "./switch.js";
@@ -363,6 +365,29 @@ function FieldControl(props: FieldProps) {
 
 function ListControl(props: FieldProps) {
 	const itemSchema = () => itemsOf(props.prop);
+	const mediaStore = useMediaStore();
+	const [brokenThumbs, setBrokenThumbs] = createSignal<ReadonlySet<string>>(new Set());
+
+	// One image field is unambiguously the row's picture. Two would need the
+	// author to say which, so both zero and two keep the plain text row.
+	const imageKey = createMemo(() => {
+		const image = propertiesOf(itemSchema()).filter(([, sub]) => sub.formType === "image-picker");
+		return image.length === 1 ? image[0]?.[0] : undefined;
+	});
+
+	const thumbUrl = (item: unknown) => {
+		const key = imageKey();
+		const store = mediaStore;
+		if (key === undefined || !store) return undefined;
+		const id = recordOf(item)[key];
+		if (typeof id !== "string" || id === "") return undefined;
+		return store.url(id);
+	};
+
+	const liveThumbUrl = (item: unknown) => {
+		const url = thumbUrl(item);
+		return url !== undefined && !brokenThumbs().has(url) ? url : undefined;
+	};
 	const items = () => {
 		const value = props.value ?? props.prop.default;
 		return Array.isArray(value) ? (value as unknown[]) : [];
@@ -476,6 +501,39 @@ function ListControl(props: FieldProps) {
 									)}
 									aria-hidden="true"
 								/>
+								<Show when={imageKey() !== undefined && mediaStore !== undefined}>
+									<span
+										class={cn(
+											FIELD_CHROME,
+											"pointer-events-none relative ml-1.5 flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md text-muted-foreground",
+										)}
+										data-slot="schema-form-list-item-thumb"
+									>
+										<Show
+											when={liveThumbUrl(item())}
+											fallback={
+												<Icon
+													icon={
+														thumbUrl(item()) === undefined ? "lucide:image" : "lucide:image-off"
+													}
+													width={16}
+													height={16}
+													aria-hidden="true"
+												/>
+											}
+										>
+											{(url) => (
+												<img
+													src={url()}
+													alt=""
+													decoding="async"
+													class="absolute inset-0 h-full w-full object-cover"
+													onError={() => setBrokenThumbs((broken) => new Set(broken).add(url()))}
+												/>
+											)}
+										</Show>
+									</span>
+								</Show>
 								<span class="pointer-events-none relative ml-2 min-w-0 flex-1 truncate text-left text-sm">
 									{caption(item(), index)}
 								</span>

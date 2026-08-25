@@ -13,12 +13,14 @@ import { describe, expect, it, vi } from "vitest";
 // after this file's happy-dom window is torn down (unhandled "document is not
 // defined"); nothing here asserts icon internals.
 vi.mock("@iconify-icon/solid", () => ({
-	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
+	Icon: (props: { class?: string; icon?: string }) => (
+		<span class={props.class} data-icon-stub={props.icon} />
+	),
 }));
 
 import { type EntityDataAdapter, EntityDataContext } from "../../src/solid/entity-data.js";
 import { dragTargetIndex } from "../../src/solid/list-reorder.js";
-import { MediaStoreContext } from "../../src/solid/media-store.js";
+import { type MediaStore, MediaStoreContext } from "../../src/solid/media-store.js";
 import {
 	type ExtendedJSONSchema,
 	extractItemDefaults,
@@ -399,5 +401,99 @@ describe("formType image-picker", () => {
 		));
 		expect(container.querySelector('[data-slot="image-picker"]')).toBeTruthy();
 		expect(container.querySelector('[data-slot="schema-form-unknown"]')).toBeNull();
+	});
+});
+
+describe("list rows preview their picture", () => {
+	const store: MediaStore = {
+		index: async () => ({
+			media: [],
+			usage: { bytes: 0, limitBytes: 1024, files: 0, limitFiles: 10 },
+		}),
+		upload: async () => ({ id: "x", mimeType: "image/png", size: 1, usedBy: 0 }),
+		remove: async () => {},
+		url: (id) => `/api/images/${id}`,
+	};
+
+	const pictureList = (itemProperties: Record<string, ExtendedJSONSchema>): ExtendedJSONSchema => ({
+		type: "object",
+		properties: {
+			pictures: {
+				type: "array",
+				default: [],
+				formType: "list",
+				title: "Pictures",
+				addLabel: "Add picture",
+				items: { type: "object", title: "Picture", properties: itemProperties },
+			},
+		},
+	});
+
+	const oneImage = pictureList({ image: { type: "string", formType: "image-picker" } });
+
+	const renderList = (schema: ExtendedJSONSchema, data: Record<string, unknown>) =>
+		render(() => (
+			<MediaStoreContext.Provider value={store}>
+				<SchemaForm schema={schema} data={data} onChange={() => {}} />
+			</MediaStoreContext.Provider>
+		));
+
+	const thumb = (container: Element) =>
+		container.querySelector('[data-slot="schema-form-list-item-thumb"]');
+
+	it("shows the chosen picture in the collapsed row", () => {
+		const { container } = renderList(oneImage, { pictures: [{ image: "photo1" }] });
+		const img = thumb(container)?.querySelector("img");
+		expect(img?.getAttribute("src")).toBe("/api/images/photo1");
+	});
+
+	it("shows the picker's empty glyph when no picture is chosen yet", () => {
+		const { container } = renderList(oneImage, { pictures: [{}] });
+		const box = thumb(container);
+		expect(box?.querySelector("img")).toBeNull();
+		expect(box?.querySelector("[data-icon-stub]")?.getAttribute("data-icon-stub")).toBe(
+			"lucide:image",
+		);
+	});
+
+	it("falls back to the broken-image glyph when the file is gone", () => {
+		const { container } = renderList(oneImage, { pictures: [{ image: "gone" }] });
+		const img = thumb(container)?.querySelector("img");
+		expect(img).toBeTruthy();
+		if (img) fireEvent.error(img);
+		expect(thumb(container)?.querySelector("img")).toBeNull();
+		expect(
+			thumb(container)?.querySelector("[data-icon-stub]")?.getAttribute("data-icon-stub"),
+		).toBe("lucide:image-off");
+	});
+
+	it("stays a text row with no image field, and with two of them", () => {
+		const { container: none } = renderList(pictureList({ label: { type: "string" } }), {
+			pictures: [{ label: "One" }],
+		});
+		expect(thumb(none)).toBeNull();
+
+		const { container: two } = renderList(
+			pictureList({
+				front: { type: "string", formType: "image-picker" },
+				back: { type: "string", formType: "image-picker" },
+			}),
+			{ pictures: [{ front: "a", back: "b" }] },
+		);
+		expect(thumb(two)).toBeNull();
+	});
+
+	it("stays a text row when no media store is registered", () => {
+		const { container } = render(() => (
+			<SchemaForm
+				schema={oneImage}
+				data={{ pictures: [{ image: "photo1" }] }}
+				onChange={() => {}}
+			/>
+		));
+		expect(thumb(container)).toBeNull();
+		expect(container.querySelector('[data-slot="schema-form-list-item"]')?.textContent).toContain(
+			"Item 1",
+		);
 	});
 });
