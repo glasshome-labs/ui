@@ -18,6 +18,38 @@ Hand-written; drop this section once release-please cuts the version from the co
 
 * **input-classes:** add `FIELD_CHROME`, the recipe SPEC.md already documented. Toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) wear it and stay keyed to `--input` in both themes, so they keep reading as empty wells now that fields do not.
 
+## [1.5.0](https://github.com/glasshome/ui/compare/v1.4.0...v1.5.0) (2026-08-26)
+
+
+### Features
+
+* **image-picker:** household image gallery with upload, delete and quota copy ([be7205d](https://github.com/glasshome/ui/commit/be7205d650bd21b10200c64838c764da3b293929))
+* **image-store:** host-provided image store singleton and imageUrl resolver ([26a79f5](https://github.com/glasshome/ui/commit/26a79f5a12b3e3e541b310213a565756d9935d3b))
+* **media-store:** resolve a thumbnail variant for gallery tiles ([07ca3d0](https://github.com/glasshome/ui/commit/07ca3d07681f98838d4a4149bb44817cd61c3482))
+* **media-tile:** promote the settings picture tile into the system ([b239c82](https://github.com/glasshome/ui/commit/b239c82853fd2921541070cfd3ebb25abd194899))
+* **schema-form:** a list row previews its picture ([f32e667](https://github.com/glasshome/ui/commit/f32e66749482ffc7a172be417d281fdf24b3f36a))
+* **schema-form:** render ImagePicker for the image-picker formType ([93bead5](https://github.com/glasshome/ui/commit/93bead5574e79f04f3eba859d5a24b3f401f6ebf))
+
+
+### Bug Fixes
+
+* **badge:** stop setting tier chips in all caps ([fd4699a](https://github.com/glasshome/ui/commit/fd4699ac8d28d4fca9313fb3b15ba1d44f8dea18))
+* **carousel:** fade rides embla's flex track, and autoplay is reactive ([fc8021b](https://github.com/glasshome/ui/commit/fc8021b320fe0ca8ad484cdabc4360100012d69a))
+* **image-picker:** add data-slot to picker trigger button ([b4ebe05](https://github.com/glasshome/ui/commit/b4ebe05b80e444441d5cafc0516bf54c084b1f6d))
+* **image-picker:** let a broken tile recover when its src resolves ([c209c8b](https://github.com/glasshome/ui/commit/c209c8be09e715295194b09443d0999ffec367ac))
+* **image-picker:** render a retryable failure state when the gallery index rejects ([7e8c5b6](https://github.com/glasshome/ui/commit/7e8c5b6597b551167c6a94e6abb4168090589e52))
+* **image-picker:** render gallery load failure as an empty state, not an alert ([5d42123](https://github.com/glasshome/ui/commit/5d42123df65ead0656d534d6a5a5cc9879ae3fee))
+* **image-picker:** resolve tiles through the store, contain store rejections ([0f7c625](https://github.com/glasshome/ui/commit/0f7c625bf83c1d7e4004ba963b59aaa4af47aa24))
+* **image-picker:** server-owned quota readout via ImageStore.usage() ([1e6f716](https://github.com/glasshome/ui/commit/1e6f716de166482028d2549b1318debef2e9feca))
+* **image-picker:** treat a row with no usable mime as not an image ([7189b50](https://github.com/glasshome/ui/commit/7189b50906a3d4ee5dc6e23ce0a0f19f8b2167bb))
+* **image-picker:** wear a field, stay reopenable, and read empty as empty ([4da947d](https://github.com/glasshome/ui/commit/4da947db944b3794f676941a54fafe22bbd12072))
+* **image-store:** add upload_failed error kind for unrecognised server errors ([33f2f67](https://github.com/glasshome/ui/commit/33f2f67f486e1f4249c9fdeb0f248192df7112b4))
+* **media:** bound the picker gallery and mark an upload pending ([20b6a18](https://github.com/glasshome/ui/commit/20b6a183a0eab3e2b08b571468d35e62333f4fc7))
+* **responsive-dialog:** let a close button choose its variant ([82a923d](https://github.com/glasshome/ui/commit/82a923da30ed57960290bac7ed4e525a6a59dc23))
+* **schema-form:** a list item's group root drops its duplicate box and title ([d615c4b](https://github.com/glasshome/ui/commit/d615c4b7e0a97802b605c8f84539ebea282c6bb2))
+* **theme:** drop the button appearance reset, it never addressed the gray box ([581d88b](https://github.com/glasshome/ui/commit/581d88b9748d6c3d18f8b52c04f0a265362e2279))
+* **ui-tests:** satisfy check:types on image-picker and schema-form tests ([cf72e0f](https://github.com/glasshome/ui/commit/cf72e0f3483df2f5f2ad169600f265a5df70b4e3))
+
 ## [1.4.0](https://github.com/glasshome/ui/compare/v1.3.0...v1.4.0) (2026-08-22)
 
 
