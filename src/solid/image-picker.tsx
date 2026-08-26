@@ -287,7 +287,7 @@ export function ImagePicker(props: ImagePickerProps) {
 													}}
 												>
 													<Show
-														when={brokenTiles()[image.id] !== store.url(image.id)}
+														when={brokenTiles()[image.id] !== store.url(image.id, "thumb")}
 														fallback={
 															<span
 																data-testid="image-tile-broken"
@@ -298,7 +298,7 @@ export function ImagePicker(props: ImagePickerProps) {
 														}
 													>
 														<img
-															src={store.url(image.id)}
+															src={store.url(image.id, "thumb")}
 															alt={`Stored ${image.id}`}
 															width={image.width}
 															height={image.height}
@@ -308,7 +308,7 @@ export function ImagePicker(props: ImagePickerProps) {
 															onError={() =>
 																setBrokenTiles((broken) => ({
 																	...broken,
-																	[image.id]: store.url(image.id),
+																	[image.id]: store.url(image.id, "thumb"),
 																}))
 															}
 														/>

@@ -34,7 +34,7 @@ function storeWith(overrides: Partial<MediaStore> = {}): MediaStore {
 		index: async () => indexOf([image("a", 2), image("b")]),
 		upload: async () => image("c"),
 		remove: async () => {},
-		url: (id) => `/api/images/${id}`,
+		url: (id, variant) => (variant === "thumb" ? `/api/images/${id}/thumb` : `/api/images/${id}`),
 		...overrides,
 	};
 }
@@ -148,13 +148,30 @@ describe("ImagePicker", () => {
 	});
 
 	it("resolves tile sources through the store, not a server-sent url", async () => {
-		withStore(storeWith({ url: (id) => `http://host:3123/api/images/${id}` }), () => (
-			<ImagePicker value="" onChange={() => {}} />
-		));
+		withStore(
+			storeWith({
+				url: (id, variant) =>
+					`http://host:3123/api/images/${id}${variant === "thumb" ? "/thumb" : ""}`,
+			}),
+			() => <ImagePicker value="" onChange={() => {}} />,
+		);
 		openGallery();
 		await waitFor(() => screen.getAllByTestId("image-tile"));
 		const tile = screen.getAllByTestId("image-tile")[0].querySelector("img");
-		expect(tile?.getAttribute("src")).toBe("http://host:3123/api/images/b");
+		expect(tile?.getAttribute("src")).toBe("http://host:3123/api/images/b/thumb");
+	});
+
+	it("draws gallery tiles from the thumbnail and the trigger from the original", async () => {
+		withStore(storeWith(), () => <ImagePicker value="a" onChange={() => {}} />);
+		expect(trigger().querySelector("img")?.getAttribute("src")).toBe("/api/images/a");
+		openGallery();
+		await waitFor(() => screen.getAllByTestId("image-tile"));
+		for (const tile of screen.getAllByTestId("image-tile")) {
+			const img = tile.querySelector("img") as HTMLImageElement;
+			expect(img.getAttribute("src")?.endsWith("/thumb")).toBe(true);
+			expect(img.getAttribute("loading")).toBe("lazy");
+			expect(img.getAttribute("decoding")).toBe("async");
+		}
 	});
 
 	it("falls back when a tile's file is gone", async () => {

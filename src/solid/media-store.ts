@@ -46,11 +46,14 @@ export type MediaIndex = {
 	usage: MediaQuotaUsage;
 };
 
+/** "thumb" is a server-side derivative, longest edge ~400px, for grids. */
+export type MediaVariant = "original" | "thumb";
+
 export interface MediaStore {
 	index(): Promise<MediaIndex>;
 	upload(file: File): Promise<StoredMedia>;
 	remove(id: string): Promise<void>;
-	url(id: string): string;
+	url(id: string, variant?: MediaVariant): string;
 }
 
 export const MediaStoreContext = createContext<MediaStore>();

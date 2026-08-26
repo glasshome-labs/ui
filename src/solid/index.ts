@@ -259,6 +259,7 @@ export {
 	MediaStoreContext,
 	MediaStoreError,
 	type MediaStoreErrorKind,
+	type MediaVariant,
 	mediaUrl,
 	provideMediaStore,
 	type StoredMedia,

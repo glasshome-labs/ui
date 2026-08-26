@@ -32,7 +32,7 @@ const stubMediaStore: MediaStore = {
 		throw new Error("unused");
 	},
 	remove: async () => {},
-	url: (id) => `/api/images/${id}`,
+	url: (id, variant) => (variant === "thumb" ? `/api/images/${id}/thumb` : `/api/images/${id}`),
 };
 
 const widgetSummary: solid.WidgetSummary = {

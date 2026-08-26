@@ -73,7 +73,7 @@ function createDemoMediaStore(): MediaStore {
 	let nextId = 3;
 	return {
 		index: async () => ({
-			images,
+			media: images,
 			usage: {
 				bytes: images.reduce((sum, image) => sum + image.size, 0),
 				limitBytes: 262_144_000,
@@ -96,7 +96,8 @@ function createDemoMediaStore(): MediaStore {
 		remove: async (id) => {
 			images = images.filter((image) => image.id !== id);
 		},
-		url: () => "https://placehold.co/96x64/png",
+		url: (_id, variant) =>
+			variant === "thumb" ? "https://placehold.co/48x32/png" : "https://placehold.co/96x64/png",
 	};
 }
 
