@@ -132,6 +132,9 @@ describe("MediaTile", () => {
 		expect(screen.getByTestId("media-tile").contains(del)).toBe(false);
 		fireEvent.click(del);
 		expect(onDelete).toHaveBeenCalledTimes(1);
+		// jsdom lays nothing out, so this only pins the touch-target expansion, not its size.
+		expect(del.className).toContain("after:-inset-1.5");
+		expect(del.className).toContain("size-8");
 	});
 
 	it("marks the selected tile for a picker and stays silent otherwise", () => {

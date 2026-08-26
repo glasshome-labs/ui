@@ -288,7 +288,11 @@ function FieldControl(props: FieldProps) {
 				/>
 			</Match>
 			<Match when={props.prop.formType === "image-picker"}>
-				<ImagePicker value={String(current() ?? "")} onChange={(val) => props.onChange(val)} />
+				<ImagePicker
+					id={props.id}
+					value={String(current() ?? "")}
+					onChange={(val) => props.onChange(val)}
+				/>
 			</Match>
 			<Match
 				when={props.prop.formType === "area-picker" || isLegacyAreaKey(props.name, props.prop)}
@@ -381,7 +385,8 @@ function ListControl(props: FieldProps) {
 		if (key === undefined || !store) return undefined;
 		const id = recordOf(item)[key];
 		if (typeof id !== "string" || id === "") return undefined;
-		return store.url(id);
+		// A 32px row chip: the thumb variant, never the original.
+		return store.url(id, "thumb");
 	};
 
 	const liveThumbUrl = (item: unknown) => {

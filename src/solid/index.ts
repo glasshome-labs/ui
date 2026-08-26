@@ -252,7 +252,16 @@ export {
 } from "./list-reorder.js";
 export { Logo } from "./logo.js";
 export {
+	mediaIndexErrorCopy,
+	mediaStoreErrorCopy,
+	toMediaStoreError,
+} from "./media-copy.js";
+export {
+	type BrokenMedia,
+	createBrokenMedia,
 	imageUrl,
+	isMediaImage,
+	MEDIA_PAGE_SIZE,
 	type MediaIndex,
 	type MediaQuotaUsage,
 	type MediaStore,
@@ -263,6 +272,7 @@ export {
 	mediaUrl,
 	provideMediaStore,
 	type StoredMedia,
+	sortMediaForClearing,
 	useMediaStore,
 } from "./media-store.js";
 export { MediaTile, type MediaTileProps } from "./media-tile.js";

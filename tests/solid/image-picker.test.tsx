@@ -8,6 +8,7 @@ vi.mock("@iconify-icon/solid", () => ({
 
 import { ImagePicker } from "../../src/solid/image-picker.jsx";
 import {
+	MEDIA_PAGE_SIZE,
 	type MediaIndex,
 	type MediaStore,
 	MediaStoreContext,
@@ -57,6 +58,9 @@ const press = (el: Element) => {
 	fireEvent.pointerUp(el);
 	fireEvent.click(el);
 };
+
+const uploadButton = () =>
+	document.querySelector('[data-slot="image-picker-upload"]') as HTMLButtonElement;
 
 const uploadFile = () => {
 	const input = screen.getByTestId("image-upload-input") as HTMLInputElement;
@@ -280,6 +284,76 @@ describe("ImagePicker", () => {
 		expect(content.className).toContain("glass-sink");
 	});
 
+	it("disables Upload and says so while an upload is in flight", async () => {
+		let settle: ((uploaded: StoredMedia) => void) | undefined;
+		const store = storeWith({
+			upload: () =>
+				new Promise<StoredMedia>((resolve) => {
+					settle = resolve;
+				}),
+		});
+		withStore(store, () => <ImagePicker value="" onChange={() => {}} />);
+		openGallery();
+		await waitFor(() => screen.getByTestId("image-upload-input"));
+		expect(uploadButton().disabled).toBe(false);
+
+		uploadFile();
+		await waitFor(() => expect(uploadButton().disabled).toBe(true));
+		expect(uploadButton().textContent).toMatch(/uploading/i);
+
+		settle?.(image("c"));
+		await waitFor(() => expect(uploadButton().disabled).toBe(false));
+		expect(uploadButton().textContent).toMatch(/^\s*Upload\s*$/);
+	});
+
+	it("clears a failed upload's banner when the gallery is reopened", async () => {
+		const store = storeWith({
+			upload: async () => {
+				throw new MediaStoreError("upload_failed");
+			},
+		});
+		withStore(store, () => <ImagePicker value="" onChange={() => {}} />);
+		press(trigger());
+		await waitFor(() => expect(gallery()).not.toBeNull());
+		uploadFile();
+		await waitFor(() => expect(screen.getByRole("alert")).toBeTruthy());
+
+		press(trigger());
+		await waitFor(() => expect(gallery()).toBeNull());
+		press(trigger());
+		await waitFor(() => expect(gallery()).not.toBeNull());
+		expect(screen.queryByRole("alert")).toBeNull();
+	});
+
+	it("carries the field id on the trigger so a Label points at a real control", async () => {
+		withStore(storeWith(), () => <ImagePicker id="widget.art" value="" onChange={() => {}} />);
+		expect(trigger().id).toBe("widget.art");
+	});
+
+	it("mounts one page of tiles, not the whole library, and pages through the rest", async () => {
+		const many = Array.from({ length: MEDIA_PAGE_SIZE + 6 }, (_, i) =>
+			image(`i${String(i).padStart(2, "0")}`),
+		);
+		withStore(storeWith({ index: async () => indexOf(many) }), () => (
+			<ImagePicker value="" onChange={() => {}} />
+		));
+		openGallery();
+		await waitFor(() => expect(screen.getAllByTestId("media-tile").length).toBe(MEDIA_PAGE_SIZE));
+		expect(screen.getByTestId("image-picker-page-label").textContent).toMatch(/page 1 of 2/i);
+
+		fireEvent.click(screen.getByRole("link", { name: /next/i }));
+		await waitFor(() => expect(screen.getAllByTestId("media-tile").length).toBe(6));
+	});
+
+	it("keeps the gallery scrollable inside a bounded height", async () => {
+		withStore(storeWith(), () => <ImagePicker value="" onChange={() => {}} />);
+		openGallery();
+		await waitFor(() => screen.getAllByTestId("media-tile"));
+		const grid = document.querySelector('[data-slot="image-picker-gallery"]') as HTMLElement;
+		expect(grid.className).toContain("overflow-y-auto");
+		expect(grid.className).toMatch(/max-h-/);
+	});
+
 	it("shows a retryable failure, not skeletons or the empty state, when the index rejects", async () => {
 		const store = storeWith({
 			index: async () => {
@@ -289,7 +363,7 @@ describe("ImagePicker", () => {
 		withStore(store, () => <ImagePicker value="" onChange={() => {}} />);
 		openGallery();
 
-		await waitFor(() => expect(screen.getByText(/your images couldn't be loaded/i)).toBeTruthy());
+		await waitFor(() => expect(screen.getByText(/your photos couldn't be listed/i)).toBeTruthy());
 		expect(document.querySelector('[data-slot="image-picker-loading"]')).toBeNull();
 		expect(screen.queryByText(/no images yet/i)).toBeNull();
 		expect(screen.queryAllByTestId("media-tile").length).toBe(0);
@@ -310,7 +384,7 @@ describe("ImagePicker", () => {
 			/images unavailable/i,
 		);
 		expect(failure.querySelector('[data-slot="empty-description"]')?.textContent).toMatch(
-			/your images couldn't be loaded/i,
+			/your photos couldn't be listed/i,
 		);
 		expect(failure.querySelector('[data-slot="empty-icon"]')).toBeTruthy();
 		expect(
@@ -331,7 +405,7 @@ describe("ImagePicker", () => {
 
 		await waitFor(() => expect(screen.getByRole("status")).toBeTruthy());
 		expect(
-			screen.getByText(/no household is active, so your images can't be loaded/i),
+			screen.getByText(/no household is active, so your photos can't be listed/i),
 		).toBeTruthy();
 		expect(screen.queryByRole("alert")).toBeNull();
 	});

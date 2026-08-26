@@ -412,7 +412,7 @@ describe("list rows preview their picture", () => {
 		}),
 		upload: async () => ({ id: "x", mimeType: "image/png", size: 1, usedBy: 0 }),
 		remove: async () => {},
-		url: (id) => `/api/images/${id}`,
+		url: (id, variant) => (variant === "thumb" ? `/api/images/${id}/thumb` : `/api/images/${id}`),
 	};
 
 	const pictureList = (itemProperties: Record<string, ExtendedJSONSchema>): ExtendedJSONSchema => ({
@@ -441,10 +441,18 @@ describe("list rows preview their picture", () => {
 	const thumb = (container: Element) =>
 		container.querySelector('[data-slot="schema-form-list-item-thumb"]');
 
-	it("shows the chosen picture in the collapsed row", () => {
+	it("draws the row chip from the thumb variant, never the full original", () => {
 		const { container } = renderList(oneImage, { pictures: [{ image: "photo1" }] });
 		const img = thumb(container)?.querySelector("img");
-		expect(img?.getAttribute("src")).toBe("/api/images/photo1");
+		expect(img?.getAttribute("src")).toBe("/api/images/photo1/thumb");
+	});
+
+	it("keeps a ten-row list off the originals entirely", () => {
+		const pictures = Array.from({ length: 10 }, (_, i) => ({ image: `p${i}` }));
+		const { container } = renderList(oneImage, { pictures });
+		const sources = [...container.querySelectorAll("img")].map((img) => img.getAttribute("src"));
+		expect(sources.length).toBe(10);
+		for (const src of sources) expect(src?.endsWith("/thumb")).toBe(true);
 	});
 
 	it("shows the picker's empty glyph when no picture is chosen yet", () => {

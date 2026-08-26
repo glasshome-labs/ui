@@ -1,4 +1,4 @@
-import { createContext, useContext } from "solid-js";
+import { createContext, createSignal, useContext } from "solid-js";
 
 export type StoredMedia = {
 	id: string;
@@ -67,6 +67,38 @@ export function provideMediaStore(store: MediaStore): void {
 
 export function useMediaStore(): MediaStore | undefined {
 	return useContext(MediaStoreContext) ?? defaultStore;
+}
+
+/** One grid page. The picker and the library both slice by this, so neither can
+ *  mount a whole 500-file library at once. */
+export const MEDIA_PAGE_SIZE = 24;
+
+/** A row whose mime is missing or not a string is not an image; a throw here would
+ *  take the surrounding gallery down with it. */
+export function isMediaImage(item: StoredMedia): boolean {
+	return typeof item.mimeType === "string" && item.mimeType.startsWith("image/");
+}
+
+/** Unused first: someone browsing stored media is looking for what is safe to delete. */
+export function sortMediaForClearing(media: StoredMedia[]): StoredMedia[] {
+	return media.filter(isMediaImage).sort((a, b) => {
+		if ((a.usedBy === 0) !== (b.usedBy === 0)) return a.usedBy === 0 ? -1 : 1;
+		return a.id.localeCompare(b.id);
+	});
+}
+
+export interface BrokenMedia {
+	isBroken: (item: StoredMedia) => boolean;
+	markBroken: (item: StoredMedia) => void;
+}
+
+/** Keyed by the url that failed, so a re-uploaded id (new url) starts unbroken again. */
+export function createBrokenMedia(thumbUrl: (id: string) => string): BrokenMedia {
+	const [broken, setBroken] = createSignal<Readonly<Record<string, string>>>({});
+	return {
+		isBroken: (item) => broken()[item.id] === thumbUrl(item.id),
+		markBroken: (item) => setBroken((previous) => ({ ...previous, [item.id]: thumbUrl(item.id) })),
+	};
 }
 
 export function mediaUrl(id: string | null | undefined): string | undefined {
