@@ -105,13 +105,13 @@ describe("ImagePicker", () => {
 	it("marks a broken tile with a glyph, not a grey fill a loading tile shares", async () => {
 		withStore(storeWith(), () => <ImagePicker value="" onChange={() => {}} />);
 		openGallery();
-		await waitFor(() => screen.getAllByTestId("image-tile"));
-		expect(screen.queryByTestId("image-tile-broken")).toBeNull();
+		await waitFor(() => screen.getAllByTestId("media-tile"));
+		expect(screen.queryByTestId("media-tile-broken")).toBeNull();
 
 		fireEvent.error(
-			screen.getAllByTestId("image-tile")[0].querySelector("img") as HTMLImageElement,
+			screen.getAllByTestId("media-tile")[0].querySelector("img") as HTMLImageElement,
 		);
-		await waitFor(() => expect(screen.getAllByTestId("image-tile-broken").length).toBe(1));
+		await waitFor(() => expect(screen.getAllByTestId("media-tile-broken").length).toBe(1));
 	});
 
 	it("queries the index once, and only after the gallery is opened", async () => {
@@ -120,17 +120,17 @@ describe("ImagePicker", () => {
 		expect(index).not.toHaveBeenCalled();
 
 		openGallery();
-		await waitFor(() => expect(screen.getAllByTestId("image-tile").length).toBe(2));
+		await waitFor(() => expect(screen.getAllByTestId("media-tile").length).toBe(2));
 		expect(index).toHaveBeenCalledTimes(1);
 	});
 
-	it("lists images once opened, unused first", async () => {
+	it("lists images once opened, unused first and badged", async () => {
 		withStore(storeWith(), () => <ImagePicker value="" onChange={() => {}} />);
 		openGallery();
-		await waitFor(() => expect(screen.getAllByRole("img").length).toBeGreaterThan(0));
-		const captions = screen.getAllByTestId("image-usage").map((n) => n.textContent);
-		expect(captions[0]).toMatch(/not used/i);
-		expect(captions[1]).toMatch(/used in 2 widgets/i);
+		await waitFor(() => expect(screen.getAllByTestId("media-tile").length).toBe(2));
+		expect(screen.getAllByTestId("media-tile-unused").length).toBe(1);
+		expect(screen.getByTestId("media-tile-unused").textContent).toBe("Unused");
+		expect(screen.getByRole("button", { name: "Use b" })).toBeTruthy();
 	});
 
 	it("skips a row with no usable mime instead of crashing the gallery", async () => {
@@ -143,7 +143,7 @@ describe("ImagePicker", () => {
 			<ImagePicker value="" onChange={() => {}} />
 		));
 		openGallery();
-		await waitFor(() => expect(screen.getAllByTestId("image-tile").length).toBe(1));
+		await waitFor(() => expect(screen.getAllByTestId("media-tile").length).toBe(1));
 		expect(gallery()).not.toBeNull();
 	});
 
@@ -156,8 +156,8 @@ describe("ImagePicker", () => {
 			() => <ImagePicker value="" onChange={() => {}} />,
 		);
 		openGallery();
-		await waitFor(() => screen.getAllByTestId("image-tile"));
-		const tile = screen.getAllByTestId("image-tile")[0].querySelector("img");
+		await waitFor(() => screen.getAllByTestId("media-tile"));
+		const tile = screen.getAllByTestId("media-tile")[0].querySelector("img");
 		expect(tile?.getAttribute("src")).toBe("http://host:3123/api/images/b/thumb");
 	});
 
@@ -165,8 +165,8 @@ describe("ImagePicker", () => {
 		withStore(storeWith(), () => <ImagePicker value="a" onChange={() => {}} />);
 		expect(trigger().querySelector("img")?.getAttribute("src")).toBe("/api/images/a");
 		openGallery();
-		await waitFor(() => screen.getAllByTestId("image-tile"));
-		for (const tile of screen.getAllByTestId("image-tile")) {
+		await waitFor(() => screen.getAllByTestId("media-tile"));
+		for (const tile of screen.getAllByTestId("media-tile")) {
 			const img = tile.querySelector("img") as HTMLImageElement;
 			expect(img.getAttribute("src")?.endsWith("/thumb")).toBe(true);
 			expect(img.getAttribute("loading")).toBe("lazy");
@@ -177,8 +177,8 @@ describe("ImagePicker", () => {
 	it("falls back when a tile's file is gone", async () => {
 		withStore(storeWith(), () => <ImagePicker value="" onChange={() => {}} />);
 		openGallery();
-		await waitFor(() => screen.getAllByTestId("image-tile"));
-		const tile = screen.getAllByTestId("image-tile")[0];
+		await waitFor(() => screen.getAllByTestId("media-tile"));
+		const tile = screen.getAllByTestId("media-tile")[0];
 		const img = tile.querySelector("img") as HTMLImageElement;
 		fireEvent.error(img);
 		await waitFor(() => expect(tile.querySelector("img")).toBeNull());
@@ -188,8 +188,8 @@ describe("ImagePicker", () => {
 		const [src, setSrc] = createSignal("data:image/gif;base64,placeholder");
 		withStore(storeWith({ url: () => src() }), () => <ImagePicker value="" onChange={() => {}} />);
 		openGallery();
-		await waitFor(() => screen.getAllByTestId("image-tile"));
-		const tile = screen.getAllByTestId("image-tile")[0];
+		await waitFor(() => screen.getAllByTestId("media-tile"));
+		const tile = screen.getAllByTestId("media-tile")[0];
 		fireEvent.error(tile.querySelector("img") as HTMLImageElement);
 		await waitFor(() => expect(tile.querySelector("img")).toBeNull());
 
@@ -201,8 +201,8 @@ describe("ImagePicker", () => {
 		const onChange = vi.fn();
 		withStore(storeWith(), () => <ImagePicker value="" onChange={onChange} />);
 		openGallery();
-		await waitFor(() => screen.getAllByTestId("image-tile"));
-		fireEvent.click(screen.getAllByTestId("image-tile")[0]);
+		await waitFor(() => screen.getAllByTestId("media-tile"));
+		fireEvent.click(screen.getAllByTestId("media-tile")[0]);
 		expect(onChange).toHaveBeenCalledWith("b");
 	});
 
@@ -265,8 +265,8 @@ describe("ImagePicker", () => {
 		const store = storeWith({ index, remove: async () => {} });
 		withStore(store, () => <ImagePicker value="a" onChange={() => {}} />);
 		openGallery();
-		await waitFor(() => screen.getAllByTestId("image-tile"));
-		fireEvent.click(screen.getAllByRole("button", { name: /delete image/i })[0]);
+		await waitFor(() => screen.getAllByTestId("media-tile"));
+		fireEvent.click(screen.getAllByRole("button", { name: /^delete a$/i })[0]);
 		fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 		await waitFor(() => expect(index.mock.calls.length).toBeGreaterThan(1));
 	});
@@ -292,7 +292,7 @@ describe("ImagePicker", () => {
 		await waitFor(() => expect(screen.getByText(/your images couldn't be loaded/i)).toBeTruthy());
 		expect(document.querySelector('[data-slot="image-picker-loading"]')).toBeNull();
 		expect(screen.queryByText(/no images yet/i)).toBeNull();
-		expect(screen.queryAllByTestId("image-tile").length).toBe(0);
+		expect(screen.queryAllByTestId("media-tile").length).toBe(0);
 	});
 
 	it("renders the index failure as an empty state, not an alert", async () => {
@@ -348,7 +348,7 @@ describe("ImagePicker", () => {
 
 		failing = false;
 		fireEvent.click(screen.getByRole("button", { name: /try again/i }));
-		await waitFor(() => expect(screen.getAllByTestId("image-tile").length).toBe(1));
+		await waitFor(() => expect(screen.getAllByTestId("media-tile").length).toBe(1));
 		expect(index.mock.calls.length).toBeGreaterThan(1);
 	});
 
@@ -376,8 +376,8 @@ describe("ImagePicker", () => {
 		});
 		withStore(store, () => <ImagePicker value="a" onChange={() => {}} />);
 		openGallery();
-		await waitFor(() => screen.getAllByTestId("image-tile"));
-		fireEvent.click(screen.getAllByRole("button", { name: /delete image/i })[0]);
+		await waitFor(() => screen.getAllByTestId("media-tile"));
+		fireEvent.click(screen.getAllByRole("button", { name: /^delete a$/i })[0]);
 		fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 
 		await waitFor(() => expect(screen.getByRole("alert").textContent).toMatch(/didn't work/i));

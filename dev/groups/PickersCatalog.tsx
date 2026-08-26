@@ -13,7 +13,9 @@ import {
 	ImagePicker,
 	type MediaStore,
 	MediaStoreContext,
+	MediaTile,
 	parseColor,
+	type StoredMedia,
 } from "../../src/solid";
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
 
@@ -63,13 +65,15 @@ const DEMO_ENTITIES: EntityViewLike[] = [
 
 const DEMO_BY_ID = new Map(DEMO_ENTITIES.map((e) => [e.id, e]));
 
+const DEMO_MEDIA: StoredMedia[] = [
+	{ id: "demo-1", mimeType: "image/png", width: 96, height: 64, size: 42_000, usedBy: 0 },
+	{ id: "demo-2", mimeType: "image/png", width: 96, height: 64, size: 88_000, usedBy: 1 },
+];
+
 // In-memory stand-in for the host's media store: keeps the picker's upload,
 // delete and quota-error paths interactive without a real backend.
 function createDemoMediaStore(): MediaStore {
-	let images = [
-		{ id: "demo-1", mimeType: "image/png", width: 96, height: 64, size: 42_000, usedBy: 0 },
-		{ id: "demo-2", mimeType: "image/png", width: 96, height: 64, size: 88_000, usedBy: 1 },
-	];
+	let images = [...DEMO_MEDIA];
 	let nextId = 3;
 	return {
 		index: async () => ({
@@ -199,6 +203,43 @@ export function PickersCatalog() {
 					<CatalogNote>
 						options come from MediaStoreContext (in-memory demo store here); upload and delete are
 						both live against it
+					</CatalogNote>
+				</CatalogItem>
+
+				<CatalogItem name="MediaTile" hint="one stored picture; picker + library share it" span={2}>
+					<div class="grid w-full max-w-sm grid-cols-3 gap-2">
+						<MediaTile
+							item={DEMO_MEDIA[0]}
+							thumbUrl={demoMediaStore.url(DEMO_MEDIA[0].id, "thumb")}
+							label="Use demo-1"
+							broken={false}
+							markUnused
+							selected
+							onSelect={() => {}}
+							onBroken={() => {}}
+							onDelete={() => {}}
+						/>
+						<MediaTile
+							item={DEMO_MEDIA[1]}
+							thumbUrl={demoMediaStore.url(DEMO_MEDIA[1].id, "thumb")}
+							label="Use demo-2"
+							broken={false}
+							onSelect={() => {}}
+							onBroken={() => {}}
+							onDelete={() => {}}
+						/>
+						<MediaTile
+							item={DEMO_MEDIA[1]}
+							thumbUrl=""
+							label="Use demo-2"
+							broken
+							onSelect={() => {}}
+							onBroken={() => {}}
+						/>
+					</div>
+					<CatalogNote>
+						selected + unused, plain, and a file whose bytes are gone. The click is the caller's:
+						the picker chooses, the settings library opens a preview.
 					</CatalogNote>
 				</CatalogItem>
 			</CatalogGroup>

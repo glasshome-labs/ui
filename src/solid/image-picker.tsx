@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, createResource, createSignal, For, Match, Show, Switch } from "solid-js";
-import { FIELD_CHROME, INPUT_CLASS } from "../lib/input-classes.js";
+import { INPUT_CLASS } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
 import { Alert } from "./alert.js";
 import {
@@ -30,6 +30,7 @@ import {
 	type StoredMedia,
 	useMediaStore,
 } from "./media-store.js";
+import { MediaTile } from "./media-tile.js";
 import { anchorToTriggerTop, Popover, PopoverAnchor, PopoverContent } from "./popover.js";
 import { SectionMeta } from "./section-card.js";
 import { Skeleton } from "./skeleton.js";
@@ -72,10 +73,6 @@ function indexErrorCopy(error: MediaStoreError): string {
 
 function toStoreError(cause: unknown): MediaStoreError {
 	return cause instanceof MediaStoreError ? cause : new MediaStoreError("upload_failed");
-}
-
-function usageLabel(usedBy: number): string {
-	return usedBy === 0 ? "not used" : `used in ${usedBy} widget${usedBy === 1 ? "" : "s"}`;
 }
 
 /** A row whose mime is missing or not a string is not an image; a throw here would
@@ -202,7 +199,7 @@ export function ImagePicker(props: ImagePickerProps) {
 							<span class="flex-1 truncate text-left">Image selected</span>
 						</Show>
 						<Icon
-							icon="mdi:chevron-down"
+							icon="lucide:chevron-down"
 							width={16}
 							height={16}
 							class="shrink-0 text-muted-foreground"
@@ -271,68 +268,26 @@ export function ImagePicker(props: ImagePickerProps) {
 								<div class="grid grid-cols-3 gap-2">
 									<For each={sorted()}>
 										{(image) => (
-											<div class="flex flex-col gap-1">
-												<button
-													type="button"
-													data-testid="image-tile"
-													class={cn(
-														FIELD_CHROME,
-														"relative aspect-square w-full overflow-hidden rounded-md",
-														props.value === image.id && "ring-2 ring-primary",
-													)}
-													onClick={() => {
-														props.onChange(image.id);
-														setThumbBroken(false);
-														setOpen(false);
-													}}
-												>
-													<Show
-														when={brokenTiles()[image.id] !== store.url(image.id, "thumb")}
-														fallback={
-															<span
-																data-testid="image-tile-broken"
-																class="absolute inset-0 flex items-center justify-center text-muted-foreground"
-															>
-																<Icon icon="lucide:image-off" width={20} height={20} />
-															</span>
-														}
-													>
-														<img
-															src={store.url(image.id, "thumb")}
-															alt={`Stored ${image.id}`}
-															width={image.width}
-															height={image.height}
-															loading="lazy"
-															decoding="async"
-															class="absolute inset-0 h-full w-full object-cover"
-															onError={() =>
-																setBrokenTiles((broken) => ({
-																	...broken,
-																	[image.id]: store.url(image.id, "thumb"),
-																}))
-															}
-														/>
-													</Show>
-												</button>
-												<div class="flex items-center justify-between gap-1">
-													<span
-														data-testid="image-usage"
-														class="min-w-0 truncate text-muted-foreground text-xs"
-													>
-														{usageLabel(image.usedBy)}
-													</span>
-													<Button
-														type="button"
-														variant="ghost"
-														size="none"
-														class="size-6"
-														aria-label="Delete image"
-														onClick={() => setPendingDelete(image)}
-													>
-														<Icon icon="lucide:trash-2" width={16} height={16} />
-													</Button>
-												</div>
-											</div>
+											<MediaTile
+												item={image}
+												thumbUrl={store.url(image.id, "thumb")}
+												label={`Use ${image.id}`}
+												broken={brokenTiles()[image.id] === store.url(image.id, "thumb")}
+												markUnused
+												selected={props.value === image.id}
+												onSelect={() => {
+													props.onChange(image.id);
+													setThumbBroken(false);
+													setOpen(false);
+												}}
+												onBroken={() =>
+													setBrokenTiles((broken) => ({
+														...broken,
+														[image.id]: store.url(image.id, "thumb"),
+													}))
+												}
+												onDelete={() => setPendingDelete(image)}
+											/>
 										)}
 									</For>
 								</div>
@@ -359,8 +314,9 @@ export function ImagePicker(props: ImagePickerProps) {
 							if (file) void handleUpload(file);
 						}}
 					/>
-					<Button type="button" variant="outline" onClick={() => fileInput?.click()}>
-						Upload image
+					<Button type="button" variant="outline" size="sm" onClick={() => fileInput?.click()}>
+						<Icon icon="lucide:upload" width={14} height={14} />
+						Upload
 					</Button>
 				</PopoverContent>
 			</Popover>

@@ -456,6 +456,17 @@ const CASES: Record<string, () => JSX.Element> = {
 			<solid.ImagePicker class="probe" value="" onChange={noop} />
 		</solid.MediaStoreContext.Provider>
 	),
+	MediaTile: () => (
+		<solid.MediaTile
+			class="probe"
+			item={{ id: "a", mimeType: "image/png", width: 10, height: 10, size: 1, usedBy: 0 }}
+			thumbUrl="/api/images/a/thumb"
+			label="Use a"
+			broken={false}
+			onSelect={noop}
+			onBroken={noop}
+		/>
+	),
 	PopoverTrigger: () => (
 		<solid.Popover>
 			<solid.PopoverTrigger class="probe">t</solid.PopoverTrigger>
