@@ -1,3 +1,4 @@
+import type { VariantProps } from "cva";
 import {
 	type Component,
 	type ComponentProps,
@@ -13,6 +14,7 @@ import {
 	useContext,
 } from "solid-js";
 import { Portal } from "solid-js/web";
+import type { buttonVariants } from "../lib/button-variants.js";
 import { OVERLAY_SURFACE, SCRIM_CLASS } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 import {
@@ -288,12 +290,22 @@ const ResponsiveDialogFooter: Component<ComponentProps<"div">> = (props) => {
 	);
 };
 
-const ResponsiveDialogClose: ParentComponent<ComponentProps<"button">> = (props) => {
-	const [local, rest] = splitProps(props, ["children", "class"]);
+/** Defaults to the footer's outline button; an icon-only close passes `ghost`
+ *  so the glyph is not boxed. */
+const ResponsiveDialogClose: ParentComponent<
+	ComponentProps<"button"> & VariantProps<typeof buttonVariants>
+> = (props) => {
+	const [local, rest] = splitProps(props, ["children", "class", "variant", "size"]);
 	const { close } = useDialogContext();
 
 	return (
-		<Button variant="outline" onClick={() => close()} class={local.class} {...rest}>
+		<Button
+			variant={local.variant ?? "outline"}
+			size={local.size}
+			onClick={() => close()}
+			class={local.class}
+			{...rest}
+		>
 			{local.children ?? "Close"}
 		</Button>
 	);
