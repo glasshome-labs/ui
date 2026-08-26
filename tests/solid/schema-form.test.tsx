@@ -272,29 +272,31 @@ describe("formType list", () => {
 		expect(container.querySelector('[data-slot="schema-form-variants"]')).toBeTruthy();
 	});
 
-	const groupList: ExtendedJSONSchema = {
+	const pictureItemSchema: ExtendedJSONSchema = {
 		type: "object",
+		title: "Picture",
 		properties: {
-			pictures: {
-				type: "array",
-				default: [],
-				formType: "list",
-				title: "Pictures",
-				addLabel: "Add picture",
-				items: {
-					type: "object",
-					title: "Picture",
-					properties: {
-						image: { type: "string", title: "Picture" },
-						crop: {
-							type: "object",
-							title: "Crop",
-							properties: { zoom: { type: "number", title: "Zoom" } },
-						},
-					},
-				},
+			image: { type: "string", title: "Picture" },
+			crop: {
+				type: "object",
+				title: "Crop",
+				properties: { zoom: { type: "number", title: "Zoom" } },
 			},
 		},
+	};
+
+	const groupPictures: ExtendedJSONSchema = {
+		type: "array",
+		default: [],
+		formType: "list",
+		title: "Pictures",
+		addLabel: "Add picture",
+		items: pictureItemSchema,
+	};
+
+	const groupList: ExtendedJSONSchema = {
+		type: "object",
+		properties: { pictures: groupPictures },
 	};
 
 	it("an item's group root drops its own box and title, a group below it keeps them", () => {
@@ -387,16 +389,11 @@ describe("formType image-picker", () => {
 			remove: async () => {},
 			url: (id: string) => `/api/images/${id}`,
 		};
+		const artField: ExtendedJSONSchema = { type: "string", formType: "image-picker", title: "Art" };
+		const schema: ExtendedJSONSchema = { type: "object", properties: { art: artField } };
 		const { container } = render(() => (
 			<MediaStoreContext.Provider value={stubMediaStore}>
-				<SchemaForm
-					schema={{
-						type: "object",
-						properties: { art: { type: "string", formType: "image-picker", title: "Art" } },
-					}}
-					data={{}}
-					onChange={() => {}}
-				/>
+				<SchemaForm schema={schema} data={{}} onChange={() => {}} />
 			</MediaStoreContext.Provider>
 		));
 		expect(container.querySelector('[data-slot="image-picker"]')).toBeTruthy();
@@ -415,19 +412,17 @@ describe("list rows preview their picture", () => {
 		url: (id, variant) => (variant === "thumb" ? `/api/images/${id}/thumb` : `/api/images/${id}`),
 	};
 
-	const pictureList = (itemProperties: Record<string, ExtendedJSONSchema>): ExtendedJSONSchema => ({
-		type: "object",
-		properties: {
-			pictures: {
-				type: "array",
-				default: [],
-				formType: "list",
-				title: "Pictures",
-				addLabel: "Add picture",
-				items: { type: "object", title: "Picture", properties: itemProperties },
-			},
-		},
-	});
+	const pictureList = (itemProperties: Record<string, ExtendedJSONSchema>): ExtendedJSONSchema => {
+		const pictures: ExtendedJSONSchema = {
+			type: "array",
+			default: [],
+			formType: "list",
+			title: "Pictures",
+			addLabel: "Add picture",
+			items: { type: "object", title: "Picture", properties: itemProperties },
+		};
+		return { type: "object", properties: { pictures } };
+	};
 
 	const oneImage = pictureList({ image: { type: "string", formType: "image-picker" } });
 

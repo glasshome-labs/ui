@@ -59,6 +59,14 @@ const press = (el: Element) => {
 	fireEvent.click(el);
 };
 
+function first<T>(items: T[], label: string): T {
+	const item = items[0];
+	if (item === undefined) throw new Error(`expected at least one ${label}`);
+	return item;
+}
+
+const firstMediaTile = () => first(screen.getAllByTestId("media-tile"), "media tile");
+
 const uploadButton = () =>
 	document.querySelector('[data-slot="image-picker-upload"]') as HTMLButtonElement;
 
@@ -112,9 +120,7 @@ describe("ImagePicker", () => {
 		await waitFor(() => screen.getAllByTestId("media-tile"));
 		expect(screen.queryByTestId("media-tile-broken")).toBeNull();
 
-		fireEvent.error(
-			screen.getAllByTestId("media-tile")[0].querySelector("img") as HTMLImageElement,
-		);
+		fireEvent.error(firstMediaTile().querySelector("img") as HTMLImageElement);
 		await waitFor(() => expect(screen.getAllByTestId("media-tile-broken").length).toBe(1));
 	});
 
@@ -161,7 +167,7 @@ describe("ImagePicker", () => {
 		);
 		openGallery();
 		await waitFor(() => screen.getAllByTestId("media-tile"));
-		const tile = screen.getAllByTestId("media-tile")[0].querySelector("img");
+		const tile = firstMediaTile().querySelector("img");
 		expect(tile?.getAttribute("src")).toBe("http://host:3123/api/images/b/thumb");
 	});
 
@@ -182,7 +188,7 @@ describe("ImagePicker", () => {
 		withStore(storeWith(), () => <ImagePicker value="" onChange={() => {}} />);
 		openGallery();
 		await waitFor(() => screen.getAllByTestId("media-tile"));
-		const tile = screen.getAllByTestId("media-tile")[0];
+		const tile = firstMediaTile();
 		const img = tile.querySelector("img") as HTMLImageElement;
 		fireEvent.error(img);
 		await waitFor(() => expect(tile.querySelector("img")).toBeNull());
@@ -193,7 +199,7 @@ describe("ImagePicker", () => {
 		withStore(storeWith({ url: () => src() }), () => <ImagePicker value="" onChange={() => {}} />);
 		openGallery();
 		await waitFor(() => screen.getAllByTestId("media-tile"));
-		const tile = screen.getAllByTestId("media-tile")[0];
+		const tile = firstMediaTile();
 		fireEvent.error(tile.querySelector("img") as HTMLImageElement);
 		await waitFor(() => expect(tile.querySelector("img")).toBeNull());
 
@@ -206,7 +212,7 @@ describe("ImagePicker", () => {
 		withStore(storeWith(), () => <ImagePicker value="" onChange={onChange} />);
 		openGallery();
 		await waitFor(() => screen.getAllByTestId("media-tile"));
-		fireEvent.click(screen.getAllByTestId("media-tile")[0]);
+		fireEvent.click(firstMediaTile());
 		expect(onChange).toHaveBeenCalledWith("b");
 	});
 
@@ -270,7 +276,7 @@ describe("ImagePicker", () => {
 		withStore(store, () => <ImagePicker value="a" onChange={() => {}} />);
 		openGallery();
 		await waitFor(() => screen.getAllByTestId("media-tile"));
-		fireEvent.click(screen.getAllByRole("button", { name: /^delete a$/i })[0]);
+		fireEvent.click(first(screen.getAllByRole("button", { name: /^delete a$/i }), "delete button"));
 		fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 		await waitFor(() => expect(index.mock.calls.length).toBeGreaterThan(1));
 	});
@@ -451,7 +457,7 @@ describe("ImagePicker", () => {
 		withStore(store, () => <ImagePicker value="a" onChange={() => {}} />);
 		openGallery();
 		await waitFor(() => screen.getAllByTestId("media-tile"));
-		fireEvent.click(screen.getAllByRole("button", { name: /^delete a$/i })[0]);
+		fireEvent.click(first(screen.getAllByRole("button", { name: /^delete a$/i }), "delete button"));
 		fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 
 		await waitFor(() => expect(screen.getByRole("alert").textContent).toMatch(/didn't work/i));
