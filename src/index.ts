@@ -82,5 +82,11 @@ export {
 	SECTION_PADDING,
 	SECTION_ROW_CLASS,
 } from "./lib/section-tokens.js";
+export {
+	THUMB_CLASS,
+	THUMB_RAIL_BLEED,
+	THUMB_RAIL_PAD,
+	THUMB_SIZE,
+} from "./lib/thumb-classes.js";
 export { createIsMobile, MOBILE_BREAKPOINT } from "./lib/use-is-mobile.js";
 export { cn } from "./lib/utils.js";
