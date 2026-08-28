@@ -496,15 +496,17 @@
 		transform: translate3d(0, 100%, 0);
 	}
 }
+/* --bs-duration, --bs-ease and --bs-max-h are published inline by
+   BottomSheetContent from bottom-sheet/constants.ts; that file is the source. */
 .bs-content {
 	transform: translate3d(0, 100%, 0);
 	bottom: var(--bs-keyboard-offset, 0);
 }
 .bs-content[data-keyboard-open] {
-	max-height: calc(85dvh - var(--bs-keyboard-offset, 0px));
+	max-height: calc(var(--bs-max-h) - var(--bs-keyboard-offset, 0px));
 }
 .bs-content[data-state="opening"] {
-	animation: bs-slide-up 500ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+	animation: bs-slide-up var(--bs-duration) var(--bs-ease) forwards;
 }
 .bs-content[data-state="open"],
 .bs-content[data-state="pressing"],
@@ -513,7 +515,7 @@
 	transform: translate3d(0, 0, 0);
 }
 .bs-content[data-state="closing"] {
-	animation: bs-slide-down 500ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+	animation: bs-slide-down var(--bs-duration) var(--bs-ease) forwards;
 }
 .bs-content[data-reduced-motion] {
 	animation-duration: 0ms !important;

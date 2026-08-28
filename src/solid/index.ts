@@ -30,6 +30,7 @@ export { Alert, AlertDescription, AlertTitle, type AlertTone } from "./alert.js"
 export {
 	AlertDialog,
 	AlertDialogAction,
+	AlertDialogBody,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
@@ -144,6 +145,7 @@ export {
 } from "./data-table.js";
 export {
 	Dialog,
+	DialogBody,
 	DialogClose,
 	DialogContent,
 	DialogDescription,
@@ -152,6 +154,7 @@ export {
 	DialogTitle,
 	DialogTrigger,
 } from "./dialog.js";
+export type { ModalSize } from "./dialog-parts.js";
 export type { DockIconButtonProps, DockItem, DockProps } from "./dock.js";
 export { Dock } from "./dock.js";
 export {
@@ -308,6 +311,7 @@ export {
 // Wave 6: Compound Components
 export {
 	ResponsiveDialog,
+	ResponsiveDialogBody,
 	ResponsiveDialogClose,
 	ResponsiveDialogContent,
 	ResponsiveDialogDescription,
@@ -358,6 +362,7 @@ export {
 } from "./settings-row.js";
 export {
 	Sheet,
+	SheetBody,
 	SheetClose,
 	SheetContent,
 	SheetDescription,

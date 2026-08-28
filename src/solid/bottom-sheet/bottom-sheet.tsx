@@ -6,15 +6,26 @@ import {
 	createSignal,
 	type JSX,
 	onCleanup,
+	onMount,
 	type ParentComponent,
 	Show,
 	splitProps,
 	useContext,
+	type ValidComponent,
 } from "solid-js";
-import { Portal } from "solid-js/web";
+import { Dynamic, Portal } from "solid-js/web";
+import { Z } from "../../lib/layers.js";
 import { OVERLAY_SURFACE_OPAQUE } from "../../lib/overlay-classes.js";
 import { cn } from "../../lib/utils.js";
-import { Z_BASE } from "./constants.js";
+import {
+	createModalLabels,
+	createModalParts,
+	MODAL_DESCRIPTION,
+	MODAL_TITLE,
+	ModalLabelsProvider,
+	useModalLabels,
+} from "../dialog-parts.js";
+import { EASE, MAX_HEIGHT, TRANSITION_MS } from "./constants.js";
 import { attachDrag } from "./drag-controller.js";
 import { type InitialFocus, trapFocus } from "./focus-trap.js";
 import { watchKeyboard } from "./keyboard.js";
@@ -98,20 +109,31 @@ const BottomSheet: ParentComponent<BottomSheetRootProps> = (props) => {
 	);
 };
 
-const BottomSheetTrigger: ParentComponent<ComponentProps<"button">> = (props) => {
-	const [local, rest] = splitProps(props, ["children", "onClick"]);
+type SheetButtonProps = ComponentProps<"button"> & { as?: ValidComponent };
+
+function callClickHandler(handler: ComponentProps<"button">["onClick"], event: MouseEvent) {
+	if (typeof handler === "function")
+		handler(event as MouseEvent & { currentTarget: HTMLButtonElement; target: Element });
+}
+
+const BottomSheetTrigger: ParentComponent<SheetButtonProps> = (props) => {
+	const [local, rest] = splitProps(props, ["children", "onClick", "as"]);
 	const ctx = useBottomSheetContext();
 	return (
-		<button
+		<Dynamic
+			component={local.as ?? "button"}
 			type="button"
-			onClick={(e) => {
-				if (typeof local.onClick === "function") local.onClick(e);
+			data-slot="bottom-sheet-trigger"
+			aria-haspopup="dialog"
+			aria-expanded={ctx.open()}
+			onClick={(event: MouseEvent) => {
+				callClickHandler(local.onClick, event);
 				ctx.setOpen(true);
 			}}
 			{...rest}
 		>
 			{local.children}
-		</button>
+		</Dynamic>
 	);
 };
 
@@ -143,6 +165,7 @@ const BottomSheetOverlay: Component<ComponentProps<"div">> = (props) => {
 
 	return (
 		<div
+			data-slot="bottom-sheet-overlay"
 			data-sheet-overlay=""
 			data-state={dataState()}
 			aria-hidden="true"
@@ -151,7 +174,7 @@ const BottomSheetOverlay: Component<ComponentProps<"div">> = (props) => {
 				"data-[state=closing]:opacity-0 data-[state=open]:opacity-100",
 				local.class,
 			)}
-			style={{ "z-index": Z_BASE }}
+			style={{ "z-index": Z.sheet }}
 			{...rest}
 		/>
 	);
@@ -159,17 +182,20 @@ const BottomSheetOverlay: Component<ComponentProps<"div">> = (props) => {
 
 interface BottomSheetContentProps extends ComponentProps<"div"> {
 	initialFocus?: InitialFocus;
+	/** Names a sheet that has no `BottomSheetTitle`. */
 	ariaLabel?: string;
 }
 
 const BottomSheetContent: ParentComponent<BottomSheetContentProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "children", "initialFocus", "ariaLabel"]);
 	const ctx = useBottomSheetContext();
+	const labels = createModalLabels();
 	let el: HTMLDivElement | undefined;
 
-	createEffect(() => {
-		if (ctx.state() === "opening") acquireScrollLock();
-	});
+	/* The portal above mounts this only while the sheet is not closed, so the
+	 * refcounted page lock follows the sheet's real lifetime, animation or not. */
+	onMount(acquireScrollLock);
+	onCleanup(releaseScrollLock);
 
 	const clearAnimInline = () => {
 		if (!el) return;
@@ -182,10 +208,7 @@ const BottomSheetContent: ParentComponent<BottomSheetContentProps> = (props) => 
 		if (e.target !== el) return;
 		const s = ctx.state();
 		if (s === "opening" && e.animationName === "bs-slide-up") ctx.setState("open");
-		else if (s === "closing" && e.animationName === "bs-slide-down") {
-			ctx.setState("closed");
-			releaseScrollLock();
-		}
+		else if (s === "closing" && e.animationName === "bs-slide-down") ctx.setState("closed");
 	};
 
 	const onTransitionEnd = (e: TransitionEvent) => {
@@ -198,7 +221,6 @@ const BottomSheetContent: ParentComponent<BottomSheetContentProps> = (props) => 
 		} else if (s === "closing") {
 			ctx.setState("closed");
 			clearAnimInline();
-			releaseScrollLock();
 		}
 	};
 
@@ -304,33 +326,41 @@ const BottomSheetContent: ParentComponent<BottomSheetContentProps> = (props) => 
 		typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 	return (
-		<div
-			{...rest}
-			ref={setRef}
-			role="dialog"
-			aria-modal="true"
-			aria-label={local.ariaLabel}
-			tabIndex={-1}
-			data-sheet-content=""
-			data-state={ctx.state()}
-			data-reduced-motion={prefersReducedMotion() ? "" : undefined}
-			onAnimationEnd={onAnimationEnd}
-			onTransitionEnd={onTransitionEnd}
-			style={{
-				"z-index": Z_BASE,
-				"will-change": "transform",
-				"touch-action": "pan-y",
-				"-webkit-tap-highlight-color": "transparent",
-			}}
-			class={cn(
-				"bs-content",
-				`fixed inset-x-0 bottom-0 flex max-h-[85dvh] flex-col rounded-t-xl ${OVERLAY_SURFACE_OPAQUE} outline-none`,
-				"after:absolute after:inset-x-0 after:top-full after:h-1/2 after:bg-inherit",
-				local.class,
-			)}
-		>
-			{local.children}
-		</div>
+		<ModalLabelsProvider value={labels}>
+			<div
+				{...rest}
+				ref={setRef}
+				role="dialog"
+				aria-modal="true"
+				aria-label={local.ariaLabel}
+				aria-labelledby={labels.labelledBy()}
+				aria-describedby={labels.describedBy()}
+				tabIndex={-1}
+				data-slot="bottom-sheet-content"
+				data-sheet-content=""
+				data-state={ctx.state()}
+				data-reduced-motion={prefersReducedMotion() ? "" : undefined}
+				onAnimationEnd={onAnimationEnd}
+				onTransitionEnd={onTransitionEnd}
+				style={{
+					"z-index": Z.sheet,
+					"--bs-duration": `${TRANSITION_MS}ms`,
+					"--bs-ease": EASE,
+					"--bs-max-h": MAX_HEIGHT,
+					"will-change": "transform",
+					"touch-action": "pan-y",
+					"-webkit-tap-highlight-color": "transparent",
+				}}
+				class={cn(
+					"bs-content",
+					`fixed inset-x-0 bottom-0 flex max-h-[var(--bs-max-h)] flex-col rounded-t-xl ${OVERLAY_SURFACE_OPAQUE} outline-none`,
+					"after:absolute after:inset-x-0 after:top-full after:h-1/2 after:bg-inherit",
+					local.class,
+				)}
+			>
+				{local.children}
+			</div>
+		</ModalLabelsProvider>
 	);
 };
 
@@ -338,6 +368,7 @@ const BottomSheetHandle: Component<ComponentProps<"div">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	return (
 		<div
+			data-slot="bottom-sheet-handle"
 			data-sheet-handle=""
 			aria-hidden="true"
 			class={cn(
@@ -351,67 +382,61 @@ const BottomSheetHandle: Component<ComponentProps<"div">> = (props) => {
 	);
 };
 
-const BottomSheetHeader: Component<ComponentProps<"div">> = (props) => {
-	const [local, rest] = splitProps(props, ["class"]);
-	return <div class={cn("flex flex-col gap-1.5 px-6 pb-4 text-left", local.class)} {...rest} />;
-};
+const {
+	Header: SharedHeader,
+	Body: BottomSheetBody,
+	Footer: SharedFooter,
+} = createModalParts("bottom-sheet");
+
+/** @deprecated Use the shared modal `Header` of the family you render in. */
+const BottomSheetHeader = SharedHeader;
+/** @deprecated Use the shared modal `Footer` of the family you render in. */
+const BottomSheetFooter = SharedFooter;
 
 const BottomSheetTitle: Component<ComponentProps<"h2">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
+	const labels = useModalLabels();
+	labels?.registerTitle();
 	return (
 		<h2
-			class={cn("font-semibold text-foreground text-lg leading-none tracking-tight", local.class)}
+			data-slot="bottom-sheet-title"
+			class={cn(MODAL_TITLE, local.class)}
 			{...rest}
+			id={labels?.titleId}
 		/>
 	);
 };
 
 const BottomSheetDescription: Component<ComponentProps<"p">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
-	return <p class={cn("text-muted-foreground text-sm", local.class)} {...rest} />;
-};
-
-const BottomSheetBody: Component<ComponentProps<"div">> = (props) => {
-	const [local, rest] = splitProps(props, ["class"]);
+	const labels = useModalLabels();
+	labels?.registerDescription();
 	return (
-		<div
-			data-sheet-scroll=""
-			class={cn(
-				"gh-scroll flex min-h-0 flex-1 touch-pan-y flex-col overflow-y-auto overscroll-contain px-6 pb-6",
-				local.class,
-			)}
+		<p
+			data-slot="bottom-sheet-description"
+			class={cn(MODAL_DESCRIPTION, local.class)}
 			{...rest}
+			id={labels?.descriptionId}
 		/>
 	);
 };
 
-const BottomSheetFooter: Component<ComponentProps<"div">> = (props) => {
-	const [local, rest] = splitProps(props, ["class"]);
-	return (
-		<div
-			class={cn(
-				"flex flex-col-reverse gap-2 px-6 pt-2 pb-6 sm:flex-row sm:justify-end",
-				local.class,
-			)}
-			{...rest}
-		/>
-	);
-};
-
-const BottomSheetClose: ParentComponent<ComponentProps<"button">> = (props) => {
-	const [local, rest] = splitProps(props, ["children", "onClick"]);
+const BottomSheetClose: ParentComponent<SheetButtonProps> = (props) => {
+	const [local, rest] = splitProps(props, ["children", "onClick", "as"]);
 	const ctx = useBottomSheetContext();
 	return (
-		<button
+		<Dynamic
+			component={local.as ?? "button"}
 			type="button"
-			onClick={(e) => {
-				if (typeof local.onClick === "function") local.onClick(e);
+			data-slot="bottom-sheet-close"
+			onClick={(event: MouseEvent) => {
+				callClickHandler(local.onClick, event);
 				ctx.setOpen(false);
 			}}
 			{...rest}
 		>
 			{local.children}
-		</button>
+		</Dynamic>
 	);
 };
 
