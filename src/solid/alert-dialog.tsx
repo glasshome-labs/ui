@@ -4,12 +4,14 @@ import { type Component, type ComponentProps, type ParentComponent, splitProps }
 import { buttonVariants } from "../lib/button-variants.js";
 import { cn } from "../lib/utils.js";
 import {
+	createModalDismiss,
 	createModalParts,
 	MODAL_DESCRIPTION,
 	MODAL_PANEL,
 	MODAL_SCRIM,
 	MODAL_TITLE,
 	MODAL_WIDTH,
+	type ModalDismissProps,
 	ModalScrollLock,
 	type ModalSize,
 } from "./dialog-parts.js";
@@ -90,8 +92,11 @@ const AlertDialogDescription: Component<ComponentProps<typeof AlertDialogPrimiti
 	);
 };
 
-type AlertDialogButtonProps = ComponentProps<typeof AlertDialogPrimitive.CloseButton> &
+type AlertDialogButtonProps = ModalDismissProps &
 	Partial<Pick<VariantProps<typeof buttonVariants>, "variant" | "size">>;
+
+const ActionDismiss = createModalDismiss("alert-dialog-action");
+const CancelDismiss = createModalDismiss("alert-dialog-cancel");
 
 /** Confirming action. Pass `variant` (e.g. "destructive"); layering a second
  *  buttonVariants() call through `class` cannot work, because the variants
@@ -100,8 +105,7 @@ type AlertDialogButtonProps = ComponentProps<typeof AlertDialogPrimitive.CloseBu
 const AlertDialogAction: ParentComponent<AlertDialogButtonProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "variant", "size"] as const);
 	return (
-		<AlertDialogPrimitive.CloseButton
-			data-slot="alert-dialog-action"
+		<ActionDismiss
 			class={cn(buttonVariants({ variant: local.variant, size: local.size }), local.class)}
 			{...rest}
 		/>
@@ -112,8 +116,7 @@ const AlertDialogAction: ParentComponent<AlertDialogButtonProps> = (props) => {
 const AlertDialogCancel: ParentComponent<AlertDialogButtonProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "variant", "size"] as const);
 	return (
-		<AlertDialogPrimitive.CloseButton
-			data-slot="alert-dialog-cancel"
+		<CancelDismiss
 			class={cn(
 				buttonVariants({ variant: local.variant ?? "outline", size: local.size }),
 				local.class,

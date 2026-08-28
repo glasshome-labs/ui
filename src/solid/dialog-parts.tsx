@@ -1,3 +1,5 @@
+import { Button as KobalteButton } from "@kobalte/core/button";
+import { useDialogContext } from "@kobalte/core/dialog";
 import {
 	type Accessor,
 	type Component,
@@ -8,6 +10,7 @@ import {
 	type JSX,
 	onCleanup,
 	onMount,
+	type ParentComponent,
 	Show,
 	splitProps,
 	useContext,
@@ -111,6 +114,34 @@ export function createModalParts(slot: string): ModalParts {
 	};
 
 	return { Header, Body, Footer };
+}
+
+export type ModalDismissProps = ComponentProps<typeof KobalteButton>;
+
+/* Not kobalte's own CloseButton: that one hard-defaults aria-label to its
+ * "Dismiss" translation, and an aria-label outranks the visible text, so every
+ * labelled button in every modal answered to "Dismiss". Here a name is set only
+ * when the caller passes one. AlertDialog is built on the Dialog context, so
+ * one factory serves both families. */
+export function createModalDismiss(slot: string): ParentComponent<ModalDismissProps> {
+	return (props) => {
+		const [local, rest] = splitProps(props, ["onClick"]);
+		const context = useDialogContext();
+		return (
+			<KobalteButton
+				data-slot={slot}
+				onClick={(event: MouseEvent) => {
+					if (typeof local.onClick === "function") {
+						local.onClick(
+							event as MouseEvent & { currentTarget: HTMLButtonElement; target: Element },
+						);
+					}
+					context.close();
+				}}
+				{...rest}
+			/>
+		);
+	};
 }
 
 /** Renderless. Mounted inside a portal that exists only while the modal is

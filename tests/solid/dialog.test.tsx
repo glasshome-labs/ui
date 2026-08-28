@@ -1,17 +1,24 @@
-import { cleanup, fireEvent, render } from "@solidjs/testing-library";
+import { cleanup, fireEvent, render, screen } from "@solidjs/testing-library";
 import { createSignal, Show } from "solid-js";
 import { afterEach, describe, expect, it } from "vitest";
 import {
 	AlertDialog,
+	AlertDialogAction,
 	AlertDialogBody,
+	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogTitle,
 } from "../../src/solid/alert-dialog.js";
-import { BottomSheet, BottomSheetContent } from "../../src/solid/bottom-sheet/index.js";
+import {
+	BottomSheet,
+	BottomSheetContent,
+	BottomSheetTitle,
+} from "../../src/solid/bottom-sheet/index.js";
 import { Button } from "../../src/solid/button.js";
 import {
 	Dialog,
 	DialogBody,
+	DialogClose,
 	DialogContent,
 	DialogDescription,
 	DialogFooter,
@@ -19,7 +26,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "../../src/solid/dialog.js";
-import { Sheet, SheetBody, SheetContent, SheetTitle } from "../../src/solid/sheet.js";
+import { Sheet, SheetBody, SheetClose, SheetContent, SheetTitle } from "../../src/solid/sheet.js";
 
 afterEach(cleanup);
 
@@ -479,5 +486,77 @@ describe("Sheet", () => {
 
 		expect(document.querySelector("[data-sheet-content]")).not.toBeNull();
 		expect(document.querySelector('[data-slot="sheet-content"]')).toBeNull();
+	});
+});
+
+describe("modal close buttons", () => {
+	it("lets the visible text name an AlertDialog action and its cancel", () => {
+		render(() => (
+			<AlertDialog open>
+				<AlertDialogContent>
+					<AlertDialogTitle>Delete this widget?</AlertDialogTitle>
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogAction>Delete</AlertDialogAction>
+				</AlertDialogContent>
+			</AlertDialog>
+		));
+
+		expect(screen.getByRole("button", { name: "Delete" }).dataset.slot).toBe(
+			"alert-dialog-action",
+		);
+		expect(screen.getByRole("button", { name: "Cancel" }).dataset.slot).toBe(
+			"alert-dialog-cancel",
+		);
+	});
+
+	it("lets the visible text name DialogClose and SheetClose", () => {
+		render(() => (
+			<Dialog open>
+				<DialogContent ariaLabel="d">
+					<DialogClose>Not now</DialogClose>
+				</DialogContent>
+			</Dialog>
+		));
+		expect(screen.getByRole("button", { name: "Not now" }).dataset.slot).toBe("dialog-close");
+		cleanup();
+
+		render(() => (
+			<Sheet open>
+				<SheetContent ariaLabel="s">
+					<SheetClose>Dismiss panel</SheetClose>
+				</SheetContent>
+			</Sheet>
+		));
+		expect(screen.getByRole("button", { name: "Dismiss panel" }).dataset.slot).toBe("sheet-close");
+	});
+
+	it("keeps an explicit aria-label for an icon-only close", () => {
+		render(() => (
+			<Dialog open>
+				<DialogContent ariaLabel="d">
+					<DialogClose aria-label="Close settings">
+						<span aria-hidden="true">x</span>
+					</DialogClose>
+				</DialogContent>
+			</Dialog>
+		));
+
+		expect(screen.getByRole("button", { name: "Close settings" }).dataset.slot).toBe(
+			"dialog-close",
+		);
+	});
+
+	it("still closes the modal it belongs to", () => {
+		render(() => (
+			<Dialog defaultOpen>
+				<DialogContent ariaLabel="d">
+					<DialogClose>Not now</DialogClose>
+				</DialogContent>
+			</Dialog>
+		));
+
+		fireEvent.click(screen.getByRole("button", { name: "Not now" }));
+		endExitAnimations();
+		expect(document.querySelector('[data-slot="dialog-content"]')).toBeNull();
 	});
 });

@@ -23,10 +23,12 @@ import {
 	BottomSheetPortal,
 } from "./bottom-sheet/index.js";
 import {
+	createModalDismiss,
 	createModalParts,
 	MODAL_DESCRIPTION,
 	MODAL_MAX_H,
 	MODAL_TITLE,
+	type ModalDismissProps,
 	ModalScrollLock,
 } from "./dialog-parts.js";
 
@@ -58,15 +60,16 @@ const SheetTrigger: Component<ComponentProps<typeof DialogPrimitive.Trigger>> = 
 	<DialogPrimitive.Trigger data-slot="sheet-trigger" {...props} />
 );
 
-type SheetCloseProps = ComponentProps<typeof DialogPrimitive.CloseButton> &
+type SheetCloseProps = ModalDismissProps &
 	Partial<Pick<VariantProps<typeof buttonVariants>, "variant" | "size">>;
+
+const SheetDismiss = createModalDismiss("sheet-close");
 
 /** Already the outline button; see DialogClose on why `as={Button}` is wrong. */
 const SheetClose: ParentComponent<SheetCloseProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "variant", "size", "children"]);
 	return (
-		<DialogPrimitive.CloseButton
-			data-slot="sheet-close"
+		<SheetDismiss
 			class={cn(
 				buttonVariants({ variant: local.variant ?? "outline", size: local.size }),
 				local.class,
@@ -74,7 +77,7 @@ const SheetClose: ParentComponent<SheetCloseProps> = (props) => {
 			{...rest}
 		>
 			{local.children ?? "Close"}
-		</DialogPrimitive.CloseButton>
+		</SheetDismiss>
 	);
 };
 

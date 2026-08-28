@@ -4,12 +4,14 @@ import { type Component, type ComponentProps, type ParentComponent, splitProps }
 import { buttonVariants } from "../lib/button-variants.js";
 import { cn } from "../lib/utils.js";
 import {
+	createModalDismiss,
 	createModalParts,
 	MODAL_DESCRIPTION,
 	MODAL_PANEL,
 	MODAL_SCRIM,
 	MODAL_TITLE,
 	MODAL_WIDTH,
+	type ModalDismissProps,
 	ModalScrollLock,
 	type ModalSize,
 } from "./dialog-parts.js";
@@ -25,8 +27,10 @@ const DialogTrigger: Component<ComponentProps<typeof DialogPrimitive.Trigger>> =
 	<DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
 );
 
-type DialogCloseProps = ComponentProps<typeof DialogPrimitive.CloseButton> &
+type DialogCloseProps = ModalDismissProps &
 	Partial<Pick<VariantProps<typeof buttonVariants>, "variant" | "size">>;
+
+const DialogDismiss = createModalDismiss("dialog-close");
 
 /** Already the outline button, so `as` is for a non-button element (a link),
  *  never for `Button`: two buttonVariants() calls leave tone knobs side by side
@@ -34,8 +38,7 @@ type DialogCloseProps = ComponentProps<typeof DialogPrimitive.CloseButton> &
 const DialogClose: ParentComponent<DialogCloseProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "variant", "size", "children"]);
 	return (
-		<DialogPrimitive.CloseButton
-			data-slot="dialog-close"
+		<DialogDismiss
 			class={cn(
 				buttonVariants({ variant: local.variant ?? "outline", size: local.size }),
 				local.class,
@@ -43,7 +46,7 @@ const DialogClose: ParentComponent<DialogCloseProps> = (props) => {
 			{...rest}
 		>
 			{local.children ?? "Close"}
-		</DialogPrimitive.CloseButton>
+		</DialogDismiss>
 	);
 };
 

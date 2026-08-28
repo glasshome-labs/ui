@@ -1,9 +1,10 @@
-import { cleanup, fireEvent, render } from "@solidjs/testing-library";
+import { cleanup, fireEvent, render, screen } from "@solidjs/testing-library";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Button } from "../../src/solid/button.js";
 import {
 	ResponsiveDialog,
 	ResponsiveDialogBody,
+	ResponsiveDialogClose,
 	ResponsiveDialogContent,
 	ResponsiveDialogDescription,
 	ResponsiveDialogFooter,
@@ -146,5 +147,28 @@ describe("ResponsiveDialog trigger", () => {
 		expect(buttons).toHaveLength(1);
 		fireEvent.click(buttons[0] as HTMLButtonElement);
 		expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+	});
+});
+
+describe("ResponsiveDialogClose", () => {
+	it("is named by its visible text, on both branches", () => {
+		for (const width of [DESKTOP_WIDTH, PHONE_WIDTH]) {
+			setViewportWidth(width);
+			render(() => (
+				<ResponsiveDialog open>
+					<ResponsiveDialogContent>
+						<ResponsiveDialogTitle>Edit widget</ResponsiveDialogTitle>
+						<ResponsiveDialogFooter>
+							<ResponsiveDialogClose>Not now</ResponsiveDialogClose>
+						</ResponsiveDialogFooter>
+					</ResponsiveDialogContent>
+				</ResponsiveDialog>
+			));
+
+			expect(screen.getByRole("button", { name: "Not now" }).dataset.slot).toBe(
+				"responsive-dialog-close",
+			);
+			cleanup();
+		}
 	});
 });
