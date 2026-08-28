@@ -28,6 +28,7 @@ import {
 	CollapsibleTrigger,
 	ContextMenu,
 	ContextMenuContent,
+	ContextMenuGroup,
 	ContextMenuItem,
 	ContextMenuLabel,
 	ContextMenuSeparator,
@@ -44,6 +45,7 @@ import {
 	DialogTrigger,
 	DropdownMenu,
 	DropdownMenuContent,
+	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
@@ -228,18 +230,20 @@ export function OverlaysCatalog() {
 						Actions
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
-						<DropdownMenuLabel>Widget</DropdownMenuLabel>
-						<DropdownMenuItem>
-							<Icon icon="lucide:pencil" width={16} height={16} /> Edit
-							<DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
-						</DropdownMenuItem>
-						<DropdownMenuItem>
-							<Icon icon="lucide:copy" width={16} height={16} /> Duplicate
-						</DropdownMenuItem>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem class="text-destructive">
-							<Icon icon="lucide:trash-2" width={16} height={16} /> Delete
-						</DropdownMenuItem>
+						<DropdownMenuGroup>
+							<DropdownMenuLabel>Widget</DropdownMenuLabel>
+							<DropdownMenuItem>
+								<Icon icon="lucide:pencil" width={16} height={16} /> Edit
+								<DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
+							</DropdownMenuItem>
+							<DropdownMenuItem>
+								<Icon icon="lucide:copy" width={16} height={16} /> Duplicate
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem class="text-destructive">
+								<Icon icon="lucide:trash-2" width={16} height={16} /> Delete
+							</DropdownMenuItem>
+						</DropdownMenuGroup>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</CatalogItem>
@@ -250,18 +254,20 @@ export function OverlaysCatalog() {
 						Right-click me
 					</ContextMenuTrigger>
 					<ContextMenuContent>
-						<ContextMenuLabel>Widget</ContextMenuLabel>
-						<ContextMenuItem>
-							<Icon icon="lucide:pencil" width={16} height={16} /> Edit
-							<ContextMenuShortcut>⌘E</ContextMenuShortcut>
-						</ContextMenuItem>
-						<ContextMenuItem>
-							<Icon icon="lucide:copy" width={16} height={16} /> Duplicate
-						</ContextMenuItem>
-						<ContextMenuSeparator />
-						<ContextMenuItem variant="destructive">
-							<Icon icon="lucide:trash-2" width={16} height={16} /> Delete
-						</ContextMenuItem>
+						<ContextMenuGroup>
+							<ContextMenuLabel>Widget</ContextMenuLabel>
+							<ContextMenuItem>
+								<Icon icon="lucide:pencil" width={16} height={16} /> Edit
+								<ContextMenuShortcut>⌘E</ContextMenuShortcut>
+							</ContextMenuItem>
+							<ContextMenuItem>
+								<Icon icon="lucide:copy" width={16} height={16} /> Duplicate
+							</ContextMenuItem>
+							<ContextMenuSeparator />
+							<ContextMenuItem variant="destructive">
+								<Icon icon="lucide:trash-2" width={16} height={16} /> Delete
+							</ContextMenuItem>
+						</ContextMenuGroup>
 					</ContextMenuContent>
 				</ContextMenu>
 			</CatalogItem>
