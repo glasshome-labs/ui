@@ -67,6 +67,7 @@ const SelectContent: ParentComponent<
 				<SlidingIndicator
 					activeSelector="[data-highlighted]"
 					orientation="vertical"
+					indicatorClass="rounded-sm"
 					class={cn("w-full", PICKER_LIST)}
 				>
 					<SelectPrimitive.Listbox class={cn(local.listboxClass)} />

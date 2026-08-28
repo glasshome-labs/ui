@@ -583,6 +583,7 @@ export function EntitySelector(props: EntitySelectorProps) {
 					<SlidingIndicator
 						activeSelector="[data-highlighted]"
 						orientation="vertical"
+						indicatorClass="rounded-sm"
 						role="presentation"
 						style={{ height: `${totalHeight()}px` }}
 					>

@@ -184,6 +184,7 @@ export function AreaPicker(props: AreaPickerProps) {
 					<SlidingIndicator
 						activeSelector="[data-highlighted]"
 						orientation="vertical"
+						indicatorClass="rounded-sm"
 						class={cn("flex flex-col gap-0.5 p-1", PICKER_LIST)}
 						onMouseLeave={() => setHovered(null)}
 					>
