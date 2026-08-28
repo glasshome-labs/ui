@@ -8,7 +8,7 @@ import { SlidingIndicator } from "./sliding-indicator.js";
 /** `split`: the root is `display: contents`, so a host (a modal panel) lays the
  *  list and the content out in its own regions while the tab state still spans
  *  them. */
-export type TabsLayout = "stack" | "split";
+type TabsLayout = "stack" | "split";
 
 const TABS_LAYOUT: Record<TabsLayout, string> = {
 	stack: "flex flex-col gap-2",
