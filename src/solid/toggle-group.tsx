@@ -51,7 +51,11 @@ const ToggleGroup: ParentComponent<
 				<Show when={sliding()} fallback={local.children}>
 					{/* w-full, not w-fit: a shrink-to-fit root still sizes to content, and a
 					    `class="w-full"` root can finally let its flex-1 items share the width. */}
-					<SlidingIndicator activeSelector="[data-pressed]" class="flex w-full items-center">
+					<SlidingIndicator
+						activeSelector="[data-pressed]"
+						indicatorClass="rounded-md"
+						class="flex w-full items-center"
+					>
 						{local.children}
 					</SlidingIndicator>
 				</Show>
@@ -86,7 +90,7 @@ const ToggleGroupItem: Component<
 				// Multi-select has no single indicator, so each pressed segment carries
 				// its own neutral fill.
 				context.sliding
-					? "hover:!bg-transparent hover:!text-primary"
+					? "hover:bg-transparent hover:text-primary"
 					: "data-[pressed]:bg-muted data-[pressed]:text-foreground",
 				local.class,
 			)}
