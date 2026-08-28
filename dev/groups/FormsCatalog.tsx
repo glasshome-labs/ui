@@ -219,6 +219,12 @@ export function FormsCatalog() {
 					Accept terms
 				</Checkbox>
 				<Checkbox disabled>Disabled</Checkbox>
+				<Checkbox size="sm" checked={checked()} onChange={setChecked}>
+					Row-sized (sm)
+				</Checkbox>
+				<Checkbox size="sm" disabled>
+					Row-sized, disabled
+				</Checkbox>
 			</CatalogItem>
 
 			<CatalogItem name="RadioGroup" hint={`value: ${radio()}`}>
