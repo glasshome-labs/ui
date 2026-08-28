@@ -501,12 +501,8 @@ describe("modal close buttons", () => {
 			</AlertDialog>
 		));
 
-		expect(screen.getByRole("button", { name: "Delete" }).dataset.slot).toBe(
-			"alert-dialog-action",
-		);
-		expect(screen.getByRole("button", { name: "Cancel" }).dataset.slot).toBe(
-			"alert-dialog-cancel",
-		);
+		expect(screen.getByRole("button", { name: "Delete" }).dataset.slot).toBe("alert-dialog-action");
+		expect(screen.getByRole("button", { name: "Cancel" }).dataset.slot).toBe("alert-dialog-cancel");
 	});
 
 	it("lets the visible text name DialogClose and SheetClose", () => {
@@ -558,5 +554,46 @@ describe("modal close buttons", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Not now" }));
 		endExitAnimations();
 		expect(document.querySelector('[data-slot="dialog-content"]')).toBeNull();
+	});
+});
+
+describe("modal labelling precedence", () => {
+	it("names a titled Dialog by its Title even when ariaLabel is passed", () => {
+		render(() => (
+			<Dialog open>
+				<DialogContent ariaLabel="Quick actions">
+					<DialogTitle>Rename dashboard</DialogTitle>
+				</DialogContent>
+			</Dialog>
+		));
+
+		expect(panel().getAttribute("aria-label")).toBeNull();
+		expect(screen.getByRole("dialog", { name: "Rename dashboard" })).toBe(panel());
+	});
+
+	it("names a titled bottom sheet by its Title even when ariaLabel is passed", () => {
+		render(() => (
+			<BottomSheet open>
+				<BottomSheetContent ariaLabel="Quick actions">
+					<BottomSheetTitle>Filters</BottomSheetTitle>
+				</BottomSheetContent>
+			</BottomSheet>
+		));
+
+		const sheet = document.querySelector<HTMLElement>("[data-sheet-content]");
+		expect(sheet?.getAttribute("aria-label")).toBeNull();
+		expect(screen.getByRole("dialog", { name: "Filters" })).toBe(sheet);
+	});
+
+	it("falls back to ariaLabel on an untitled bottom sheet", () => {
+		render(() => (
+			<BottomSheet open>
+				<BottomSheetContent ariaLabel="Quick actions">rows</BottomSheetContent>
+			</BottomSheet>
+		));
+
+		expect(screen.getByRole("dialog", { name: "Quick actions" })).toBe(
+			document.querySelector("[data-sheet-content]"),
+		);
 	});
 });

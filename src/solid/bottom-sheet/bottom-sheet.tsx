@@ -185,7 +185,7 @@ const BottomSheetOverlay: Component<ComponentProps<"div">> = (props) => {
 
 interface BottomSheetContentProps extends ComponentProps<"div"> {
 	initialFocus?: InitialFocus;
-	/** Names a sheet that has no `BottomSheetTitle`. */
+	/** Names a sheet that has no `BottomSheetTitle`. A registered Title wins. */
 	ariaLabel?: string;
 }
 
@@ -340,7 +340,7 @@ const BottomSheetContent: ParentComponent<BottomSheetContentProps> = (props) => 
 				ref={setRef}
 				role="dialog"
 				aria-modal="true"
-				aria-label={local.ariaLabel}
+				aria-label={labels.labelledBy() ? undefined : local.ariaLabel}
 				aria-labelledby={labels.labelledBy()}
 				aria-describedby={labels.describedBy()}
 				tabIndex={-1}

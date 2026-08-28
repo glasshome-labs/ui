@@ -1,4 +1,4 @@
-import { Dialog as DialogPrimitive } from "@kobalte/core/dialog";
+import { Dialog as DialogPrimitive, useDialogContext } from "@kobalte/core/dialog";
 import type { VariantProps } from "cva";
 import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
 import { buttonVariants } from "../lib/button-variants.js";
@@ -52,12 +52,13 @@ const DialogClose: ParentComponent<DialogCloseProps> = (props) => {
 
 type DialogContentProps = ComponentProps<typeof DialogPrimitive.Content> & {
 	size?: ModalSize;
-	/** Names a panel that has no `DialogTitle`; a titled panel needs nothing. */
+	/** Names a panel that has no `DialogTitle`. A registered Title wins. */
 	ariaLabel?: string;
 };
 
 const DialogContent: ParentComponent<DialogContentProps> = (props) => {
 	const [local, others] = splitProps(props, ["class", "children", "size", "ariaLabel"]);
+	const context = useDialogContext();
 	return (
 		<DialogPrimitive.Portal>
 			<ModalScrollLock />
@@ -65,7 +66,7 @@ const DialogContent: ParentComponent<DialogContentProps> = (props) => {
 			<DialogPrimitive.Content
 				data-slot="dialog-content"
 				role="dialog"
-				aria-label={local.ariaLabel}
+				aria-label={context.titleId() ? undefined : local.ariaLabel}
 				class={cn(MODAL_PANEL, MODAL_WIDTH[local.size ?? "lg"], local.class)}
 				{...others}
 			>

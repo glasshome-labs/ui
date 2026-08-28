@@ -1,4 +1,5 @@
 import { AlertDialog as AlertDialogPrimitive } from "@kobalte/core/alert-dialog";
+import { useDialogContext } from "@kobalte/core/dialog";
 import type { VariantProps } from "cva";
 import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
 import { buttonVariants } from "../lib/button-variants.js";
@@ -39,12 +40,13 @@ const AlertDialogOverlay: Component<ComponentProps<typeof AlertDialogPrimitive.O
 
 type AlertDialogContentProps = ComponentProps<typeof AlertDialogPrimitive.Content> & {
 	size?: ModalSize;
-	/** Names a panel that has no `AlertDialogTitle`. */
+	/** Names a panel that has no `AlertDialogTitle`. A registered Title wins. */
 	ariaLabel?: string;
 };
 
 const AlertDialogContent: ParentComponent<AlertDialogContentProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "children", "size", "ariaLabel"]);
+	const context = useDialogContext();
 	return (
 		<AlertDialogPrimitive.Portal>
 			<ModalScrollLock />
@@ -52,7 +54,7 @@ const AlertDialogContent: ParentComponent<AlertDialogContentProps> = (props) => 
 			<AlertDialogPrimitive.Content
 				data-slot="alert-dialog-content"
 				role="alertdialog"
-				aria-label={local.ariaLabel}
+				aria-label={context.titleId() ? undefined : local.ariaLabel}
 				class={cn(MODAL_PANEL, MODAL_WIDTH[local.size ?? "md"], local.class)}
 				{...rest}
 			>
