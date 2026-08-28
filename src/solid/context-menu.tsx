@@ -1,52 +1,36 @@
-import { Icon } from "@iconify-icon/solid";
 import { ContextMenu as ContextMenuPrimitive } from "@kobalte/core/context-menu";
 import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
-import { OVERLAY_SURFACE } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
-import { SlidingIndicator } from "./sliding-indicator.js";
+import {
+	MENU_CONTENT_CLASS,
+	MenuCheckboxItemPart,
+	MenuContentIndicator,
+	MenuItemPart,
+	MenuLabelPart,
+	MenuRadioItemPart,
+	MenuSeparatorPart,
+	MenuSubContentPart,
+	MenuSubTriggerPart,
+} from "./menu-parts.js";
 
 const ContextMenu = ContextMenuPrimitive;
-const ContextMenuTrigger = ContextMenuPrimitive.Trigger;
 const ContextMenuGroup = ContextMenuPrimitive.Group;
 const ContextMenuSub = ContextMenuPrimitive.Sub;
 const ContextMenuRadioGroup = ContextMenuPrimitive.RadioGroup;
 
+const ContextMenuTrigger: Component<ComponentProps<typeof ContextMenuPrimitive.Trigger>> = (
+	props,
+) => {
+	return <ContextMenuPrimitive.Trigger data-slot="context-menu-trigger" {...props} />;
+};
+
 const ContextMenuSubTrigger: ParentComponent<
 	ComponentProps<typeof ContextMenuPrimitive.SubTrigger> & { inset?: boolean }
-> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "children", "inset"]);
-	return (
-		<ContextMenuPrimitive.SubTrigger
-			data-slot="context-menu-sub-trigger"
-			data-inset={local.inset}
-			class={cn(
-				"flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-hidden focus:text-foreground data-[expanded]:bg-muted data-[inset]:pl-8 data-[expanded]:text-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				local.class,
-			)}
-			{...rest}
-		>
-			{local.children}
-			<Icon icon="lucide:chevron-right" width={16} height={16} class="ml-auto" />
-		</ContextMenuPrimitive.SubTrigger>
-	);
-};
+> = (props) => <MenuSubTriggerPart slotName="context-menu-sub-trigger" {...props} />;
 
 const ContextMenuSubContent: Component<ComponentProps<typeof ContextMenuPrimitive.SubContent>> = (
 	props,
-) => {
-	const [local, rest] = splitProps(props, ["class"]);
-	return (
-		<ContextMenuPrimitive.SubContent
-			data-slot="context-menu-sub-content"
-			class={cn(
-				OVERLAY_SURFACE,
-				"data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] overflow-hidden rounded-md p-1 text-popover-foreground data-[closed]:animate-out data-[expanded]:animate-in",
-				local.class,
-			)}
-			{...rest}
-		/>
-	);
-};
+) => <MenuSubContentPart slotName="context-menu-sub-content" {...props} />;
 
 const ContextMenuContent: Component<ComponentProps<typeof ContextMenuPrimitive.Content>> = (
 	props,
@@ -56,20 +40,10 @@ const ContextMenuContent: Component<ComponentProps<typeof ContextMenuPrimitive.C
 		<ContextMenuPrimitive.Portal>
 			<ContextMenuPrimitive.Content
 				data-slot="context-menu-content"
-				class={cn(
-					OVERLAY_SURFACE,
-					"data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md p-1 text-popover-foreground data-[closed]:animate-out data-[expanded]:animate-in",
-					local.class,
-				)}
+				class={cn(MENU_CONTENT_CLASS, "overflow-y-auto overflow-x-hidden", local.class)}
 				{...rest}
 			>
-				<SlidingIndicator
-					activeSelector=":focus"
-					orientation="vertical"
-					indicatorClass="rounded-sm"
-				>
-					{local.children}
-				</SlidingIndicator>
+				<MenuContentIndicator>{local.children}</MenuContentIndicator>
 			</ContextMenuPrimitive.Content>
 		</ContextMenuPrimitive.Portal>
 	);
@@ -78,98 +52,27 @@ const ContextMenuContent: Component<ComponentProps<typeof ContextMenuPrimitive.C
 const ContextMenuItem: Component<
 	ComponentProps<typeof ContextMenuPrimitive.Item> & {
 		inset?: boolean;
+		tone?: string;
+		/** @deprecated pass `tone="var(--destructive)"` instead */
 		variant?: "default" | "destructive";
 	}
-> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "inset", "variant"]);
-	const variant = () => local.variant ?? "default";
-	return (
-		<ContextMenuPrimitive.Item
-			data-slot="context-menu-item"
-			data-inset={local.inset}
-			data-variant={variant()}
-			class={cn(
-				"data-[variant=destructive]:*:[svg]:!text-destructive relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden focus:text-foreground data-[disabled]:pointer-events-none data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[disabled]:opacity-50 data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				local.class,
-			)}
-			{...rest}
-		/>
-	);
-};
+> = (props) => <MenuItemPart slotName="context-menu-item" {...props} />;
 
 const ContextMenuCheckboxItem: ParentComponent<
 	ComponentProps<typeof ContextMenuPrimitive.CheckboxItem>
-> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "children"]);
-	return (
-		<ContextMenuPrimitive.CheckboxItem
-			data-slot="context-menu-checkbox-item"
-			class={cn(
-				"relative flex cursor-default select-none items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden focus:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				local.class,
-			)}
-			{...rest}
-		>
-			<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
-				<ContextMenuPrimitive.ItemIndicator>
-					<Icon icon="lucide:check" width={16} height={16} class="size-4" />
-				</ContextMenuPrimitive.ItemIndicator>
-			</span>
-			{local.children}
-		</ContextMenuPrimitive.CheckboxItem>
-	);
-};
+> = (props) => <MenuCheckboxItemPart slotName="context-menu-checkbox-item" {...props} />;
 
 const ContextMenuRadioItem: ParentComponent<
 	ComponentProps<typeof ContextMenuPrimitive.RadioItem>
-> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "children"]);
-	return (
-		<ContextMenuPrimitive.RadioItem
-			data-slot="context-menu-radio-item"
-			class={cn(
-				"relative flex cursor-default select-none items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden focus:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				local.class,
-			)}
-			{...rest}
-		>
-			<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
-				<ContextMenuPrimitive.ItemIndicator>
-					{/* mdi:circle is filled; lucide:circle is stroke-only and invisible at 8px. */}
-					<Icon icon="mdi:circle" width={8} height={8} class="size-2" />
-				</ContextMenuPrimitive.ItemIndicator>
-			</span>
-			{local.children}
-		</ContextMenuPrimitive.RadioItem>
-	);
-};
+> = (props) => <MenuRadioItemPart slotName="context-menu-radio-item" {...props} />;
 
 const ContextMenuLabel: Component<
 	ComponentProps<typeof ContextMenuPrimitive.GroupLabel> & { inset?: boolean }
-> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "inset"]);
-	return (
-		<ContextMenuPrimitive.GroupLabel
-			data-slot="context-menu-label"
-			data-inset={local.inset}
-			class={cn("px-2 py-1.5 font-medium text-foreground text-sm data-[inset]:pl-8", local.class)}
-			{...rest}
-		/>
-	);
-};
+> = (props) => <MenuLabelPart slotName="context-menu-label" {...props} />;
 
 const ContextMenuSeparator: Component<ComponentProps<typeof ContextMenuPrimitive.Separator>> = (
 	props,
-) => {
-	const [local, rest] = splitProps(props, ["class"]);
-	return (
-		<ContextMenuPrimitive.Separator
-			data-slot="context-menu-separator"
-			class={cn("-mx-1 my-1 h-px bg-border", local.class)}
-			{...rest}
-		/>
-	);
-};
+) => <MenuSeparatorPart slotName="context-menu-separator" {...props} />;
 
 const ContextMenuShortcut: Component<ComponentProps<"span">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);

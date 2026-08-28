@@ -1,9 +1,12 @@
 import { Icon } from "@iconify-icon/solid";
+import { createSignal } from "solid-js";
 import {
+	AreaChart,
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
 	Badge,
+	BarList,
 	Button,
 	Card,
 	CardAction,
@@ -12,13 +15,34 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuGroup,
+	ContextMenuItem,
+	ContextMenuLabel,
+	ContextMenuSeparator,
+	ContextMenuTrigger,
 	CountPill,
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
+	DropdownMenuTrigger,
 	Empty,
 	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
+	HoverCard,
+	HoverCardContent,
+	HoverCardTrigger,
 	Item,
 	ItemActions,
 	ItemContent,
@@ -30,6 +54,7 @@ import {
 	ItemSeparator,
 	ItemTitle,
 	Overlay,
+	RangeToggle,
 	ScopeIndicator,
 	SectionCard,
 	SectionIcon,
@@ -37,14 +62,21 @@ import {
 	SectionRow,
 	SectionSubtitle,
 	Separator,
+	StackedBar,
 	Table,
 	TableBody,
+	TableBulkBar,
 	TableCaption,
 	TableCell,
+	TableEmpty,
+	TableFilterSelect,
 	TableFooter,
 	TableHead,
 	TableHeader,
 	TableRow,
+	TableSearchInput,
+	TableSkeleton,
+	TableSortHeader,
 	TierBadge,
 	WidgetIdentity,
 	WidgetTrustBadge,
@@ -52,6 +84,10 @@ import {
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
 
 export function DataCatalog() {
+	const [showArchived, setShowArchived] = createSignal(false);
+	const [search, setSearch] = createSignal("");
+	const [scopeFilter, setScopeFilter] = createSignal("all");
+	const [rangeDays, setRangeDays] = createSignal(30);
 	return (
 		<CatalogGroup id="cat-data" title="Data display">
 			<CatalogItem name="Badge" hint="glass tone chips — pass any tone color" span={2}>
@@ -224,6 +260,151 @@ export function DataCatalog() {
 						</TableRow>
 					</TableFooter>
 				</Table>
+			</CatalogItem>
+
+			<CatalogItem name="DropdownMenu sub + checkbox" hint="click Actions" span={2}>
+				<DropdownMenu>
+					<DropdownMenuTrigger as={Button} variant="outline">
+						Actions
+					</DropdownMenuTrigger>
+					<DropdownMenuContent>
+						<DropdownMenuGroup>
+							<DropdownMenuLabel>Widget</DropdownMenuLabel>
+							<DropdownMenuItem>
+								<Icon icon="lucide:pencil" width={16} height={16} />
+								Edit
+							</DropdownMenuItem>
+							<DropdownMenuCheckboxItem checked={showArchived()} onChange={setShowArchived}>
+								Show archived
+							</DropdownMenuCheckboxItem>
+						</DropdownMenuGroup>
+						<DropdownMenuSeparator />
+						<DropdownMenuSub>
+							<DropdownMenuSubTrigger>Move to</DropdownMenuSubTrigger>
+							<DropdownMenuSubContent>
+								<DropdownMenuItem>Living room</DropdownMenuItem>
+								<DropdownMenuItem>Kitchen</DropdownMenuItem>
+							</DropdownMenuSubContent>
+						</DropdownMenuSub>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			</CatalogItem>
+
+			<CatalogItem name="ContextMenu tone" hint="right-click; destructive item wears a tone">
+				<ContextMenu>
+					<ContextMenuTrigger class="flex h-16 w-full items-center justify-center rounded-md border border-border/60 border-dashed bg-muted/20 text-muted-foreground text-xs">
+						Right-click here
+					</ContextMenuTrigger>
+					<ContextMenuContent>
+						<ContextMenuGroup>
+							<ContextMenuLabel>Widget</ContextMenuLabel>
+							<ContextMenuItem>Duplicate</ContextMenuItem>
+						</ContextMenuGroup>
+						<ContextMenuSeparator />
+						<ContextMenuItem tone="var(--destructive)">
+							<Icon icon="lucide:trash-2" width={16} height={16} />
+							Delete
+						</ContextMenuItem>
+					</ContextMenuContent>
+				</ContextMenu>
+			</CatalogItem>
+
+			<CatalogItem name="HoverCard widget" hint="hover the badge">
+				<HoverCard openDelay={150}>
+					<HoverCardTrigger as={Button} variant="outline">
+						@glasshome/energy-flow
+					</HoverCardTrigger>
+					<HoverCardContent>
+						<p class="font-medium text-sm">Energy Flow</p>
+						<p class="mt-1 text-muted-foreground text-xs">
+							Official widget. 12k installs, updated 2 days ago.
+						</p>
+					</HoverCardContent>
+				</HoverCard>
+			</CatalogItem>
+
+			<CatalogItem
+				name="DataTable toolbar"
+				hint="TableSearchInput · TableFilterSelect · TableSortHeader · TableBulkBar"
+				span={3}
+			>
+				<div class="w-full space-y-3">
+					<div class="flex flex-wrap items-center gap-2">
+						<TableSearchInput
+							value={search()}
+							onInput={setSearch}
+							placeholder="Search widgets"
+							label="Search widgets"
+						/>
+						<TableFilterSelect
+							options={["all", "official", "community"]}
+							value={scopeFilter()}
+							onChange={setScopeFilter}
+							label={(v) => v}
+							ariaLabel="Filter by scope"
+						/>
+						<TableSortHeader label="Name" active dir="asc" onClick={() => {}} />
+					</div>
+					<TableBulkBar>
+						<span class="text-xs">2 selected</span>
+						<Button variant="outline" size="sm">
+							Archive
+						</Button>
+						<Button variant="destructive" size="sm">
+							Delete
+						</Button>
+					</TableBulkBar>
+				</div>
+			</CatalogItem>
+
+			<CatalogItem name="DataTable empty" hint="composes Empty">
+				<TableEmpty
+					icon="lucide:inbox"
+					message="No widgets match your search."
+					action={
+						<Button variant="outline" size="sm">
+							Clear filters
+						</Button>
+					}
+				/>
+			</CatalogItem>
+
+			<CatalogItem name="DataTable skeleton" hint="composes Skeleton rows" span={2}>
+				<div class="w-full">
+					<TableSkeleton count={3} />
+				</div>
+			</CatalogItem>
+
+			<CatalogItem name="charts" hint="AreaChart · BarList · RangeToggle · StackedBar" span={3}>
+				<div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+					<div class="space-y-2">
+						<RangeToggle value={rangeDays()} onChange={setRangeDays} />
+						<AreaChart
+							data={[
+								{ day: "2026-08-01", count: 12 },
+								{ day: "2026-08-02", count: 18 },
+								{ day: "2026-08-03", count: 9 },
+								{ day: "2026-08-04", count: 24 },
+								{ day: "2026-08-05", count: 20 },
+							]}
+							height={56}
+						/>
+					</div>
+					<BarList
+						items={[
+							{ label: "energy-flow", value: 420, sublabel: "official" },
+							{ label: "clock", value: 260, sublabel: "official" },
+							{ label: "area-summary", value: 90, sublabel: "community" },
+						]}
+					/>
+					<StackedBar
+						segments={[
+							{ label: "Fresh (<30d)", value: 12, tone: "var(--success)" },
+							{ label: "Aging (30-90d)", value: 5, tone: "var(--warning)" },
+							{ label: "Stale (>90d)", value: 2, tone: "var(--destructive)" },
+						]}
+					/>
+				</div>
 			</CatalogItem>
 
 			<CatalogItem name="Empty" hint="empty-state scaffold" span={2}>

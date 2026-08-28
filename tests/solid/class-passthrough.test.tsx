@@ -81,6 +81,7 @@ const SKIP: Record<string, string> = {
 	RangeToggle: "no class prop (pre-existing passthrough gap)",
 	RowActions: "no class prop (pre-existing passthrough gap)",
 	ScopeIndicator: "no class prop (pre-existing passthrough gap)",
+	ScrollBar: "deprecated no-op; gh-scroll's native-styled bar is the bar",
 	SectionAddButton: "no class prop (pre-existing passthrough gap)",
 	SectionEmpty: "no class prop (pre-existing passthrough gap)",
 	SectionRowSkeletons: "no class prop (pre-existing passthrough gap)",
@@ -436,6 +437,49 @@ const CASES: Record<string, () => JSX.Element> = {
 			<solid.DropdownMenuTrigger>t</solid.DropdownMenuTrigger>
 			<solid.DropdownMenuContent>
 				<solid.DropdownMenuRadioGroup class="probe" value="a" />
+			</solid.DropdownMenuContent>
+		</solid.DropdownMenu>
+	),
+	DropdownMenuCheckboxItem: () => (
+		<solid.DropdownMenu defaultOpen>
+			<solid.DropdownMenuTrigger>t</solid.DropdownMenuTrigger>
+			<solid.DropdownMenuContent>
+				<solid.DropdownMenuCheckboxItem class="probe">i</solid.DropdownMenuCheckboxItem>
+			</solid.DropdownMenuContent>
+		</solid.DropdownMenu>
+	),
+	DropdownMenuRadioItem: () => (
+		<solid.DropdownMenu defaultOpen>
+			<solid.DropdownMenuTrigger>t</solid.DropdownMenuTrigger>
+			<solid.DropdownMenuContent>
+				<solid.DropdownMenuRadioGroup value="a">
+					<solid.DropdownMenuRadioItem class="probe" value="a">
+						a
+					</solid.DropdownMenuRadioItem>
+				</solid.DropdownMenuRadioGroup>
+			</solid.DropdownMenuContent>
+		</solid.DropdownMenu>
+	),
+	DropdownMenuSubTrigger: () => (
+		<solid.DropdownMenu defaultOpen>
+			<solid.DropdownMenuTrigger>t</solid.DropdownMenuTrigger>
+			<solid.DropdownMenuContent>
+				<solid.DropdownMenuSub>
+					<solid.DropdownMenuSubTrigger class="probe">s</solid.DropdownMenuSubTrigger>
+				</solid.DropdownMenuSub>
+			</solid.DropdownMenuContent>
+		</solid.DropdownMenu>
+	),
+	DropdownMenuSubContent: () => (
+		<solid.DropdownMenu defaultOpen>
+			<solid.DropdownMenuTrigger>t</solid.DropdownMenuTrigger>
+			<solid.DropdownMenuContent>
+				<solid.DropdownMenuSub defaultOpen>
+					<solid.DropdownMenuSubTrigger>s</solid.DropdownMenuSubTrigger>
+					<solid.DropdownMenuSubContent class="probe">
+						<solid.DropdownMenuItem>i</solid.DropdownMenuItem>
+					</solid.DropdownMenuSubContent>
+				</solid.DropdownMenuSub>
 			</solid.DropdownMenuContent>
 		</solid.DropdownMenu>
 	),
