@@ -68,9 +68,18 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 		"itemSelector",
 		"class",
 		"children",
+		"ref",
 	]);
 	const horizontal = () => (local.orientation ?? "horizontal") === "horizontal";
 	let containerRef: HTMLDivElement | undefined;
+	// A caller's ref goes through here, not through the spread: `spread()` would
+	// hand its own ref to the element and leave containerRef unset, so nothing
+	// would ever measure.
+	const setContainerRef = (el: HTMLDivElement) => {
+		containerRef = el;
+		const forwarded = local.ref;
+		if (typeof forwarded === "function") forwarded(el);
+	};
 	const [pos, setPos] = createSignal<Pos | null>(null);
 
 	// On a real move, play a symmetric squash-and-stretch (1 → peak → 1) over the
@@ -228,7 +237,7 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 	});
 
 	return (
-		<div ref={containerRef} class={cn("relative isolate", local.class)} {...rest}>
+		<div ref={setContainerRef} class={cn("relative isolate", local.class)} {...rest}>
 			<Show when={pos()}>
 				{(p) => (
 					<div

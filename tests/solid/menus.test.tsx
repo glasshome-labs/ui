@@ -121,6 +121,32 @@ describe("DropdownMenuContent", () => {
 		expect(indicator?.querySelectorAll('[data-slot="dropdown-menu-item"]')).toHaveLength(2);
 	});
 
+	it("keeps every wrapper between the menu and its items out of the a11y tree", () => {
+		const { container } = render(() => (
+			<DropdownMenu>
+				<DropdownMenuTrigger as={Button}>Open</DropdownMenuTrigger>
+				<DropdownMenuContent>
+					<DropdownMenuItem>One</DropdownMenuItem>
+					<DropdownMenuItem>Two</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		));
+
+		fireEvent.pointerDown(container.querySelector("button") as HTMLElement, {
+			pointerType: "mouse",
+			button: 0,
+		});
+
+		const menu = document.querySelector<HTMLElement>('[role="menu"]');
+		const item = menu?.querySelector<HTMLElement>('[role="menuitem"]');
+		if (!menu || !item) throw new Error("menu did not render");
+		for (let el = item.parentElement; el && el !== menu; el = el.parentElement) {
+			expect(String(el.getAttribute("role")), el.outerHTML.slice(0, 120)).toMatch(
+				/^(none|presentation)$/,
+			);
+		}
+	});
+
 	it("gives DropdownMenuSub a SubContent that wraps its items in an indicator", () => {
 		const { container } = render(() => (
 			<DropdownMenu>

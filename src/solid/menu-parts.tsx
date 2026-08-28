@@ -67,16 +67,18 @@ export const MenuContentIndicator: ParentComponent = (props) => {
 	});
 
 	return (
-		<div ref={containerRef}>
-			<SlidingIndicator
-				activeSelector="[data-highlighted]"
-				orientation="vertical"
-				indicatorClass="rounded-sm"
-				indicatorTone={tone()}
-			>
-				{props.children}
-			</SlidingIndicator>
-		</div>
+		<SlidingIndicator
+			ref={containerRef}
+			// The one element between role="menu" and its role="menuitem" rows:
+			// an unnamed div there breaks the menu's ownership in the a11y tree.
+			role="none"
+			activeSelector="[data-highlighted]"
+			orientation="vertical"
+			indicatorClass="rounded-sm"
+			indicatorTone={tone()}
+		>
+			{props.children}
+		</SlidingIndicator>
 	);
 };
 
