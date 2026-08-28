@@ -5,6 +5,7 @@ vi.mock("@iconify-icon/solid", () => ({
 	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
 }));
 
+import { CARD_INTERACTIVE, CARD_SURFACE_BASE } from "../../src/lib/card-classes.js";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "../../src/solid/empty.js";
 import { HeroAction } from "../../src/solid/hero-action.js";
 import { PageHeader } from "../../src/solid/page-header.js";
@@ -16,6 +17,8 @@ import {
 	SectionRowSkeletons,
 	SectionTitle,
 } from "../../src/solid/section-card.js";
+import { WidgetCard } from "../../src/solid/widget-card.js";
+import type { WidgetSummary } from "../../src/solid/widget-identity.js";
 
 afterEach(cleanup);
 
@@ -82,6 +85,12 @@ describe("SectionCard spacing owner", () => {
 		for (const el of own) {
 			expect(el.getAttribute("data-slot"), el.outerHTML.slice(0, 80)).toBeTruthy();
 		}
+	});
+
+	it("leaves the hover sheen to the interactive card recipe", () => {
+		expect(CARD_INTERACTIVE).toContain("hover:[--glass-light:");
+		const { container } = full();
+		expect(slot(container, "section-card").className).not.toContain("hover:");
 	});
 
 	it("steps the title at one breakpoint", () => {
@@ -186,9 +195,45 @@ describe("HeroAction and PageHeader stop carrying app chrome", () => {
 	it("PageHeader wears the card surface and leaves its outer spacing to the caller", () => {
 		const { container } = render(() => <PageHeader title="Widgets" count={12} />);
 		const root = slot(container, "page-header");
-		expect(root.className).toContain("glass");
-		expect(root.className).not.toContain("glass-banner");
+		expect(root.className).toContain(CARD_SURFACE_BASE);
 		expect(root.className).not.toMatch(/(^|\s)-?m[trblxy]?-/);
 		expect(root.className).not.toContain("white");
+	});
+});
+
+describe("WidgetCard tile", () => {
+	const widget: WidgetSummary = {
+		scope: "glasshome",
+		name: "energy-flow",
+		displayName: "Energy Flow",
+		description: "Live power flow in one animated card.",
+		latestVersion: "1.2.0",
+		downloadCount: 4820,
+	};
+
+	const parts = (root: HTMLElement) => {
+		const card = root.querySelector<HTMLElement>('[data-slot="card"]');
+		if (!card) throw new Error("no card");
+		return {
+			body: card.querySelector<HTMLElement>('[data-slot="widget-card-body"]'),
+			last: card.lastElementChild,
+			meta: card.querySelector<HTMLElement>('[data-slot="widget-meta"]'),
+		};
+	};
+
+	it("pins the meta footer whether or not a description renders", () => {
+		for (const props of [
+			{ widget },
+			{ widget, showDescription: false },
+			{ widget: { ...widget, description: null } },
+		]) {
+			const { container, unmount } = render(() => <WidgetCard layout="tile" {...props} />);
+			const { body, last, meta } = parts(container);
+			expect(body?.className).toContain("flex-1");
+			expect(meta).not.toBeNull();
+			expect(last).toBe(meta);
+			expect(meta?.className).not.toMatch(/(^|\s)-?m[trblxy]?-/);
+			unmount();
+		}
 	});
 });

@@ -29,6 +29,16 @@ const COMMUNITY_WIDGET: WidgetSummary = {
 	versionCount: 3,
 };
 
+const BARE_WIDGET: WidgetSummary = {
+	scope: "ihsen",
+	name: "door-chime",
+	displayName: "Door Chime",
+	icon: "lucide:bell",
+	latestVersion: "1.0.0",
+	ownerType: "personal",
+	downloadCount: 140,
+};
+
 const UNLISTED_WIDGET: WidgetSummary = {
 	...COMMUNITY_WIDGET,
 	name: "house-sitter",
@@ -77,10 +87,16 @@ export function WidgetCardCatalog() {
 			>
 				<div class="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					<WidgetCard layout="tile" widget={OFFICIAL_WIDGET} href="#cat-widget-card" />
-					<WidgetCard layout="tile" widget={COMMUNITY_WIDGET} href="#cat-widget-card" />
+					<WidgetCard layout="tile" widget={BARE_WIDGET} href="#cat-widget-card" />
+					<WidgetCard
+						layout="tile"
+						widget={COMMUNITY_WIDGET}
+						href="#cat-widget-card"
+						showDescription={false}
+					/>
 				</div>
 				<CatalogNote>
-					meta stays pinned to the footer even when descriptions differ in length
+					meta stays pinned to the footer whether the description is long, missing, or turned off
 				</CatalogNote>
 			</CatalogItem>
 

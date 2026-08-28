@@ -5,7 +5,12 @@ vi.mock("@iconify-icon/solid", () => ({
 	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
 }));
 
+import { ICON_BUTTON_CLASS } from "../../src/lib/button-variants.js";
+import { CARD_SURFACE } from "../../src/lib/card-classes.js";
+import { FIELD_CHROME } from "../../src/lib/input-classes.js";
+import { FLOATING_PANEL } from "../../src/lib/overlay-classes.js";
 import { CHIP, ICON_PILL } from "../../src/lib/pill-classes.js";
+import { cn } from "../../src/lib/utils.js";
 import { Badge } from "../../src/solid/badge.js";
 import { CopyButton } from "../../src/solid/copy-button.js";
 import { CountPill } from "../../src/solid/count-pill.js";
@@ -21,6 +26,13 @@ afterEach(() => {
 	document.body.innerHTML = "";
 });
 
+/* twMerge drops whatever a caller overrides, so a customised chip never carries
+ * CHIP verbatim; the material it must keep is the assertion. */
+const expectChipMaterial = (el: HTMLElement) => {
+	expect(el.className).toContain("glass glass-tint");
+	expect(el.className).toContain("rounded-full");
+};
+
 const slot = (root: ParentNode, name: string) => {
 	const el = root.querySelector<HTMLElement>(`[data-slot="${name}"]`);
 	if (!el) throw new Error(`no [data-slot="${name}"]`);
@@ -33,20 +45,19 @@ describe("one tinted material", () => {
 		expect(slot(container, "badge").className).toContain(CHIP);
 	});
 
-	it("CountPill is a neutral Badge, not a flat foreground fill", () => {
+	it("CountPill is a neutral Badge with steady figures", () => {
 		const { container } = render(() => <CountPill>3</CountPill>);
 		const pill = slot(container, "badge");
-		expect(pill.className).toContain("glass");
+		expectChipMaterial(pill);
 		expect(pill.className).toContain("tabular-nums");
-		expect(pill.className).not.toContain("bg-foreground/10");
 		expect(pill.getAttribute("style")).toContain("var(--muted-foreground)");
 	});
 
 	it("ScopeIndicator is a mono Badge", () => {
 		const { container } = render(() => <ScopeIndicator scope="ihsen" type="personal" />);
 		const pill = slot(container, "badge");
+		expectChipMaterial(pill);
 		expect(pill.className).toContain("font-mono");
-		expect(pill.className).not.toContain("bg-muted/50");
 		expect(pill.textContent).toContain("@ihsen");
 	});
 
@@ -54,7 +65,6 @@ describe("one tinted material", () => {
 		const byMedia = render(() => <ItemMedia media="icon" />);
 		const media = slot(byMedia.container, "item-media");
 		expect(media.className).toContain(ICON_PILL);
-		expect(media.className).not.toContain("bg-foreground/10");
 		expect(media.getAttribute("data-media")).toBe("icon");
 
 		const byVariant = render(() => <ItemMedia variant="icon" />);
@@ -64,8 +74,7 @@ describe("one tinted material", () => {
 	it("Progress rides a recessed rail with a tinted glass fill", () => {
 		const { container } = render(() => <Progress value={60} tone="var(--success)" />);
 		const track = slot(container, "progress");
-		expect(track.className).toContain("glass-sink");
-		expect(track.className).not.toContain("bg-primary/15");
+		expect(track.className).toContain(FIELD_CHROME);
 		expect(track.getAttribute("style") ?? "").not.toContain("box-shadow");
 
 		const fill = slot(container, "progress-indicator");
@@ -83,9 +92,15 @@ describe("Tooltip", () => {
 			</Tooltip>
 		));
 		const content = slot(document, "tooltip-content");
-		expect(content.className).toContain("glass");
-		expect(content.className).not.toContain("bg-primary");
+		expect(content.className).toContain(FLOATING_PANEL);
 		expect(content.className).toContain("px-3 py-1.5");
+	});
+
+	it("keeps Kobalte's namespace on the root", () => {
+		expect(typeof Tooltip).toBe("function");
+		for (const member of ["Trigger", "Content", "Portal", "Arrow"] as const) {
+			expect(typeof Tooltip[member], member).toBe("function");
+		}
 	});
 
 	it("Kbd no longer re-skins itself inside a tooltip", () => {
@@ -105,7 +120,8 @@ describe("Dock", () => {
 		const badge = slot(container, "badge");
 		expect(badge.textContent).toBe("9+");
 		expect(badge.getAttribute("aria-label")).toBe("12 pending");
-		expect(badge.className).not.toContain("bg-primary/15");
+		expectChipMaterial(badge);
+		expect(badge.getAttribute("style")).toContain("var(--primary)");
 	});
 
 	it("hands its label to Tooltip instead of an always-mounted span", () => {
@@ -118,10 +134,7 @@ describe("Dock", () => {
 	it("wears the shared card surface", () => {
 		const { container } = render(() => <Dock items={items} />);
 		const bar = slot(container, "dock-bar");
-		expect(bar.className).toContain("glass");
-		expect(bar.className).not.toContain(
-			"--glass-base:color-mix(in_srgb,var(--card)_80%,transparent)",
-		);
+		expect(bar.className).toContain(cn(CARD_SURFACE, "[--glass-lift:0.55]"));
 	});
 });
 
@@ -129,8 +142,7 @@ describe("CopyButton", () => {
 	it("wears the shared icon button and lets the caller place it", () => {
 		const { container } = render(() => <CopyButton text="npm run build" />);
 		const button = slot(container, "copy-button");
-		expect(button.className).toContain("rounded-full");
+		expect(button.className).toContain(ICON_BUTTON_CLASS);
 		expect(button.className).not.toContain("absolute");
-		expect(button.className).not.toContain("bg-foreground/10");
 	});
 });

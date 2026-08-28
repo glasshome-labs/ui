@@ -103,12 +103,14 @@ function WidgetCardTile(props: InternalProps) {
 			padding="md"
 			class={cn("group h-full", props.class)}
 		>
-			<WidgetIdentity widget={props.widget} iconSize="md" showVersionInline={false} />
-			<Show when={showDescription() && props.widget.description}>
-				<p class="line-clamp-2 flex-1 text-muted-foreground text-xs leading-relaxed">
-					{props.widget.description}
-				</p>
-			</Show>
+			<div data-slot="widget-card-body" class="flex flex-1 flex-col gap-3">
+				<WidgetIdentity widget={props.widget} iconSize="md" showVersionInline={false} />
+				<Show when={showDescription() && props.widget.description}>
+					<p class="line-clamp-2 text-muted-foreground text-xs leading-relaxed">
+						{props.widget.description}
+					</p>
+				</Show>
+			</div>
 			<WidgetMeta widget={props.widget} showLatestVersion />
 		</Card>
 	);

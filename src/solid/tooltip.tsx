@@ -5,9 +5,14 @@ import { cn } from "../lib/utils.js";
 
 /* Kobalte takes the popper options on the root, not on the content, so the
  * gutter that keeps the panel off its trigger has to default here. */
-const Tooltip: Component<ComponentProps<typeof TooltipPrimitive>> = (props) => (
+const TooltipRoot: Component<ComponentProps<typeof TooltipPrimitive>> = (props) => (
 	<TooltipPrimitive gutter={6} {...props} />
 );
+
+/* Object.assign, not a bare wrapper: Kobalte ships Tooltip as a callable
+ * namespace and Tooltip.Trigger/.Content/.Portal/.Arrow are part of the
+ * published surface. */
+const Tooltip = Object.assign(TooltipRoot, TooltipPrimitive);
 
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
