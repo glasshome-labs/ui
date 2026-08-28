@@ -18,6 +18,30 @@ Hand-written; drop this section once release-please cuts the version from the co
 
 * **input-classes:** add `FIELD_CHROME`, the recipe SPEC.md already documented. Toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) wear it and stay keyed to `--input` in both themes, so they keep reading as empty wells now that fields do not.
 
+## [1.6.0](https://github.com/glasshome/ui/compare/v1.5.0...v1.6.0) (2026-08-28)
+
+
+### Features
+
+* **area-picker:** disabled mode ([da5200e](https://github.com/glasshome/ui/commit/da5200e98abba49d7effb420d9a220e857863ad8))
+* **area-picker:** multi-select mode ([135fa77](https://github.com/glasshome/ui/commit/135fa77c2d917b7fba7e40c721add611434a7a46))
+* **field:** FieldSubGroup, legend at the sub-heading rung, disabled dims descriptions ([9026d85](https://github.com/glasshome/ui/commit/9026d858220139fe9b0863e4c8d88636bfbc201f))
+* **hero-action:** promote the setup wizard's card into the package ([7f76064](https://github.com/glasshome/ui/commit/7f76064e7b5cf5797c494d1e20025f82d33a95f2))
+* **hero-option:** optional tick and an onPick that fires on re-pick ([4deb0ed](https://github.com/glasshome/ui/commit/4deb0ed6422dfdecd94a051793ce9da6ee935b46))
+* **option-card:** hero size for wizard-weight pick-one screens ([9c29a23](https://github.com/glasshome/ui/commit/9c29a236029aab5829e0d8eccaf40f92b21b8004))
+* **option-card:** selectable option cards over RadioGroup ([daac9ab](https://github.com/glasshome/ui/commit/daac9abfb1ddeab8c988aaf4b3ab866310102ec5))
+* **step-indicator:** dots for steppers ([53dc662](https://github.com/glasshome/ui/commit/53dc6625c4c8164a17a75e521f038a5ea2175a3c))
+* **switch-row:** description and disabled ([38bdde1](https://github.com/glasshome/ui/commit/38bdde1a44b4ca773fca3c20b1e4dddf0c7d9fc4))
+* **switch-row:** optional leading icon ([4d04d6c](https://github.com/glasshome/ui/commit/4d04d6c1835f7d10d39dad1bc72b2c81cf47e4d2))
+
+
+### Bug Fixes
+
+* **field:** legend owns its space, sub-group stacks flush ([5a7e3d4](https://github.com/glasshome/ui/commit/5a7e3d4266a1546caf66ec5afa9025d6936c75ca))
+* **input,dialog,field:** password reveal, quiet dialog scrollbars, generous field spacing ([cf69cd9](https://github.com/glasshome/ui/commit/cf69cd9b1d78f203b7273c4b39a5446b632545e1))
+* **switch-row:** centre the switch when there is no description ([16f2ab1](https://github.com/glasshome/ui/commit/16f2ab1a49d2526068870a4ea0067edb32ff66b7))
+* **switch:** pass aria labels through ([a03d8d5](https://github.com/glasshome/ui/commit/a03d8d5bea5097e1a81dfca0bb034aa74f89fedd))
+
 ## [1.5.0](https://github.com/glasshome/ui/compare/v1.4.0...v1.5.0) (2026-08-26)
 
 
