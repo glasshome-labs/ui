@@ -39,6 +39,7 @@ export function CatalogItem(props: {
 		props.span === 3 ? "sm:col-span-2 lg:col-span-3" : props.span === 2 ? "sm:col-span-2" : "";
 	return (
 		<div
+			data-specimen={props.name}
 			// Opaque surface on purpose: a component gallery must give glass/translucent
 			// specimens (alerts, tone badges, switches) a clean, known backdrop.
 			// Translucent cells over the page's decorative aurora made every tint read

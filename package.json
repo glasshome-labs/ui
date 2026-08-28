@@ -68,7 +68,8 @@
 		"lint": "biome check .",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"dev:gallery": "vite --config vite.dev.config.ts"
+		"dev:gallery": "vite --config vite.dev.config.ts",
+		"gallery:shots": "node dev/shoot.mjs"
 	},
 	"peerDependencies": {
 		"astro": ">=4",

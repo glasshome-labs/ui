@@ -39,7 +39,17 @@ export {
 	carouselTrack,
 } from "./lib/carousel-classes.js";
 export { glassToneText, toneTextMix } from "./lib/glass-tone.js";
-export { FIELD_CHROME, INPUT_CLASS, INPUT_SURFACE } from "./lib/input-classes.js";
+export {
+	CONTROL_H,
+	FIELD_CHROME,
+	FIELD_CONTROL,
+	FIELD_TEXT,
+	FOCUS_RING,
+	INPUT_CLASS,
+	INPUT_SURFACE,
+	INVALID_RING,
+} from "./lib/input-classes.js";
+export { Z, Z_CLASS } from "./lib/layers.js";
 export {
 	LOGO_DEFAULT_SIZE,
 	LOGO_DEFAULT_SRC,
@@ -53,18 +63,24 @@ export {
 	LOGO_SUB_CLASS,
 	type LogoSize,
 } from "./lib/logo-lockup.js";
+export { MENU_ITEM, MENU_LABEL, MENU_SEPARATOR } from "./lib/menu-classes.js";
 export {
+	anchorToTriggerTop,
+	FIELD_MOTION,
+	FLOATING_PANEL,
 	OVERLAY_BLUR,
+	OVERLAY_MOTION,
 	OVERLAY_SURFACE,
 	OVERLAY_SURFACE_BASE,
 	OVERLAY_SURFACE_OPAQUE,
 	SCRIM_CLASS,
 } from "./lib/overlay-classes.js";
+export { CHIP, ICON_PILL, ICON_PILL_TINT } from "./lib/pill-classes.js";
 export {
 	SECTION_INNER_RADIUS,
 	SECTION_OUTER_RADIUS,
 	SECTION_PADDING,
 	SECTION_ROW_CLASS,
 } from "./lib/section-tokens.js";
-export { createIsMobile } from "./lib/use-is-mobile.js";
+export { createIsMobile, MOBILE_BREAKPOINT } from "./lib/use-is-mobile.js";
 export { cn } from "./lib/utils.js";
