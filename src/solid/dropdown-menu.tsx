@@ -1,14 +1,28 @@
 import { DropdownMenu as DropdownMenuPrimitive } from "@kobalte/core/dropdown-menu";
-import { type Component, type ComponentProps, splitProps } from "solid-js";
-import { OVERLAY_SURFACE } from "../lib/overlay-classes.js";
+import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
 import { cn } from "../lib/utils.js";
-import { SlidingIndicator } from "./sliding-indicator.js";
+import {
+	MENU_CONTENT_CLASS,
+	MenuCheckboxItemPart,
+	MenuContentIndicator,
+	MenuItemPart,
+	MenuLabelPart,
+	MenuRadioItemPart,
+	MenuSeparatorPart,
+	MenuSubContentPart,
+	MenuSubTriggerPart,
+} from "./menu-parts.js";
 
 const DropdownMenu = DropdownMenuPrimitive;
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
+
+const DropdownMenuTrigger: Component<ComponentProps<typeof DropdownMenuPrimitive.Trigger>> = (
+	props,
+) => {
+	return <DropdownMenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />;
+};
 
 const DropdownMenuContent: Component<ComponentProps<typeof DropdownMenuPrimitive.Content>> = (
 	props,
@@ -18,64 +32,47 @@ const DropdownMenuContent: Component<ComponentProps<typeof DropdownMenuPrimitive
 		<DropdownMenuPrimitive.Portal>
 			<DropdownMenuPrimitive.Content
 				data-slot="dropdown-menu-content"
-				class={cn(
-					OVERLAY_SURFACE,
-					"data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 z-50 min-w-[8rem] overflow-hidden rounded-md p-1 text-popover-foreground data-[closed]:animate-out data-[expanded]:animate-in",
-					local.class,
-				)}
+				class={cn(MENU_CONTENT_CLASS, local.class)}
 				{...others}
 			>
-				<SlidingIndicator
-					activeSelector=":focus"
-					orientation="vertical"
-					indicatorClass="rounded-sm"
-				>
-					{local.children}
-				</SlidingIndicator>
+				<MenuContentIndicator>{local.children}</MenuContentIndicator>
 			</DropdownMenuPrimitive.Content>
 		</DropdownMenuPrimitive.Portal>
 	);
 };
 
-const DropdownMenuItem: Component<ComponentProps<typeof DropdownMenuPrimitive.Item>> = (props) => {
-	const [local, others] = splitProps(props, ["class"]);
-	return (
-		<DropdownMenuPrimitive.Item
-			data-slot="dropdown-menu-item"
-			class={cn(
-				"relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden transition-colors focus:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
-				local.class,
-			)}
-			{...others}
-		/>
-	);
-};
+const DropdownMenuItem: Component<
+	ComponentProps<typeof DropdownMenuPrimitive.Item> & {
+		inset?: boolean;
+		tone?: string;
+		/** @deprecated pass `tone="var(--destructive)"` instead */
+		variant?: "default" | "destructive";
+	}
+> = (props) => <MenuItemPart slot="dropdown-menu-item" {...props} />;
+
+const DropdownMenuSubTrigger: ParentComponent<
+	ComponentProps<typeof DropdownMenuPrimitive.SubTrigger> & { inset?: boolean }
+> = (props) => <MenuSubTriggerPart slot="dropdown-menu-sub-trigger" {...props} />;
+
+const DropdownMenuSubContent: ParentComponent<
+	ComponentProps<typeof DropdownMenuPrimitive.SubContent>
+> = (props) => <MenuSubContentPart slot="dropdown-menu-sub-content" {...props} />;
+
+const DropdownMenuCheckboxItem: ParentComponent<
+	ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>
+> = (props) => <MenuCheckboxItemPart slot="dropdown-menu-checkbox-item" {...props} />;
+
+const DropdownMenuRadioItem: ParentComponent<
+	ComponentProps<typeof DropdownMenuPrimitive.RadioItem>
+> = (props) => <MenuRadioItemPart slot="dropdown-menu-radio-item" {...props} />;
 
 const DropdownMenuSeparator: Component<ComponentProps<typeof DropdownMenuPrimitive.Separator>> = (
 	props,
-) => {
-	const [local, others] = splitProps(props, ["class"]);
-	return (
-		<DropdownMenuPrimitive.Separator
-			data-slot="dropdown-menu-separator"
-			class={cn("-mx-1 my-1 h-px bg-border", local.class)}
-			{...others}
-		/>
-	);
-};
+) => <MenuSeparatorPart slot="dropdown-menu-separator" {...props} />;
 
-const DropdownMenuLabel: Component<ComponentProps<typeof DropdownMenuPrimitive.GroupLabel>> = (
-	props,
-) => {
-	const [local, others] = splitProps(props, ["class"]);
-	return (
-		<DropdownMenuPrimitive.GroupLabel
-			data-slot="dropdown-menu-label"
-			class={cn("px-2 py-1.5 font-medium text-sm", local.class)}
-			{...others}
-		/>
-	);
-};
+const DropdownMenuLabel: Component<
+	ComponentProps<typeof DropdownMenuPrimitive.GroupLabel> & { inset?: boolean }
+> = (props) => <MenuLabelPart slot="dropdown-menu-label" {...props} />;
 
 const DropdownMenuShortcut: Component<ComponentProps<"span">> = (props) => {
 	const [local, others] = splitProps(props, ["class"]);
@@ -90,13 +87,17 @@ const DropdownMenuShortcut: Component<ComponentProps<"span">> = (props) => {
 
 export {
 	DropdownMenu,
+	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
 	DropdownMenuShortcut,
 	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 };
