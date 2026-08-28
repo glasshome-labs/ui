@@ -35,7 +35,10 @@ const ColorWheel: Component<ColorWheelProps> = (props) => {
 	const size = () => local.size ?? 200;
 	// Kobalte reads `thickness` as a percentage of the radius, so a px thumb
 	// only fits if the ring is sized from the same number the class resolves to.
-	const thickness = () => local.thickness ?? Math.ceil((THUMB_SIZE / (size() / 2)) * 100);
+	// Clamped at the top of that range: past it Kobalte's mask radius goes
+	// negative and the ring renders as a filled disc.
+	const thickness = () =>
+		local.thickness ?? Math.min(100, Math.ceil((THUMB_SIZE / (size() / 2)) * 100));
 
 	return (
 		<KColorWheel
