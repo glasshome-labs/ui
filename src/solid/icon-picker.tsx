@@ -1,7 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
-import { INPUT_CLASS } from "../lib/input-classes.js";
+import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
+import { CHIP } from "../lib/pill-classes.js";
 import { cn } from "../lib/utils.js";
+import { PickerSearch } from "./picker-search.js";
 import { Popover, PopoverAnchor, PopoverContent } from "./popover.js";
 
 const ICON_LIBRARIES = [
@@ -321,11 +323,13 @@ export function IconPicker(props: IconPickerProps) {
 	};
 
 	return (
-		<Popover open={open()} onOpenChange={setOpen} modal>
+		<Popover surface="field" open={open()} onOpenChange={setOpen} modal>
 			<PopoverAnchor as="div" class={props.class}>
 				<button
 					type="button"
-					class={cn(INPUT_CLASS, "items-center gap-2 text-sm")}
+					data-slot="icon-picker-trigger"
+					data-expanded={open() || undefined}
+					class={PICKER_TRIGGER}
 					onClick={() => setOpen(!open())}
 				>
 					<Show
@@ -348,38 +352,41 @@ export function IconPicker(props: IconPickerProps) {
 				</button>
 			</PopoverAnchor>
 			<PopoverContent
-				class="w-[var(--kb-popper-anchor-width)] p-0"
 				onOpenAutoFocus={(e) => {
 					e.preventDefault();
-					searchRef?.focus();
+					// preventScroll: the panel is portalled at (0,0) until the popper places it,
+					// so a plain focus() scrolls the page to the top.
+					searchRef?.focus({ preventScroll: true });
 				}}
 				onInteractOutside={() => setOpen(false)}
 			>
 				<div class="flex flex-col">
-					<div class="border-b px-3 py-2">
-						<input
-							ref={searchRef}
-							type="text"
-							placeholder="Search icons..."
-							value={search()}
-							onInput={(e) => {
-								setSearch(e.currentTarget.value);
-								searchIcons(e.currentTarget.value, activeLib());
-							}}
-							class="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-						/>
-					</div>
-					<div class="flex gap-1 overflow-x-auto border-b px-2 py-1.5">
+					<PickerSearch
+						inputRef={(el) => {
+							searchRef = el;
+						}}
+						value={search()}
+						onValueChange={(next) => {
+							setSearch(next);
+							searchIcons(next, activeLib());
+						}}
+						placeholder="Search icons..."
+						aria-label="Search icons"
+					/>
+					<div class="flex gap-1 overflow-x-auto border-border/50 border-b px-2 py-1.5">
 						<For each={ICON_LIBRARIES}>
 							{(lib) => (
 								<button
 									type="button"
-									class="shrink-0 rounded-md px-2 py-0.5 text-xs transition-colors"
-									classList={{
-										"bg-primary text-primary-foreground": activeLib() === lib.prefix,
-										"text-muted-foreground hover:bg-accent hover:text-accent-foreground":
-											activeLib() !== lib.prefix,
-									}}
+									data-slot="icon-picker-library"
+									aria-pressed={activeLib() === lib.prefix}
+									class={cn(
+										CHIP,
+										"cursor-pointer transition-colors",
+										activeLib() === lib.prefix
+											? "[--glass-tone:var(--primary)]"
+											: "text-muted-foreground [--glass-base:transparent] [--glass-edge:transparent] [--glass-light:0] [--glass-rim:0] hover:text-foreground",
+									)}
 									onClick={() => handleLibChange(lib.prefix)}
 								>
 									{lib.label}
@@ -387,7 +394,7 @@ export function IconPicker(props: IconPickerProps) {
 							)}
 						</For>
 					</div>
-					<div class="max-h-[280px] overflow-y-auto p-2">
+					<div class={cn(PICKER_LIST, "p-2")}>
 						<Show when={loading() && displayIcons().length === 0}>
 							<div class="py-4 text-center text-muted-foreground text-sm">Searching...</div>
 						</Show>
@@ -411,7 +418,7 @@ export function IconPicker(props: IconPickerProps) {
 						</div>
 					</div>
 					<Show when={!search().trim()}>
-						<div class="border-t px-3 py-1.5 text-muted-foreground text-xs">
+						<div class="border-border/50 border-t px-3 py-1.5 text-muted-foreground text-xs">
 							Type to search{" "}
 							{activeLib() ? ICON_LIBRARIES.find((l) => l.prefix === activeLib())?.label : "all"}{" "}
 							icons

@@ -9,7 +9,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import { INPUT_CLASS } from "../lib/input-classes.js";
+import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
 import { cn } from "../lib/utils.js";
 import { Alert } from "./alert.js";
 import {
@@ -49,7 +49,7 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from "./pagination.js";
-import { anchorToTriggerTop, Popover, PopoverAnchor, PopoverContent } from "./popover.js";
+import { Popover, PopoverAnchor, PopoverContent } from "./popover.js";
 import { SectionMeta } from "./section-card.js";
 import { Skeleton } from "./skeleton.js";
 
@@ -152,19 +152,14 @@ export function ImagePicker(props: ImagePickerProps) {
 
 	return (
 		<div data-slot="image-picker" class={cn(props.class)}>
-			<Popover
-				open={open()}
-				onOpenChange={openGallery}
-				modal
-				gutter={0}
-				getAnchorRect={anchorToTriggerTop}
-			>
+			<Popover surface="field" open={open()} onOpenChange={openGallery} modal>
 				<PopoverAnchor as="div">
 					<button
 						type="button"
 						id={props.id}
 						data-slot="image-picker-trigger"
-						class={cn(INPUT_CLASS, "items-center gap-2 text-sm")}
+						data-expanded={open() || undefined}
+						class={PICKER_TRIGGER}
 						onClick={() => openGallery(!open())}
 					>
 						<Show
@@ -202,160 +197,159 @@ export function ImagePicker(props: ImagePickerProps) {
 						/>
 					</button>
 				</PopoverAnchor>
-				<PopoverContent
-					surface="field"
-					class="flex w-[var(--kb-popper-anchor-width)] min-w-72 flex-col gap-3"
-					onInteractOutside={() => setOpen(false)}
-				>
-					<Show when={error()}>
-						{(err) => (
-							<Alert tone="destructive" role="alert">
-								{mediaStoreErrorCopy(err())}
-							</Alert>
-						)}
-					</Show>
-					<Switch
-						fallback={
-							<div data-slot="image-picker-loading" class="grid grid-cols-3 gap-2">
-								<For each={[0, 1, 2, 3, 4, 5]}>{() => <Skeleton class="aspect-square" />}</For>
-							</div>
-						}
-					>
-						<Match when={indexError()}>
-							{(failure) => (
-								// role="status": the gallery is explaining itself, not raising an alarm.
-								<Empty role="status">
-									<EmptyHeader>
-										<EmptyMedia variant="icon">
-											<Icon icon="lucide:image-off" width={24} height={24} />
-										</EmptyMedia>
-										<EmptyTitle>Images unavailable</EmptyTitle>
-										<EmptyDescription>{mediaIndexErrorCopy(failure())}</EmptyDescription>
-									</EmptyHeader>
-									<EmptyContent>
-										<Button
-											type="button"
-											variant="outline"
-											size="sm"
-											data-slot="image-picker-retry"
-											onClick={() => void refetch()}
-										>
-											Try again
-										</Button>
-									</EmptyContent>
-								</Empty>
+				<PopoverContent class="min-w-72" onInteractOutside={() => setOpen(false)}>
+					{/* The panel owns no padding: the gallery body owns its own inset. */}
+					<div data-slot="image-picker-body" class="flex flex-col gap-3 p-3">
+						<Show when={error()}>
+							{(err) => (
+								<Alert tone="destructive" role="alert">
+									{mediaStoreErrorCopy(err())}
+								</Alert>
 							)}
-						</Match>
-						<Match when={loaded()}>
-							<Show
-								when={sorted().length > 0}
-								fallback={
-									<Empty>
+						</Show>
+						<Switch
+							fallback={
+								<div data-slot="image-picker-loading" class="grid grid-cols-3 gap-2">
+									<For each={[0, 1, 2, 3, 4, 5]}>{() => <Skeleton class="aspect-square" />}</For>
+								</div>
+							}
+						>
+							<Match when={indexError()}>
+								{(failure) => (
+									// role="status": the gallery is explaining itself, not raising an alarm.
+									<Empty role="status">
 										<EmptyHeader>
 											<EmptyMedia variant="icon">
-												<Icon icon="lucide:image" width={24} height={24} />
+												<Icon icon="lucide:image-off" width={24} height={24} />
 											</EmptyMedia>
-											<EmptyTitle>No images yet</EmptyTitle>
-											<EmptyDescription>Upload one to use it here.</EmptyDescription>
+											<EmptyTitle>Images unavailable</EmptyTitle>
+											<EmptyDescription>{mediaIndexErrorCopy(failure())}</EmptyDescription>
 										</EmptyHeader>
+										<EmptyContent>
+											<Button
+												type="button"
+												variant="outline"
+												size="sm"
+												data-slot="image-picker-retry"
+												onClick={() => void refetch()}
+											>
+												Try again
+											</Button>
+										</EmptyContent>
 									</Empty>
-								}
-							>
-								<div
-									data-slot="image-picker-gallery"
-									class="grid max-h-64 grid-cols-3 gap-2 overflow-y-auto"
-								>
-									<For each={pageImages()}>
-										{(image) => (
-											<MediaTile
-												item={image}
-												thumbUrl={thumbUrl(image.id)}
-												label={`Use ${image.id}`}
-												broken={brokenTiles.isBroken(image)}
-												markUnused
-												selected={props.value === image.id}
-												onSelect={() => {
-													props.onChange(image.id);
-													setThumbBroken(false);
-													setOpen(false);
-												}}
-												onBroken={() => brokenTiles.markBroken(image)}
-												onDelete={() => setPendingDelete(image)}
-											/>
-										)}
-									</For>
-								</div>
-								<Show when={pageCount() > 1}>
-									<Pagination>
-										<PaginationContent class="w-full justify-between">
-											<PaginationItem>
-												<PaginationPrevious
-													href="#"
-													aria-disabled={current() === 0}
-													class={current() === 0 ? "pointer-events-none opacity-50" : undefined}
-													onClick={(event) => {
-														event.preventDefault();
-														step(-1);
-													}}
-												/>
-											</PaginationItem>
-											<PaginationItem data-testid="image-picker-page-label">
-												<SectionMeta>
-													Page {current() + 1} of {pageCount()}
-												</SectionMeta>
-											</PaginationItem>
-											<PaginationItem>
-												<PaginationNext
-													href="#"
-													aria-disabled={current() === pageCount() - 1}
-													class={
-														current() === pageCount() - 1
-															? "pointer-events-none opacity-50"
-															: undefined
-													}
-													onClick={(event) => {
-														event.preventDefault();
-														step(1);
-													}}
-												/>
-											</PaginationItem>
-										</PaginationContent>
-									</Pagination>
-								</Show>
-							</Show>
-							<Show when={loaded()?.usage}>
-								{(u) => (
-									<SectionMeta>
-										{formatBytes(u().bytes)} of {formatBytes(u().limitBytes)} · {u().files} of{" "}
-										{u().limitFiles} images
-									</SectionMeta>
 								)}
-							</Show>
-						</Match>
-					</Switch>
-					<input
-						ref={fileInput}
-						type="file"
-						accept="image/*"
-						data-testid="image-upload-input"
-						class="hidden"
-						onChange={(e) => {
-							const file = e.currentTarget.files?.[0];
-							e.currentTarget.value = "";
-							if (file) void handleUpload(file);
-						}}
-					/>
-					<Button
-						type="button"
-						variant="outline"
-						size="sm"
-						data-slot="image-picker-upload"
-						disabled={uploading()}
-						onClick={() => fileInput?.click()}
-					>
-						<Icon icon="lucide:upload" width={14} height={14} />
-						{uploading() ? "Uploading..." : "Upload"}
-					</Button>
+							</Match>
+							<Match when={loaded()}>
+								<Show
+									when={sorted().length > 0}
+									fallback={
+										<Empty>
+											<EmptyHeader>
+												<EmptyMedia variant="icon">
+													<Icon icon="lucide:image" width={24} height={24} />
+												</EmptyMedia>
+												<EmptyTitle>No images yet</EmptyTitle>
+												<EmptyDescription>Upload one to use it here.</EmptyDescription>
+											</EmptyHeader>
+										</Empty>
+									}
+								>
+									<div
+										data-slot="image-picker-gallery"
+										class={cn("grid grid-cols-3 gap-2", PICKER_LIST)}
+									>
+										<For each={pageImages()}>
+											{(image) => (
+												<MediaTile
+													item={image}
+													thumbUrl={thumbUrl(image.id)}
+													label={`Use ${image.id}`}
+													broken={brokenTiles.isBroken(image)}
+													markUnused
+													selected={props.value === image.id}
+													onSelect={() => {
+														props.onChange(image.id);
+														setThumbBroken(false);
+														setOpen(false);
+													}}
+													onBroken={() => brokenTiles.markBroken(image)}
+													onDelete={() => setPendingDelete(image)}
+												/>
+											)}
+										</For>
+									</div>
+									<Show when={pageCount() > 1}>
+										<Pagination>
+											<PaginationContent class="w-full justify-between">
+												<PaginationItem>
+													<PaginationPrevious
+														href="#"
+														aria-disabled={current() === 0}
+														class={current() === 0 ? "pointer-events-none opacity-50" : undefined}
+														onClick={(event) => {
+															event.preventDefault();
+															step(-1);
+														}}
+													/>
+												</PaginationItem>
+												<PaginationItem data-testid="image-picker-page-label">
+													<SectionMeta>
+														Page {current() + 1} of {pageCount()}
+													</SectionMeta>
+												</PaginationItem>
+												<PaginationItem>
+													<PaginationNext
+														href="#"
+														aria-disabled={current() === pageCount() - 1}
+														class={
+															current() === pageCount() - 1
+																? "pointer-events-none opacity-50"
+																: undefined
+														}
+														onClick={(event) => {
+															event.preventDefault();
+															step(1);
+														}}
+													/>
+												</PaginationItem>
+											</PaginationContent>
+										</Pagination>
+									</Show>
+								</Show>
+								<Show when={loaded()?.usage}>
+									{(u) => (
+										<SectionMeta>
+											{formatBytes(u().bytes)} of {formatBytes(u().limitBytes)} · {u().files} of{" "}
+											{u().limitFiles} images
+										</SectionMeta>
+									)}
+								</Show>
+							</Match>
+						</Switch>
+						<input
+							ref={fileInput}
+							type="file"
+							accept="image/*"
+							data-testid="image-upload-input"
+							class="hidden"
+							onChange={(e) => {
+								const file = e.currentTarget.files?.[0];
+								e.currentTarget.value = "";
+								if (file) void handleUpload(file);
+							}}
+						/>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							data-slot="image-picker-upload"
+							disabled={uploading()}
+							onClick={() => fileInput?.click()}
+						>
+							<Icon icon="lucide:upload" width={14} height={14} />
+							{uploading() ? "Uploading..." : "Upload"}
+						</Button>
+					</div>
 				</PopoverContent>
 			</Popover>
 			<AlertDialog

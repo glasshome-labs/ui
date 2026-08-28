@@ -1,10 +1,11 @@
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
-import { INPUT_SURFACE } from "../lib/input-classes.js";
-import { OVERLAY_SURFACE } from "../lib/overlay-classes.js";
+import { MENU_ITEM } from "../lib/menu-classes.js";
+import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
+import { cn } from "../lib/utils.js";
 import { useEntityData } from "./entity-data.js";
-import { Input } from "./input.js";
-import { anchorToTriggerTop, Popover, PopoverAnchor } from "./popover.js";
+import { PickerSearch } from "./picker-search.js";
+import { Popover, PopoverAnchor, PopoverContent } from "./popover.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
 
 interface AreaPickerBaseProps {
@@ -29,6 +30,8 @@ interface AreaPickerMultiProps extends AreaPickerBaseProps {
 }
 
 type AreaPickerProps = AreaPickerSingleProps | AreaPickerMultiProps;
+
+const CLEAR_ROW = "__clear__";
 
 export function AreaPicker(props: AreaPickerProps) {
 	const data = useEntityData();
@@ -79,19 +82,18 @@ export function AreaPicker(props: AreaPickerProps) {
 		return only.length === 1 ? areaList().find((a) => a.id === only[0]) : undefined;
 	});
 
-	// One glass pill (SlidingIndicator) tracks the active row and animates between
-	// rows, exactly like the Select. The pill is an absolutely-positioned layer, so
-	// unlike a per-row `glass` border it never nudges row height. Children of the
-	// indicator are [optional Clear button, ...filtered areas]; `active` is that
-	// child index. Hover wins; otherwise the pill rests on the selected area.
-	const [hovered, setHovered] = createSignal<number | null>(null);
+	// One glass pill (SlidingIndicator) tracks the highlighted row and animates
+	// between rows, exactly like the Select. Hover wins; otherwise the pill rests
+	// on a selected row, which in multi mode is the first one still listed.
+	const [hovered, setHovered] = createSignal<string | null>(null);
 	const showClear = () => props.allowClear !== false && !!props.value;
-	const selectedIndex = createMemo(() => {
-		if (!props.value) return null;
-		const j = filtered().findIndex((a) => a.id === props.value);
-		return j < 0 ? null : j + (showClear() ? 1 : 0);
+	const restingId = createMemo(() => {
+		const list = filtered();
+		if (!multi()) return list.some((a) => a.id === props.value) ? (props.value ?? null) : null;
+		const ids = selected();
+		return list.find((a) => ids.includes(a.id))?.id ?? null;
 	});
-	const activeIndex = () => hovered() ?? selectedIndex();
+	const highlightedId = () => hovered() ?? restingId();
 
 	const selectArea = (areaId: string) => {
 		if (props.disabled) return;
@@ -117,6 +119,7 @@ export function AreaPicker(props: AreaPickerProps) {
 
 	return (
 		<Popover
+			surface="field"
 			open={open()}
 			onOpenChange={(isOpen) => {
 				if (!isOpen) {
@@ -125,13 +128,13 @@ export function AreaPicker(props: AreaPickerProps) {
 				}
 			}}
 			modal
-			gutter={0}
-			getAnchorRect={anchorToTriggerTop}
 		>
 			<PopoverAnchor as="div" class={props.class}>
 				<button
 					type="button"
-					class={`flex h-9 w-full items-center gap-2 rounded-md ${INPUT_SURFACE} px-3 py-2 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 hover:[--glass-light:0.09] disabled:hover:[--glass-light:0.05]`}
+					data-slot="area-picker-trigger"
+					data-expanded={open() || undefined}
+					class={PICKER_TRIGGER}
 					disabled={props.disabled}
 					onClick={() => setOpen(!open())}
 				>
@@ -167,104 +170,98 @@ export function AreaPicker(props: AreaPickerProps) {
 					/>
 				</button>
 			</PopoverAnchor>
-			<Popover.Portal>
-				<Popover.Content
-					data-slot="popover-content"
-					class={`${OVERLAY_SURFACE} relative z-50 w-[var(--kb-popper-anchor-width)] overflow-hidden rounded-md text-popover-foreground outline-hidden data-[closed]:animate-select-out data-[expanded]:animate-select-in`}
-					onOpenAutoFocus={(e) => e.preventDefault()}
-					onInteractOutside={() => setOpen(false)}
-				>
-					<div class="flex flex-col">
-						<div class="border-b px-3 py-2">
-							<Input
-								type="text"
-								placeholder="Search areas..."
-								value={search()}
-								onInput={(e) => setSearch(e.currentTarget.value)}
-								class="border-none bg-transparent shadow-none outline-none focus-visible:ring-0"
-							/>
-						</div>
-						<div class="max-h-[280px] overflow-y-auto">
-							<Show when={filtered().length === 0 && missing().length === 0}>
-								<div class="py-4 text-center text-muted-foreground text-sm">No areas found</div>
-							</Show>
-							<For each={missing()}>
-								{(areaId) => (
-									<div
-										data-slot="area-picker-missing"
-										class="flex w-full items-center gap-2 px-3 py-1.5 text-muted-foreground/60 text-sm"
-									>
-										<span class="truncate">{areaId}</span>
-										<span class="shrink-0 text-xs">no longer exists</span>
-									</div>
-								)}
-							</For>
-							<SlidingIndicator
-								orientation="vertical"
-								active={activeIndex()}
-								class="flex flex-col gap-0.5 p-1"
-								onMouseLeave={() => setHovered(null)}
+			<PopoverContent
+				onOpenAutoFocus={(e) => e.preventDefault()}
+				onInteractOutside={() => setOpen(false)}
+			>
+				<div class="flex flex-col">
+					<PickerSearch
+						value={search()}
+						onValueChange={setSearch}
+						placeholder="Search areas..."
+						aria-label="Search areas"
+					/>
+					<SlidingIndicator
+						activeSelector="[data-highlighted]"
+						orientation="vertical"
+						class={cn("flex flex-col gap-0.5 p-1", PICKER_LIST)}
+						onMouseLeave={() => setHovered(null)}
+					>
+						<Show when={filtered().length === 0 && missing().length === 0}>
+							<div class="py-4 text-center text-muted-foreground text-sm">No areas found</div>
+						</Show>
+						<For each={missing()}>
+							{(areaId) => (
+								<div
+									data-slot="area-picker-missing"
+									class={cn(MENU_ITEM, "text-muted-foreground/60")}
+								>
+									<span class="truncate">{areaId}</span>
+									<span class="shrink-0 text-xs">no longer exists</span>
+								</div>
+							)}
+						</For>
+						<Show when={showClear()}>
+							<button
+								type="button"
+								data-slot="area-picker-clear"
+								data-highlighted={highlightedId() === CLEAR_ROW || undefined}
+								class={cn(MENU_ITEM, "w-full cursor-pointer text-left")}
+								onMouseEnter={() => setHovered(CLEAR_ROW)}
+								onClick={clear}
 							>
-								<Show when={showClear()}>
-									<button
-										type="button"
-										class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
-										onMouseEnter={() => setHovered(0)}
-										onClick={clear}
+								<div class="flex size-[18px] shrink-0 items-center justify-center">
+									<Icon
+										icon="mdi:close-circle-outline"
+										width={18}
+										height={18}
+										class="text-muted-foreground"
+									/>
+								</div>
+								<span class="text-muted-foreground">Clear selection</span>
+							</button>
+						</Show>
+						<For each={filtered()}>
+							{(area) => (
+								<button
+									type="button"
+									data-slot="area-picker-row"
+									data-highlighted={highlightedId() === area.id || undefined}
+									aria-pressed={multi() ? isSelected(area.id) : undefined}
+									class={cn(MENU_ITEM, "group w-full cursor-pointer text-left")}
+									classList={{
+										"text-foreground": isSelected(area.id),
+									}}
+									onMouseEnter={() => setHovered(area.id)}
+									onClick={() => (multi() ? toggleArea(area.id) : selectArea(area.id))}
+								>
+									<div class="flex size-[18px] shrink-0 items-center justify-center">
+										<Icon icon={area.icon || "mdi:home-floor-1"} width={18} height={18} />
+									</div>
+									<div class="flex min-w-0 flex-1 flex-col">
+										<span class="truncate font-medium">{area.name}</span>
+									</div>
+									<span
+										class="shrink-0 text-muted-foreground text-xs group-hover:text-foreground/60"
+										classList={{
+											"!text-foreground/60": isSelected(area.id),
+										}}
 									>
-										<div class="flex size-[18px] shrink-0 items-center justify-center">
-											<Icon
-												icon="mdi:close-circle-outline"
-												width={18}
-												height={18}
-												class="text-muted-foreground"
-											/>
-										</div>
-										<span class="text-muted-foreground">Clear selection</span>
-									</button>
-								</Show>
-								<For each={filtered()}>
-									{(area, j) => (
-										<button
-											type="button"
-											data-slot="area-picker-row"
-											aria-pressed={multi() ? isSelected(area.id) : undefined}
-											class="group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
-											classList={{
-												"text-foreground": isSelected(area.id),
-											}}
-											onMouseEnter={() => setHovered(j() + (showClear() ? 1 : 0))}
-											onClick={() => (multi() ? toggleArea(area.id) : selectArea(area.id))}
-										>
-											<div class="flex size-[18px] shrink-0 items-center justify-center">
-												<Icon icon={area.icon || "mdi:home-floor-1"} width={18} height={18} />
-											</div>
-											<div class="flex min-w-0 flex-1 flex-col">
-												<span class="truncate font-medium">{area.name}</span>
-											</div>
-											<span
-												class="shrink-0 text-muted-foreground text-xs group-hover:text-foreground/60"
-												classList={{
-													"!text-foreground/60": isSelected(area.id),
-												}}
-											>
-												{area.entityCount} entities
-											</span>
-											<Show when={multi()}>
-												<div class="flex size-4 shrink-0 items-center justify-center">
-													<Show when={isSelected(area.id)}>
-														<Icon icon="lucide:check" width={16} height={16} class="text-primary" />
-													</Show>
-												</div>
+										{area.entityCount} entities
+									</span>
+									<Show when={multi()}>
+										<div class="flex size-4 shrink-0 items-center justify-center">
+											<Show when={isSelected(area.id)}>
+												<Icon icon="lucide:check" width={16} height={16} class="text-primary" />
 											</Show>
-										</button>
-									)}
-								</For>
-							</SlidingIndicator>
-						</div>
-					</div>
-				</Popover.Content>
-			</Popover.Portal>
+										</div>
+									</Show>
+								</button>
+							)}
+						</For>
+					</SlidingIndicator>
+				</div>
+			</PopoverContent>
 		</Popover>
 	);
 }
