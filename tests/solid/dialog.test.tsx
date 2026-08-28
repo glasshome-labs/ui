@@ -463,32 +463,16 @@ describe("Sheet", () => {
 		expect(body?.className).not.toContain("first-of-type");
 	});
 
-	it("carries `above` and the rest of the props into the deprecated bottom variant", () => {
+	it("slides from an edge, never from the bottom", () => {
 		render(() => (
 			<Sheet open>
-				<SheetContent side="bottom" above={<span>toolbar</span>} id="filters">
-					<SheetBody>rows</SheetBody>
-				</SheetContent>
+				<SheetContent ariaLabel="s">rows</SheetContent>
 			</Sheet>
 		));
 
-		const sheet = document.querySelector<HTMLElement>("[data-sheet-content]");
-		expect(sheet?.getAttribute("id")).toBe("filters");
-		expect(sheet?.querySelector('[data-slot="sheet-content-above"]')?.textContent).toBe("toolbar");
-	});
-
-	it("renders side=bottom as a bottom sheet", () => {
-		render(() => (
-			<Sheet open>
-				<SheetContent side="bottom">
-					<SheetTitle>Filters</SheetTitle>
-					<SheetBody>rows</SheetBody>
-				</SheetContent>
-			</Sheet>
-		));
-
-		expect(document.querySelector("[data-sheet-content]")).not.toBeNull();
-		expect(document.querySelector('[data-slot="sheet-content"]')).toBeNull();
+		const content = document.querySelector<HTMLElement>('[data-slot="sheet-content"]');
+		expect(content?.className).toContain("slide-in-from-right");
+		expect(document.querySelector("[data-sheet-content]")).toBeNull();
 	});
 });
 
@@ -572,6 +556,20 @@ describe("modal labelling precedence", () => {
 
 		expect(panel().getAttribute("aria-label")).toBeNull();
 		expect(screen.getByRole("dialog", { name: "Rename dashboard" })).toBe(panel());
+	});
+
+	it("names a titled Sheet by its Title even when ariaLabel is passed", () => {
+		render(() => (
+			<Sheet open>
+				<SheetContent ariaLabel="Quick actions">
+					<SheetTitle>Widget settings</SheetTitle>
+				</SheetContent>
+			</Sheet>
+		));
+
+		const content = document.querySelector<HTMLElement>('[data-slot="sheet-content"]');
+		expect(content?.getAttribute("aria-label")).toBeNull();
+		expect(screen.getByRole("dialog", { name: "Widget settings" })).toBe(content);
 	});
 
 	it("names a titled bottom sheet by its Title even when ariaLabel is passed", () => {

@@ -1,27 +1,17 @@
-import { Dialog as DialogPrimitive } from "@kobalte/core/dialog";
+import { Dialog as DialogPrimitive, useDialogContext } from "@kobalte/core/dialog";
 import type { VariantProps } from "cva";
 import {
 	type Component,
 	type ComponentProps,
-	createContext,
-	createSignal,
 	type JSX,
 	type ParentComponent,
 	Show,
 	splitProps,
-	useContext,
 } from "solid-js";
 import { buttonVariants } from "../lib/button-variants.js";
 import { Z_CLASS } from "../lib/layers.js";
 import { OVERLAY_SURFACE, SCRIM_CLASS } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
-import {
-	BottomSheet,
-	BottomSheetContent,
-	BottomSheetHandle,
-	BottomSheetOverlay,
-	BottomSheetPortal,
-} from "./bottom-sheet/index.js";
 import {
 	createModalDismiss,
 	createModalParts,
@@ -32,29 +22,11 @@ import {
 	ModalScrollLock,
 } from "./dialog-parts.js";
 
-interface SheetOpenState {
-	open: () => boolean;
-	setOpen: (next: boolean) => void;
-}
-
-const SheetOpenContext = createContext<SheetOpenState>();
-
-/* The open state is mirrored out of kobalte so the deprecated bottom variant
- * can drive a BottomSheet from the same <Sheet open> the side variants use. */
-const Sheet: ParentComponent<ComponentProps<typeof DialogPrimitive>> = (props) => {
-	const [uncontrolled, setUncontrolled] = createSignal(props.defaultOpen ?? false);
-	const open = () => (props.open !== undefined ? props.open === true : uncontrolled());
-	const setOpen = (next: boolean) => {
-		if (props.open === undefined) setUncontrolled(next);
-		props.onOpenChange?.(next);
-	};
-
-	return (
-		<SheetOpenContext.Provider value={{ open, setOpen }}>
-			<DialogPrimitive {...props} preventScroll={false} open={open()} onOpenChange={setOpen} />
-		</SheetOpenContext.Provider>
-	);
-};
+/* Kobalte's own scroll lock is off here too: ModalScrollLock is the one
+ * refcounted page lock every modal family shares. */
+const Sheet: ParentComponent<ComponentProps<typeof DialogPrimitive>> = (props) => (
+	<DialogPrimitive {...props} preventScroll={false} />
+);
 
 const SheetTrigger: Component<ComponentProps<typeof DialogPrimitive.Trigger>> = (props) => (
 	<DialogPrimitive.Trigger data-slot="sheet-trigger" {...props} />
@@ -108,10 +80,10 @@ const SHEET_SIDE = {
 	top: `data-[closed]:slide-out-to-top data-[expanded]:slide-in-from-top inset-x-3 top-3 ${MODAL_MAX_H}`,
 } as const;
 
-type SheetSide = keyof typeof SHEET_SIDE | "bottom";
+type SheetSide = keyof typeof SHEET_SIDE;
 
 type SheetContentProps = ComponentProps<typeof DialogPrimitive.Content> & {
-	/** `"bottom"` is deprecated: it renders a `BottomSheet`. Use `ResponsiveDialog`. */
+	/** A modal belongs in `ResponsiveDialog`; this family slides from an edge. */
 	side?: SheetSide;
 	above?: JSX.Element;
 	/** Names a panel that has no `SheetTitle`. */
@@ -128,44 +100,24 @@ const SheetAbove: Component<{ above?: JSX.Element }> = (props) => (
 
 const SheetContent: ParentComponent<SheetContentProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "children", "side", "above", "ariaLabel"]);
-	const side = (): SheetSide => local.side ?? "right";
-	const bottomState = useContext(SheetOpenContext);
+	const context = useDialogContext();
 
 	return (
-		<Show
-			when={side() !== "bottom"}
-			fallback={
-				<BottomSheet
-					open={bottomState?.open() === true}
-					onOpenChange={(next) => bottomState?.setOpen(next)}
-				>
-					<BottomSheetPortal>
-						<BottomSheetOverlay />
-						<BottomSheetContent {...rest} class={local.class} ariaLabel={local.ariaLabel}>
-							<SheetAbove above={local.above} />
-							<BottomSheetHandle />
-							{local.children}
-						</BottomSheetContent>
-					</BottomSheetPortal>
-				</BottomSheet>
-			}
-		>
-			<DialogPrimitive.Portal>
-				<ModalScrollLock />
-				<SheetOverlay />
-				<DialogPrimitive.Content
-					data-slot="sheet-content"
-					role="dialog"
-					aria-label={local.ariaLabel}
-					class={cn(SHEET_PANEL, SHEET_SIDE[side() as keyof typeof SHEET_SIDE], local.class)}
-					onOpenAutoFocus={(e: Event) => e.preventDefault()}
-					{...rest}
-				>
-					<SheetAbove above={local.above} />
-					{local.children}
-				</DialogPrimitive.Content>
-			</DialogPrimitive.Portal>
-		</Show>
+		<DialogPrimitive.Portal>
+			<ModalScrollLock />
+			<SheetOverlay />
+			<DialogPrimitive.Content
+				data-slot="sheet-content"
+				role="dialog"
+				aria-label={context.titleId() ? undefined : local.ariaLabel}
+				class={cn(SHEET_PANEL, SHEET_SIDE[local.side ?? "right"], local.class)}
+				onOpenAutoFocus={(e: Event) => e.preventDefault()}
+				{...rest}
+			>
+				<SheetAbove above={local.above} />
+				{local.children}
+			</DialogPrimitive.Content>
+		</DialogPrimitive.Portal>
 	);
 };
 
