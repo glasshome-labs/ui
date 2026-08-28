@@ -19,26 +19,9 @@ const ScrollArea: ParentComponent<ComponentProps<"div">> = (props) => {
 	);
 };
 
+/** @deprecated `gh-scroll`'s native-styled bar is the bar; renders nothing. */
 const ScrollBar: Component<ComponentProps<"div"> & { orientation?: "vertical" | "horizontal" }> = (
-	props,
-) => {
-	const [local, rest] = splitProps(props, ["class", "orientation"]);
-	const orientation = () => local.orientation ?? "vertical";
-	return (
-		<div
-			data-slot="scroll-area-scrollbar"
-			data-orientation={orientation()}
-			class={cn(
-				"flex touch-none select-none p-px transition-colors",
-				orientation() === "vertical" && "h-full w-2.5 border-l border-l-transparent",
-				orientation() === "horizontal" && "h-2.5 flex-col border-t border-t-transparent",
-				local.class,
-			)}
-			{...rest}
-		>
-			<div data-slot="scroll-area-thumb" class="relative flex-1 rounded-full bg-border" />
-		</div>
-	);
-};
+	_props,
+) => null;
 
 export { ScrollArea, ScrollBar };
