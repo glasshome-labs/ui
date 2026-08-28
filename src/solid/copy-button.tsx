@@ -1,5 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Component, createSignal, Show } from "solid-js";
+import { ICON_BUTTON_CLASS } from "../lib/button-variants.js";
 import { cn } from "../lib/utils.js";
 import { toast } from "./sonner.js";
 
@@ -25,11 +26,9 @@ const CopyButton: Component<CopyButtonProps> = (props) => {
 	return (
 		<button
 			type="button"
+			data-slot="copy-button"
 			onClick={handleCopy}
-			class={cn(
-				"absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/10 backdrop-blur-sm transition-all hover:scale-105 hover:bg-foreground/20 active:scale-95",
-				props.class,
-			)}
+			class={cn(ICON_BUTTON_CLASS, "size-8", props.class)}
 			aria-label={copied() ? "Copied!" : "Copy to clipboard"}
 		>
 			<Show

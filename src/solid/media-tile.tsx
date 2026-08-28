@@ -71,7 +71,7 @@ export function MediaTile(props: MediaTileProps) {
 					data-slot="media-tile-unused"
 					data-testid="media-tile-unused"
 					tone="var(--warning)"
-					class={cn("pointer-events-none absolute bottom-1 left-1", SCRIM_CLASS)}
+					class="pointer-events-none absolute bottom-1 left-1 backdrop-blur-md"
 				>
 					Unused
 				</Badge>

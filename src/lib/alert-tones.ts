@@ -46,7 +46,7 @@ export const alertFill = (c: string) => `color-mix(in srgb, ${c} 9%, transparent
 export const alertIconFill = (c: string) => `color-mix(in srgb, ${c} 16%, transparent)`;
 
 export const ALERT_CLASS =
-	"relative overflow-hidden flex items-start gap-3 rounded-lg border p-3 backdrop-blur-sm";
+	"relative overflow-hidden flex items-start gap-3 rounded-lg p-3 backdrop-blur-sm";
 /* gh-alert-* svg chrome lives in globals.css as real CSS: an arbitrary variant
  * here only works if the consumer's Tailwind scans package source. */
 export const ALERT_ICON_CLASS =

@@ -1,8 +1,14 @@
 import { Tooltip as TooltipPrimitive } from "@kobalte/core/tooltip";
 import { type Component, type ComponentProps, splitProps } from "solid-js";
+import { FLOATING_PANEL, OVERLAY_MOTION } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 
-const Tooltip = TooltipPrimitive;
+/* Kobalte takes the popper options on the root, not on the content, so the
+ * gutter that keeps the panel off its trigger has to default here. */
+const Tooltip: Component<ComponentProps<typeof TooltipPrimitive>> = (props) => (
+	<TooltipPrimitive gutter={6} {...props} />
+);
+
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
 const TooltipContent: Component<ComponentProps<typeof TooltipPrimitive.Content>> = (props) => {
@@ -12,7 +18,9 @@ const TooltipContent: Component<ComponentProps<typeof TooltipPrimitive.Content>>
 			<TooltipPrimitive.Content
 				data-slot="tooltip-content"
 				class={cn(
-					"fade-in-0 zoom-in-95 data-[closed]:fade-out-0 data-[closed]:zoom-out-95 z-50 animate-in overflow-hidden rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-xs data-[closed]:animate-out",
+					FLOATING_PANEL,
+					OVERLAY_MOTION,
+					"overflow-hidden px-3 py-1.5 text-xs",
 					local.class,
 				)}
 				{...others}
