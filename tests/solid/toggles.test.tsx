@@ -5,7 +5,17 @@
 import { parseColor } from "@kobalte/core/colors";
 import { cleanup, fireEvent, render } from "@solidjs/testing-library";
 import type { JSX } from "solid-js";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+// The real custom element fetches icon data from the Iconify API; the request
+// is still in flight when happy-dom tears the window down, which surfaces as an
+// unhandled AbortError at teardown. Nothing here asserts icon internals.
+vi.mock("@iconify-icon/solid", () => ({
+	Icon: (props: { class?: string; icon?: string }) => (
+		<span class={props.class} data-icon-stub={props.icon} />
+	),
+}));
+
 import { FIELD_CHROME, FOCUS_RING } from "../../src/lib/input-classes.js";
 import { THUMB_CLASS } from "../../src/lib/thumb-classes.js";
 import { Checkbox } from "../../src/solid/checkbox.js";
