@@ -72,12 +72,12 @@ const fieldVariants = cva({
 				// A stack of content tops out against the control; a single-line
 				// caption row centres on it.
 				"flex-row items-start not-has-[>[data-slot=field-content]]:items-center gap-3",
-				"[&>[data-slot=field-label]]:flex-auto",
+				"[&>[data-slot=field-label]]:flex-auto [&>[data-slot=field-title]]:flex-auto",
 			],
 			responsive: [
 				"@md/field-group:flex-row flex-col @md/field-group:items-start @md/field-group:gap-3 gap-2 @md/field-group:[&>*]:w-auto [&>*]:w-full [&>.sr-only]:w-auto",
 				"@md/field-group:not-has-[>[data-slot=field-content]]:items-center",
-				"@md/field-group:[&>[data-slot=field-label]]:flex-auto",
+				"@md/field-group:[&>[data-slot=field-label]]:flex-auto @md/field-group:[&>[data-slot=field-title]]:flex-auto",
 			],
 		},
 	},

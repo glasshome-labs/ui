@@ -96,6 +96,18 @@ describe("Field stack", () => {
 		expect(classOf(container, '[data-slot="field-content"]')).toContain("gap-1.5");
 	});
 
+	it("grows the caption of a horizontal row, whether it is a label or a title", () => {
+		const { container } = render(() => (
+			<Field orientation="horizontal">
+				<FieldTitle>Enable notifications</FieldTitle>
+			</Field>
+		));
+		const field = classOf(container, '[data-slot="field"]');
+		expect(field).toContain("[&>[data-slot=field-label]]:flex-auto");
+		expect(field).toContain("[&>[data-slot=field-title]]:flex-auto");
+		expect(field).toContain("not-has-[>[data-slot=field-content]]:items-center");
+	});
+
 	it("gives the title its own slot instead of borrowing the label's", () => {
 		const { container } = render(() => <FieldTitle>Door locks</FieldTitle>);
 		expect(container.querySelector('[data-slot="field-title"]')).toBeTruthy();

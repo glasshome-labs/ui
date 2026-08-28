@@ -142,7 +142,12 @@ describe("OptionCard", () => {
 		const item = container.querySelector('[data-slot="radio-group-item"]');
 		const className = item?.className ?? "";
 		for (const token of CARD_SURFACE.split(" ")) expect(className, token).toContain(token);
-		expect(className).toContain("glass-tint");
+		// .glass-tint would tint the card's own body copy, and mix it toward
+		// `transparent` on every unpicked card.
+		expect(className).not.toContain("glass-tint");
+		expect(className).toContain(
+			"data-[checked]:[--glass-edge:color-mix(in_srgb,var(--primary)_45%,transparent)]",
+		);
 		expect(className, "bg-* is a no-op on glass").not.toContain("bg-primary/5");
 		expect(className).not.toContain("border-border");
 	});

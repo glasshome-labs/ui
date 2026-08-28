@@ -21,7 +21,9 @@ const Checkbox: Component<ComponentProps<typeof CheckboxPrimitive>> = (props) =>
 						aria-hidden="true"
 						data-slot="checkbox-box"
 						class={cn(
-							"box-border inline-flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-sm transition-all duration-200 ease-out group-active:scale-90",
+							// The theme's smallest radius token fully rounds a box this size, which
+							// would make the checkbox read as a radio.
+							"box-border inline-flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-[5px] transition-all duration-200 ease-out group-active:scale-90",
 							"peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50 peer-focus-visible:[--glass-edge:var(--ring)]",
 							state.checked()
 								? "glass glass-tint text-foreground [--glass-tone:var(--primary)]"
