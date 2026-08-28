@@ -5,7 +5,7 @@
  * from a zero-size first pass. */
 import { cleanup, render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SlidingIndicator } from "../../src/solid/sliding-indicator.js";
 
 type Rect = { left: number; top: number; width: number; height: number };
@@ -153,5 +153,42 @@ describe("SlidingIndicator", () => {
 
 		const indicator = container.querySelector<HTMLElement>("[data-sliding-indicator]");
 		expect(indicator?.className).not.toContain("ease-out");
+	});
+
+	it("does not re-measure after unmount once document.fonts.ready resolves late", async () => {
+		let ready: () => void = () => {};
+		const readyPromise = new Promise<FontFaceSet>((resolve) => {
+			ready = () => resolve({} as FontFaceSet);
+		});
+		const originalFonts = document.fonts;
+		Object.defineProperty(document, "fonts", {
+			value: { ready: readyPromise },
+			configurable: true,
+		});
+
+		const { container, unmount } = render(() => (
+			<SlidingIndicator active={0}>
+				<button type="button">One</button>
+			</SlidingIndicator>
+		));
+		const root = container.firstElementChild;
+		const button = container.querySelector("button") as HTMLElement;
+		if (!(root instanceof HTMLElement)) throw new Error("no root");
+		stubRect(root, { left: 0, top: 0, width: 80, height: 32 });
+		stubRect(button, { left: 0, top: 0, width: 80, height: 32 });
+		Object.defineProperty(root, "clientWidth", { value: 80, configurable: true });
+		Object.defineProperty(root, "clientHeight", { value: 32, configurable: true });
+		await flush();
+
+		// containerRef itself isn't nulled on unmount, so measure() would still
+		// call getBoundingClientRect on it without the disposed guard.
+		const rectSpy = vi.spyOn(root, "getBoundingClientRect");
+		unmount();
+		const callsAtUnmount = rectSpy.mock.calls.length;
+		ready();
+		await flush();
+
+		expect(rectSpy.mock.calls.length).toBe(callsAtUnmount);
+		Object.defineProperty(document, "fonts", { value: originalFonts, configurable: true });
 	});
 });

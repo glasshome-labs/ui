@@ -158,6 +158,7 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 	// against the freshly-resolved set on every measure() pass.
 	let ro: ResizeObserver | undefined;
 	const observedItems = new Set<Element>();
+	let disposed = false;
 
 	// Observing only the container missed the case that broke the admin tabs
 	// pill: an <iconify-icon> or a webfont finishes loading AFTER first paint and
@@ -214,9 +215,12 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 		// (the same class of bug the item-level ResizeObserver above fixes for
 		// icons); one extra pass once fonts settle catches that too.
 		if (typeof document !== "undefined" && document.fonts) {
-			document.fonts.ready.then(() => measure());
+			document.fonts.ready.then(() => {
+				if (!disposed) measure();
+			});
 		}
 		onCleanup(() => {
+			disposed = true;
 			ro?.disconnect();
 			mo.disconnect();
 			containerRef?.removeEventListener("focusin", onFocusIn);
