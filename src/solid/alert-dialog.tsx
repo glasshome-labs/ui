@@ -1,17 +1,26 @@
 import { AlertDialog as AlertDialogPrimitive } from "@kobalte/core/alert-dialog";
 import type { VariantProps } from "cva";
-import { type Component, type ComponentProps, splitProps } from "solid-js";
-import { OVERLAY_SURFACE, SCRIM_CLASS } from "../lib/overlay-classes.js";
+import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
+import { buttonVariants } from "../lib/button-variants.js";
 import { cn } from "../lib/utils.js";
-import { buttonVariants } from "./button.js";
+import {
+	createModalParts,
+	MODAL_DESCRIPTION,
+	MODAL_PANEL,
+	MODAL_SCRIM,
+	MODAL_TITLE,
+	MODAL_WIDTH,
+	ModalScrollLock,
+	type ModalSize,
+} from "./dialog-parts.js";
 
-const AlertDialog = AlertDialogPrimitive;
+const AlertDialog: ParentComponent<ComponentProps<typeof AlertDialogPrimitive>> = (props) => (
+	<AlertDialogPrimitive {...props} preventScroll={false} />
+);
 
 const AlertDialogTrigger: Component<ComponentProps<typeof AlertDialogPrimitive.Trigger>> = (
 	props,
-) => {
-	return <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />;
-};
+) => <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />;
 
 const AlertDialogOverlay: Component<ComponentProps<typeof AlertDialogPrimitive.Overlay>> = (
 	props,
@@ -20,63 +29,49 @@ const AlertDialogOverlay: Component<ComponentProps<typeof AlertDialogPrimitive.O
 	return (
 		<AlertDialogPrimitive.Overlay
 			data-slot="alert-dialog-overlay"
-			class={cn(
-				`data-[closed]:fade-out-0 data-[expanded]:fade-in-0 fixed inset-0 z-50 ${SCRIM_CLASS} data-[closed]:animate-out data-[expanded]:animate-in`,
-				local.class,
-			)}
+			class={cn(MODAL_SCRIM, local.class)}
 			{...rest}
 		/>
 	);
 };
 
-const AlertDialogContent: Component<ComponentProps<typeof AlertDialogPrimitive.Content>> = (
-	props,
-) => {
-	const [local, rest] = splitProps(props, ["class"]);
+type AlertDialogContentProps = ComponentProps<typeof AlertDialogPrimitive.Content> & {
+	size?: ModalSize;
+	/** Names a panel that has no `AlertDialogTitle`. */
+	ariaLabel?: string;
+};
+
+const AlertDialogContent: ParentComponent<AlertDialogContentProps> = (props) => {
+	const [local, rest] = splitProps(props, ["class", "children", "size", "ariaLabel"]);
 	return (
 		<AlertDialogPrimitive.Portal>
+			<ModalScrollLock />
 			<AlertDialogOverlay />
 			<AlertDialogPrimitive.Content
 				data-slot="alert-dialog-content"
-				class={cn(
-					OVERLAY_SURFACE,
-					"data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg p-6 duration-200 data-[closed]:animate-out data-[expanded]:animate-in sm:max-w-lg",
-					local.class,
-				)}
+				role="alertdialog"
+				aria-label={local.ariaLabel}
+				class={cn(MODAL_PANEL, MODAL_WIDTH[local.size ?? "md"], local.class)}
 				{...rest}
-			/>
+			>
+				{local.children}
+			</AlertDialogPrimitive.Content>
 		</AlertDialogPrimitive.Portal>
 	);
 };
 
-const AlertDialogHeader: Component<ComponentProps<"div">> = (props) => {
-	const [local, rest] = splitProps(props, ["class"]);
-	return (
-		<div
-			data-slot="alert-dialog-header"
-			class={cn("flex flex-col gap-2 text-center sm:text-left", local.class)}
-			{...rest}
-		/>
-	);
-};
-
-const AlertDialogFooter: Component<ComponentProps<"div">> = (props) => {
-	const [local, rest] = splitProps(props, ["class"]);
-	return (
-		<div
-			data-slot="alert-dialog-footer"
-			class={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", local.class)}
-			{...rest}
-		/>
-	);
-};
+const {
+	Header: AlertDialogHeader,
+	Body: AlertDialogBody,
+	Footer: AlertDialogFooter,
+} = createModalParts("alert-dialog");
 
 const AlertDialogTitle: Component<ComponentProps<typeof AlertDialogPrimitive.Title>> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	return (
 		<AlertDialogPrimitive.Title
 			data-slot="alert-dialog-title"
-			class={cn("font-semibold text-lg", local.class)}
+			class={cn(MODAL_TITLE, local.class)}
 			{...rest}
 		/>
 	);
@@ -89,36 +84,40 @@ const AlertDialogDescription: Component<ComponentProps<typeof AlertDialogPrimiti
 	return (
 		<AlertDialogPrimitive.Description
 			data-slot="alert-dialog-description"
-			class={cn("text-muted-foreground text-sm", local.class)}
+			class={cn(MODAL_DESCRIPTION, local.class)}
 			{...rest}
 		/>
 	);
 };
 
+type AlertDialogButtonProps = ComponentProps<typeof AlertDialogPrimitive.CloseButton> &
+	Partial<Pick<VariantProps<typeof buttonVariants>, "variant" | "size">>;
+
 /** Confirming action. Pass `variant` (e.g. "destructive"); layering a second
  *  buttonVariants() call through `class` cannot work, because the variants
  *  carry tone as arbitrary custom properties that tailwind-merge keeps side by
  *  side, leaving the later stylesheet rule to win. */
-const AlertDialogAction: Component<
-	ComponentProps<typeof AlertDialogPrimitive.CloseButton> &
-		Partial<Pick<VariantProps<typeof buttonVariants>, "variant" | "size">>
-> = (props) => {
+const AlertDialogAction: ParentComponent<AlertDialogButtonProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "variant", "size"] as const);
 	return (
 		<AlertDialogPrimitive.CloseButton
+			data-slot="alert-dialog-action"
 			class={cn(buttonVariants({ variant: local.variant, size: local.size }), local.class)}
 			{...rest}
 		/>
 	);
 };
 
-const AlertDialogCancel: Component<ComponentProps<typeof AlertDialogPrimitive.CloseButton>> = (
-	props,
-) => {
-	const [local, rest] = splitProps(props, ["class"]);
+/** This family's Close: the outline button that dismisses without acting. */
+const AlertDialogCancel: ParentComponent<AlertDialogButtonProps> = (props) => {
+	const [local, rest] = splitProps(props, ["class", "variant", "size"] as const);
 	return (
 		<AlertDialogPrimitive.CloseButton
-			class={cn(buttonVariants({ variant: "outline" }), local.class)}
+			data-slot="alert-dialog-cancel"
+			class={cn(
+				buttonVariants({ variant: local.variant ?? "outline", size: local.size }),
+				local.class,
+			)}
 			{...rest}
 		/>
 	);
@@ -127,6 +126,7 @@ const AlertDialogCancel: Component<ComponentProps<typeof AlertDialogPrimitive.Cl
 export {
 	AlertDialog,
 	AlertDialogAction,
+	AlertDialogBody,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,

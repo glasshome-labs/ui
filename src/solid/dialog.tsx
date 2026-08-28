@@ -1,26 +1,69 @@
 import { Dialog as DialogPrimitive } from "@kobalte/core/dialog";
+import type { VariantProps } from "cva";
 import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
-import { OVERLAY_SURFACE, SCRIM_CLASS } from "../lib/overlay-classes.js";
+import { buttonVariants } from "../lib/button-variants.js";
 import { cn } from "../lib/utils.js";
+import {
+	createModalParts,
+	MODAL_DESCRIPTION,
+	MODAL_PANEL,
+	MODAL_SCRIM,
+	MODAL_TITLE,
+	MODAL_WIDTH,
+	ModalScrollLock,
+	type ModalSize,
+} from "./dialog-parts.js";
 
-const Dialog = DialogPrimitive;
-const DialogTrigger = DialogPrimitive.Trigger;
-const DialogClose = DialogPrimitive.CloseButton;
+/* Kobalte's own scroll lock is off everywhere: one refcounted lock
+ * (bottom-sheet/scroll-lock.ts) serves every modal family, so a nested modal
+ * cannot release the page early. */
+const Dialog: ParentComponent<ComponentProps<typeof DialogPrimitive>> = (props) => (
+	<DialogPrimitive {...props} preventScroll={false} />
+);
 
-const DialogContent: ParentComponent<ComponentProps<typeof DialogPrimitive.Content>> = (props) => {
-	const [local, others] = splitProps(props, ["class", "children"]);
+const DialogTrigger: Component<ComponentProps<typeof DialogPrimitive.Trigger>> = (props) => (
+	<DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
+);
+
+type DialogCloseProps = ComponentProps<typeof DialogPrimitive.CloseButton> &
+	Partial<Pick<VariantProps<typeof buttonVariants>, "variant" | "size">>;
+
+/** Already the outline button, so `as` is for a non-button element (a link),
+ *  never for `Button`: two buttonVariants() calls leave tone knobs side by side
+ *  and the later stylesheet rule wins. */
+const DialogClose: ParentComponent<DialogCloseProps> = (props) => {
+	const [local, rest] = splitProps(props, ["class", "variant", "size", "children"]);
+	return (
+		<DialogPrimitive.CloseButton
+			data-slot="dialog-close"
+			class={cn(
+				buttonVariants({ variant: local.variant ?? "outline", size: local.size }),
+				local.class,
+			)}
+			{...rest}
+		>
+			{local.children ?? "Close"}
+		</DialogPrimitive.CloseButton>
+	);
+};
+
+type DialogContentProps = ComponentProps<typeof DialogPrimitive.Content> & {
+	size?: ModalSize;
+	/** Names a panel that has no `DialogTitle`; a titled panel needs nothing. */
+	ariaLabel?: string;
+};
+
+const DialogContent: ParentComponent<DialogContentProps> = (props) => {
+	const [local, others] = splitProps(props, ["class", "children", "size", "ariaLabel"]);
 	return (
 		<DialogPrimitive.Portal>
-			<DialogPrimitive.Overlay
-				class={`data-[closed]:fade-out-0 data-[expanded]:fade-in-0 fixed inset-0 z-50 ${SCRIM_CLASS} data-[closed]:animate-out data-[expanded]:animate-in`}
-			/>
+			<ModalScrollLock />
+			<DialogPrimitive.Overlay data-slot="dialog-overlay" class={MODAL_SCRIM} />
 			<DialogPrimitive.Content
 				data-slot="dialog-content"
-				class={cn(
-					OVERLAY_SURFACE,
-					"gh-scroll data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 fixed top-1/2 left-1/2 z-50 grid max-h-[85vh] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 overflow-y-auto p-6 duration-200 data-[closed]:animate-out data-[expanded]:animate-in sm:rounded-lg",
-					local.class,
-				)}
+				role="dialog"
+				aria-label={local.ariaLabel}
+				class={cn(MODAL_PANEL, MODAL_WIDTH[local.size ?? "lg"], local.class)}
 				{...others}
 			>
 				{local.children}
@@ -29,34 +72,14 @@ const DialogContent: ParentComponent<ComponentProps<typeof DialogPrimitive.Conte
 	);
 };
 
-const DialogHeader: Component<ComponentProps<"div">> = (props) => {
-	const [local, others] = splitProps(props, ["class"]);
-	return (
-		<div
-			data-slot="dialog-header"
-			class={cn("flex flex-col gap-2 text-center sm:text-left", local.class)}
-			{...others}
-		/>
-	);
-};
-
-const DialogFooter: Component<ComponentProps<"div">> = (props) => {
-	const [local, others] = splitProps(props, ["class"]);
-	return (
-		<div
-			data-slot="dialog-footer"
-			class={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", local.class)}
-			{...others}
-		/>
-	);
-};
+const { Header: DialogHeader, Body: DialogBody, Footer: DialogFooter } = createModalParts("dialog");
 
 const DialogTitle: Component<ComponentProps<typeof DialogPrimitive.Title>> = (props) => {
 	const [local, others] = splitProps(props, ["class"]);
 	return (
 		<DialogPrimitive.Title
 			data-slot="dialog-title"
-			class={cn("font-semibold text-lg leading-none tracking-tight", local.class)}
+			class={cn(MODAL_TITLE, local.class)}
 			{...others}
 		/>
 	);
@@ -69,7 +92,7 @@ const DialogDescription: Component<ComponentProps<typeof DialogPrimitive.Descrip
 	return (
 		<DialogPrimitive.Description
 			data-slot="dialog-description"
-			class={cn("text-muted-foreground text-sm", local.class)}
+			class={cn(MODAL_DESCRIPTION, local.class)}
 			{...others}
 		/>
 	);
@@ -77,6 +100,7 @@ const DialogDescription: Component<ComponentProps<typeof DialogPrimitive.Descrip
 
 export {
 	Dialog,
+	DialogBody,
 	DialogClose,
 	DialogContent,
 	DialogDescription,

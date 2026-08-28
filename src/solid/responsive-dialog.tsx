@@ -3,58 +3,41 @@ import {
 	type Component,
 	type ComponentProps,
 	createContext,
-	createEffect,
 	createSignal,
 	type JSX,
-	onCleanup,
-	onMount,
 	type ParentComponent,
 	Show,
 	splitProps,
 	useContext,
+	type ValidComponent,
 } from "solid-js";
-import { Portal } from "solid-js/web";
 import type { buttonVariants } from "../lib/button-variants.js";
-import { OVERLAY_SURFACE, SCRIM_CLASS } from "../lib/overlay-classes.js";
-import { cn } from "../lib/utils.js";
+import { createIsMobile } from "../lib/use-is-mobile.js";
 import {
 	BottomSheet,
-	BottomSheetBody,
 	BottomSheetContent,
+	BottomSheetDescription,
 	BottomSheetHandle,
 	BottomSheetOverlay,
 	BottomSheetPortal,
+	BottomSheetTitle,
+	BottomSheetTrigger,
 } from "./bottom-sheet/index.js";
 import { Button } from "./button.js";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "./dialog.js";
+import { createModalParts, type ModalSize } from "./dialog-parts.js";
 
-const MOBILE_BREAKPOINT = 640;
-
-function createIsMobileDialog(breakpoint = MOBILE_BREAKPOINT) {
-	const [isMobile, setIsMobile] = createSignal(
-		typeof window !== "undefined" && window.innerWidth < breakpoint,
-	);
-
-	onMount(() => {
-		const check = () => setIsMobile(window.innerWidth < breakpoint);
-		window.addEventListener("resize", check);
-		onCleanup(() => window.removeEventListener("resize", check));
-	});
-
-	return isMobile;
-}
-
-interface DialogContextType {
+interface ResponsiveDialogContextValue {
 	open: () => boolean;
 	setOpen: (open: boolean) => void;
-	close: () => void;
 	isMobile: () => boolean;
 }
 
-const DialogContext = createContext<DialogContextType>();
+const ResponsiveDialogContext = createContext<ResponsiveDialogContextValue>();
 
-function useDialogContext() {
-	const ctx = useContext(DialogContext);
-	if (!ctx) throw new Error("Dialog components must be used within ResponsiveDialog");
+function useResponsiveDialogContext(): ResponsiveDialogContextValue {
+	const ctx = useContext(ResponsiveDialogContext);
+	if (!ctx) throw new Error("ResponsiveDialog parts must be used within <ResponsiveDialog>");
 	return ctx;
 }
 
@@ -65,228 +48,100 @@ interface ResponsiveDialogProps {
 	defaultOpen?: boolean;
 }
 
+/** Centred kobalte dialog from `sm` up, drag-to-dismiss bottom sheet below it.
+ *  Both branches render the same parts, so a call site never branches. */
 const ResponsiveDialog: ParentComponent<ResponsiveDialogProps> = (props) => {
 	const [uncontrolledOpen, setUncontrolledOpen] = createSignal(props.defaultOpen ?? false);
-	const isMobile = createIsMobileDialog();
+	const mobile = createIsMobile();
+	const isMobile = () => mobile() === true;
 
-	const isControlled = () => props.open !== undefined;
-	const open = () => (isControlled() ? props.open === true : uncontrolledOpen());
-
-	const setOpen = (newOpen: boolean) => {
-		if (!isControlled()) setUncontrolledOpen(newOpen);
-		props.onOpenChange?.(newOpen);
+	const open = () => (props.open !== undefined ? props.open === true : uncontrolledOpen());
+	const setOpen = (next: boolean) => {
+		if (props.open === undefined) setUncontrolledOpen(next);
+		props.onOpenChange?.(next);
 	};
 
 	return (
-		<DialogContext.Provider value={{ open, setOpen, close: () => setOpen(false), isMobile }}>
-			{props.children}
-		</DialogContext.Provider>
+		<ResponsiveDialogContext.Provider value={{ open, setOpen, isMobile }}>
+			<Show
+				when={isMobile()}
+				fallback={
+					<Dialog open={open()} onOpenChange={setOpen}>
+						{props.children}
+					</Dialog>
+				}
+			>
+				<BottomSheet open={open()} onOpenChange={setOpen}>
+					{props.children}
+				</BottomSheet>
+			</Show>
+		</ResponsiveDialogContext.Provider>
 	);
 };
 
-const ResponsiveDialogTrigger: ParentComponent<ComponentProps<"button">> = (props) => {
-	const [local, rest] = splitProps(props, ["children", "class"]);
-	const { setOpen } = useDialogContext();
-
+const ResponsiveDialogTrigger: ParentComponent<
+	ComponentProps<"button"> & { as?: ValidComponent }
+> = (props) => {
+	const ctx = useResponsiveDialogContext();
 	return (
-		<button type="button" onClick={() => setOpen(true)} class={local.class} {...rest}>
-			{local.children}
-		</button>
-	);
-};
-
-const ResponsiveDialogContent: ParentComponent<ComponentProps<"div">> = (props) => {
-	const ctx = useDialogContext();
-	return (
-		<Show when={ctx.isMobile()} fallback={<DesktopContent {...props} />}>
-			<MobileContent {...props} />
+		<Show when={ctx.isMobile()} fallback={<DialogTrigger {...props} />}>
+			<BottomSheetTrigger {...props} />
 		</Show>
 	);
 };
 
-// Desktop: centered modal with manual overlay + close animation
-const DesktopContent: ParentComponent<ComponentProps<"div">> = (props) => {
-	const [local, rest] = splitProps(props, ["children", "class"]);
-	const ctx = useDialogContext();
-	const { open, setOpen } = ctx;
-	const [isClosing, setIsClosing] = createSignal(false);
-	const [isOpening, setIsOpening] = createSignal(false);
-	let contentRef: HTMLDivElement | undefined;
-	let previousActiveElement: HTMLElement | null = null;
-
-	const handleClose = () => {
-		if (isClosing()) return;
-		setIsClosing(true);
-		setTimeout(() => {
-			setOpen(false);
-			setIsClosing(false);
-			previousActiveElement?.focus();
-		}, 300);
-	};
-
-	ctx.close = handleClose;
-
-	createEffect(() => {
-		if (open()) {
-			setIsOpening(true);
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => setIsOpening(false));
-			});
-		}
-	});
-
-	createEffect(() => {
-		if (open()) {
-			previousActiveElement = document.activeElement as HTMLElement;
-			document.body.style.overflow = "hidden";
-			setTimeout(() => contentRef?.focus(), 0);
-		}
-		onCleanup(() => {
-			document.body.style.overflow = "";
-		});
-	});
-
-	createEffect(() => {
-		if (!open()) return;
-		const onKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape") {
-				e.preventDefault();
-				handleClose();
-			}
-		};
-		document.addEventListener("keydown", onKeyDown);
-		onCleanup(() => document.removeEventListener("keydown", onKeyDown));
-	});
-
-	createEffect(() => {
-		if (!open() || !contentRef) return;
-		const onTabKey = (e: KeyboardEvent) => {
-			if (e.key !== "Tab" || !contentRef) return;
-			const focusable = contentRef.querySelectorAll<HTMLElement>(
-				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-			);
-			const first = focusable[0];
-			const last = focusable[focusable.length - 1];
-			if (e.shiftKey) {
-				if (document.activeElement === first) {
-					e.preventDefault();
-					last?.focus();
-				}
-			} else {
-				if (document.activeElement === last) {
-					e.preventDefault();
-					first?.focus();
-				}
-			}
-		};
-		document.addEventListener("keydown", onTabKey);
-		onCleanup(() => document.removeEventListener("keydown", onTabKey));
-	});
-
-	const visible = () => open() || isClosing();
-
-	return (
-		<Show when={visible()}>
-			<Portal>
-				<div class="fixed inset-0 z-50">
-					<div
-						class={cn(
-							`fixed inset-0 ${SCRIM_CLASS} transition-opacity duration-100 ease-out`,
-							isClosing() || isOpening() ? "opacity-0" : "opacity-100",
-						)}
-						onClick={handleClose}
-						aria-hidden="true"
-					/>
-					{/* Click-outside dismiss layer; Escape is handled by a document listener above. */}
-					{/* biome-ignore lint/a11y/noStaticElementInteractions: see above */}
-					{/* biome-ignore lint/a11y/useKeyWithClickEvents: see above */}
-					<div
-						class="fixed inset-0 flex items-start justify-center p-4 pt-[15vh]"
-						onClick={handleClose}
-					>
-						{/* biome-ignore lint/a11y/useKeyWithClickEvents: stopPropagation guard so content clicks don't dismiss; not an action. */}
-						<div
-							ref={contentRef}
-							role="dialog"
-							aria-modal="true"
-							tabIndex={-1}
-							class={cn(
-								`gh-scroll relative flex max-h-[70vh] w-full max-w-lg flex-col overflow-y-auto rounded-lg ${OVERLAY_SURFACE} p-6 outline-none transition-all duration-50 ease-out`,
-								isClosing() || isOpening() ? "scale-95 opacity-0" : "scale-100 opacity-100",
-								local.class,
-							)}
-							onClick={(e: MouseEvent) => e.stopPropagation()}
-							{...rest}
-						>
-							{local.children}
-						</div>
-					</div>
-				</div>
-			</Portal>
-		</Show>
-	);
+type ResponsiveDialogContentProps = ComponentProps<"div"> & {
+	/** Desktop panel width. The mobile sheet is always full width. */
+	size?: ModalSize;
+	/** Names a panel that has no `ResponsiveDialogTitle`. */
+	ariaLabel?: string;
 };
 
-// Mobile: in-house BottomSheet (drag-to-dismiss + velocity + scroll handoff)
-const MobileContent: ParentComponent<ComponentProps<"div">> = (props) => {
-	const [local, rest] = splitProps(props, ["children", "class"]);
-	const ctx = useDialogContext();
-	ctx.close = () => ctx.setOpen(false);
+const ResponsiveDialogContent: ParentComponent<ResponsiveDialogContentProps> = (props) => {
+	const ctx = useResponsiveDialogContext();
+	const [local, rest] = splitProps(props, ["class", "children", "size", "ariaLabel"]);
 
 	return (
-		<BottomSheet open={ctx.open()} onOpenChange={ctx.setOpen}>
+		<Show
+			when={ctx.isMobile()}
+			fallback={
+				<DialogContent class={local.class} size={local.size} ariaLabel={local.ariaLabel} {...rest}>
+					{local.children}
+				</DialogContent>
+			}
+		>
 			<BottomSheetPortal>
 				<BottomSheetOverlay />
-				<BottomSheetContent class={local.class} {...rest}>
+				<BottomSheetContent class={local.class} ariaLabel={local.ariaLabel} {...rest}>
 					<BottomSheetHandle />
-					<BottomSheetBody class="pt-2">{local.children}</BottomSheetBody>
+					{local.children}
 				</BottomSheetContent>
 			</BottomSheetPortal>
-		</BottomSheet>
+		</Show>
 	);
 };
 
-const ResponsiveDialogHeader: Component<ComponentProps<"div">> = (props) => {
-	const [local, rest] = splitProps(props, ["class"]);
-	return (
-		<div
-			data-slot="responsive-dialog-header"
-			class={cn("flex flex-col space-y-1.5 pb-4 text-left", local.class)}
-			{...rest}
-		/>
-	);
-};
+const {
+	Header: ResponsiveDialogHeader,
+	Body: ResponsiveDialogBody,
+	Footer: ResponsiveDialogFooter,
+} = createModalParts("responsive-dialog");
 
 const ResponsiveDialogTitle: Component<ComponentProps<"h2">> = (props) => {
-	const [local, rest] = splitProps(props, ["class"]);
+	const ctx = useResponsiveDialogContext();
 	return (
-		<h2
-			data-slot="responsive-dialog-title"
-			class={cn("font-semibold text-foreground text-lg leading-none tracking-tight", local.class)}
-			{...rest}
-		/>
+		<Show when={ctx.isMobile()} fallback={<DialogTitle {...props} />}>
+			<BottomSheetTitle {...props} />
+		</Show>
 	);
 };
 
 const ResponsiveDialogDescription: Component<ComponentProps<"p">> = (props) => {
-	const [local, rest] = splitProps(props, ["class"]);
+	const ctx = useResponsiveDialogContext();
 	return (
-		<p
-			data-slot="responsive-dialog-description"
-			class={cn("text-muted-foreground text-sm", local.class)}
-			{...rest}
-		/>
-	);
-};
-
-const ResponsiveDialogFooter: Component<ComponentProps<"div">> = (props) => {
-	const [local, rest] = splitProps(props, ["class"]);
-	return (
-		<div
-			data-slot="responsive-dialog-footer"
-			class={cn("flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end", local.class)}
-			{...rest}
-		/>
+		<Show when={ctx.isMobile()} fallback={<DialogDescription {...props} />}>
+			<BottomSheetDescription {...props} />
+		</Show>
 	);
 };
 
@@ -296,13 +151,14 @@ const ResponsiveDialogClose: ParentComponent<
 	ComponentProps<"button"> & VariantProps<typeof buttonVariants>
 > = (props) => {
 	const [local, rest] = splitProps(props, ["children", "class", "variant", "size"]);
-	const { close } = useDialogContext();
+	const ctx = useResponsiveDialogContext();
 
 	return (
 		<Button
+			data-slot="responsive-dialog-close"
 			variant={local.variant ?? "outline"}
 			size={local.size}
-			onClick={() => close()}
+			onClick={() => ctx.setOpen(false)}
 			class={local.class}
 			{...rest}
 		>
@@ -313,6 +169,7 @@ const ResponsiveDialogClose: ParentComponent<
 
 export {
 	ResponsiveDialog,
+	ResponsiveDialogBody,
 	ResponsiveDialogClose,
 	ResponsiveDialogContent,
 	ResponsiveDialogDescription,

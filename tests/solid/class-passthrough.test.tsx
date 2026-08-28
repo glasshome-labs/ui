@@ -527,6 +527,20 @@ const CASES: Record<string, () => JSX.Element> = {
 			</solid.ResponsiveDialogContent>
 		</solid.ResponsiveDialog>
 	),
+	ResponsiveDialogTitle: () => (
+		<solid.ResponsiveDialog open>
+			<solid.ResponsiveDialogContent>
+				<solid.ResponsiveDialogTitle class="probe">t</solid.ResponsiveDialogTitle>
+			</solid.ResponsiveDialogContent>
+		</solid.ResponsiveDialog>
+	),
+	ResponsiveDialogDescription: () => (
+		<solid.ResponsiveDialog open>
+			<solid.ResponsiveDialogContent>
+				<solid.ResponsiveDialogDescription class="probe">d</solid.ResponsiveDialogDescription>
+			</solid.ResponsiveDialogContent>
+		</solid.ResponsiveDialog>
+	),
 	SchemaForm: () => (
 		<solid.SchemaForm
 			class="probe"
