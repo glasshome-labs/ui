@@ -22,8 +22,9 @@ const FieldSet: Component<ComponentProps<"fieldset">> = (props) => {
 				// from its widest child and ignores descendant min-w-0 overrides,
 				// so wide unwrapped content (a card title) can push it past a flex
 				// parent's width instead of shrinking with it.
-				"flex min-w-0 flex-col gap-4",
-				"has-[>[data-slot=checkbox-group]]:gap-4 has-[>[data-slot=radio-group]]:gap-4",
+				// [&>legend]: the rendered legend is not a flex item, so the gap
+				// above cannot reach it; the container still owns that distance.
+				"flex min-w-0 flex-col gap-4 [&>legend]:mb-4",
 				local.class,
 			)}
 			{...rest}
@@ -37,12 +38,11 @@ const FieldLegend: Component<ComponentProps<"legend"> & { variant?: "legend" | "
 	const [local, rest] = splitProps(props, ["class", "variant"] as const);
 	const variant = () => local.variant ?? "legend";
 	return (
-		// A native legend is out of flow, so FieldSet's gap never applies under it: it owns its own space.
 		<legend
 			data-slot="field-legend"
 			data-variant={variant()}
 			class={cn(
-				"mb-4 leading-tight",
+				"leading-tight",
 				"data-[variant=legend]:font-semibold data-[variant=legend]:text-base",
 				"data-[variant=label]:font-medium data-[variant=label]:text-sm",
 				local.class,
@@ -57,29 +57,27 @@ const FieldGroup: Component<ComponentProps<"div">> = (props) => {
 	return (
 		<div
 			data-slot="field-group"
-			class={cn(
-				"group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4",
-				local.class,
-			)}
+			class={cn("group/field-group @container/field-group flex w-full flex-col gap-6", local.class)}
 			{...rest}
 		/>
 	);
 };
 
 const fieldVariants = cva({
-	base: "group/field flex w-full gap-4 data-[invalid=true]:text-destructive",
+	base: "group/field flex w-full data-[invalid=true]:text-destructive",
 	variants: {
 		orientation: {
-			vertical: ["flex-col [&>*]:w-full [&>.sr-only]:w-auto"],
+			vertical: ["flex-col gap-2 [&>*]:w-full [&>.sr-only]:w-auto"],
 			horizontal: [
-				"flex-row items-center",
+				// A stack of content tops out against the control; a single-line
+				// caption row centres on it.
+				"flex-row items-start not-has-[>[data-slot=field-content]]:items-center gap-3",
 				"[&>[data-slot=field-label]]:flex-auto",
-				"has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
 			],
 			responsive: [
-				"@md/field-group:flex-row flex-col @md/field-group:items-center @md/field-group:[&>*]:w-auto [&>*]:w-full [&>.sr-only]:w-auto",
+				"@md/field-group:flex-row flex-col @md/field-group:items-start @md/field-group:gap-3 gap-2 @md/field-group:[&>*]:w-auto [&>*]:w-full [&>.sr-only]:w-auto",
+				"@md/field-group:not-has-[>[data-slot=field-content]]:items-center",
 				"@md/field-group:[&>[data-slot=field-label]]:flex-auto",
-				"@md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
 			],
 		},
 	},
@@ -122,7 +120,7 @@ const FieldLabel: Component<ComponentProps<typeof Label>> = (props) => {
 			class={cn(
 				"group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50",
 				"has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4",
-				"has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10",
+				"has-data-[checked]:border-primary has-data-[checked]:bg-primary/5 dark:has-data-[checked]:bg-primary/10",
 				local.class,
 			)}
 			{...rest}
@@ -134,7 +132,7 @@ const FieldTitle: Component<ComponentProps<"div">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	return (
 		<div
-			data-slot="field-label"
+			data-slot="field-title"
 			class={cn(
 				"flex w-fit items-center gap-2 font-medium text-sm leading-snug group-data-[disabled=true]/field:opacity-50",
 				local.class,
@@ -151,7 +149,6 @@ const FieldDescription: Component<ComponentProps<"p">> = (props) => {
 			data-slot="field-description"
 			class={cn(
 				"font-normal text-muted-foreground text-sm leading-normal group-has-[[data-orientation=horizontal]]/field:text-balance",
-				"nth-last-2:-mt-1 last:mt-0 [[data-variant=legend]+&]:-mt-1.5",
 				// Dims with its title, else a disabled row reads as description-first.
 				"group-data-[disabled=true]/field:opacity-50",
 				"[&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4",
@@ -176,16 +173,13 @@ const FieldSeparator: ParentComponent<ComponentProps<"div">> = (props) => {
 		<div
 			data-slot="field-separator"
 			data-content={!!local.children}
-			class={cn(
-				"relative -my-2 h-5 text-sm group-data-[variant=outline]/field-group:-mb-2",
-				local.class,
-			)}
+			class={cn("relative h-5 text-sm", local.class)}
 			{...rest}
 		>
 			<Separator class="absolute inset-0 top-1/2" />
 			<Show when={local.children}>
 				<span
-					class="relative mx-auto block w-fit bg-background px-2 text-muted-foreground"
+					class="relative mx-auto block w-fit bg-card px-2 text-muted-foreground"
 					data-slot="field-separator-content"
 				>
 					{local.children}
@@ -220,7 +214,7 @@ const FieldError: Component<
 		}
 
 		return (
-			<ul class="ml-4 flex list-disc flex-col gap-1">
+			<ul class="flex list-disc flex-col gap-1 pl-4">
 				<For each={uniqueErrors}>
 					{(error) => <Show when={error?.message}>{(message) => <li>{message()}</li>}</Show>}
 				</For>

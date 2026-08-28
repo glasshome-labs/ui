@@ -371,9 +371,7 @@ export function FormsCatalog() {
 					<FormField name="email">
 						<FormItem>
 							<FormLabel>Email</FormLabel>
-							<FormControl>
-								<Input type="email" placeholder="you@example.com" />
-							</FormControl>
+							<FormControl type="email" placeholder="you@example.com" />
 							<FormDescription>We only use it for account recovery.</FormDescription>
 							<FormMessage />
 						</FormItem>

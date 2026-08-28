@@ -5,12 +5,14 @@ import {
 	createMemo,
 	createUniqueId,
 	type ParentComponent,
-	Show,
 	splitProps,
 	useContext,
+	type ValidComponent,
 } from "solid-js";
+import { Dynamic } from "solid-js/web";
 import { cn } from "../lib/utils.js";
-import { Label } from "./label.js";
+import { Field, FieldDescription, FieldError, FieldLabel } from "./field.js";
+import { Input } from "./input.js";
 
 interface FormFieldContextValue {
 	name: string;
@@ -48,7 +50,9 @@ const Form: ParentComponent<
 				clearError: (name) => local.onClearError?.(name),
 			}}
 		>
-			<form {...rest}>{local.children}</form>
+			<form data-slot="form" {...rest}>
+				{local.children}
+			</form>
 		</FormContext.Provider>
 	);
 };
@@ -80,26 +84,24 @@ const FormField: ParentComponent<{ name: string }> = (props) => {
 	);
 };
 
-const FormItem: ParentComponent<ComponentProps<"div">> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "children"]);
+/** @deprecated Use `Field`. Form* is the same stack with the id wiring attached. */
+const FormItem: ParentComponent<ComponentProps<typeof Field>> = (props) => {
 	const id = createUniqueId();
 
 	return (
 		<FormItemContext.Provider value={{ id }}>
-			<div data-slot="form-item" class={cn("grid gap-2", local.class)} {...rest}>
-				{local.children}
-			</div>
+			<Field {...props} />
 		</FormItemContext.Provider>
 	);
 };
 
-const FormLabel: Component<ComponentProps<typeof Label>> = (props) => {
+/** @deprecated Use `FieldLabel`. */
+const FormLabel: Component<ComponentProps<typeof FieldLabel>> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	const { error, formItemId } = useFormField();
 
 	return (
-		<Label
-			data-slot="form-label"
+		<FieldLabel
 			data-error={!!error()}
 			class={cn("data-[error=true]:text-destructive", local.class)}
 			for={formItemId()}
@@ -108,55 +110,45 @@ const FormLabel: Component<ComponentProps<typeof Label>> = (props) => {
 	);
 };
 
-const FormControl: ParentComponent<ComponentProps<"div">> = (props) => {
+/**
+ * Renders THE control (default: `Input`, any other through `as`) with the id and
+ * aria the field context knows. There is no wrapper: a describedby on a div
+ * around an input is read by nothing.
+ */
+const FormControl = <T extends ValidComponent = typeof Input>(
+	props: { as?: T } & ComponentProps<T>,
+) => {
 	const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
-	const [local, rest] = splitProps(props, ["children"]);
+	const [local, rest] = splitProps(props as { as?: ValidComponent }, ["as"]);
 
 	return (
-		<div
-			data-slot="form-control"
+		<Dynamic
+			component={local.as ?? Input}
 			id={formItemId()}
-			aria-describedby={
-				!error() ? formDescriptionId() : `${formDescriptionId()} ${formMessageId()}`
-			}
-			aria-invalid={!!error()}
-			{...rest}
-		>
-			{local.children}
-		</div>
-	);
-};
-
-const FormDescription: Component<ComponentProps<"p">> = (props) => {
-	const [local, rest] = splitProps(props, ["class"]);
-	const { formDescriptionId } = useFormField();
-
-	return (
-		<p
-			data-slot="form-description"
-			id={formDescriptionId()}
-			class={cn("text-muted-foreground text-sm", local.class)}
+			aria-describedby={error() ? `${formDescriptionId()} ${formMessageId()}` : formDescriptionId()}
+			aria-invalid={error() ? true : undefined}
 			{...rest}
 		/>
 	);
 };
 
-const FormMessage: ParentComponent<ComponentProps<"p">> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "children"]);
+/** @deprecated Use `FieldDescription`. */
+const FormDescription: Component<ComponentProps<typeof FieldDescription>> = (props) => {
+	const { formDescriptionId } = useFormField();
+
+	return <FieldDescription id={formDescriptionId()} {...props} />;
+};
+
+/** @deprecated Use `FieldError`. */
+const FormMessage: ParentComponent<ComponentProps<typeof FieldError>> = (props) => {
+	const [local, rest] = splitProps(props, ["children"]);
 	const { error, formMessageId } = useFormField();
 	const body = () => error() || local.children;
 
 	return (
-		<Show when={body()}>
-			<p
-				data-slot="form-message"
-				id={formMessageId()}
-				class={cn("text-destructive text-sm", local.class)}
-				{...rest}
-			>
-				{body()}
-			</p>
-		</Show>
+		<FieldError id={formMessageId()} {...rest}>
+			{body()}
+		</FieldError>
 	);
 };
 
