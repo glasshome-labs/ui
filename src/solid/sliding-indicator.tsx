@@ -102,6 +102,7 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 
 	const measure = () => {
 		if (!containerRef) return;
+		syncObservedItems();
 		let el: HTMLElement | null | undefined;
 		if (local.activeSelector) {
 			el = containerRef.querySelector<HTMLElement>(local.activeSelector);
@@ -153,27 +154,75 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 		queueMicrotask(measure);
 	});
 
+	// The items actually under the ResizeObserver, so entries can be diffed
+	// against the freshly-resolved set on every measure() pass.
+	let ro: ResizeObserver | undefined;
+	const observedItems = new Set<Element>();
+	let disposed = false;
+
+	// Observing only the container missed the case that broke the admin tabs
+	// pill: an <iconify-icon> or a webfont finishes loading AFTER first paint and
+	// grows the trigger, but a w-full container never itself resizes, so the
+	// indicator kept the stale width. Observing the resolved item(s) directly
+	// catches that growth.
+	function syncObservedItems() {
+		if (!containerRef || !ro) return;
+		const next = new Set<Element>();
+		if (local.activeSelector) {
+			const el = containerRef.querySelector(local.activeSelector);
+			if (el) next.add(el);
+		} else if (local.active != null && local.active >= 0) {
+			const sel = local.itemSelector ?? ":scope > :not([data-sliding-indicator])";
+			for (const el of containerRef.querySelectorAll(sel)) next.add(el);
+		}
+		for (const el of observedItems) {
+			if (!next.has(el)) {
+				ro.unobserve(el);
+				observedItems.delete(el);
+			}
+		}
+		for (const el of next) {
+			if (!observedItems.has(el)) {
+				ro.observe(el);
+				observedItems.add(el);
+			}
+		}
+	}
+
 	onMount(() => {
 		if (!containerRef) return;
-		// Resize (responsive, font load, reflow).
-		const ro = new ResizeObserver(() => measure());
+		ro = new ResizeObserver(() => measure());
 		ro.observe(containerRef);
-		// Attribute-based selection (Kobalte): re-slide when the active child's
-		// marker attribute moves. Cheap for the small item sets this is used with.
-		// Attribute-based selection (e.g. Kobalte's [data-selected]/[data-highlighted]).
-		let mo: MutationObserver | undefined;
+		// Attribute-based selection (e.g. Kobalte's [data-selected]/[data-highlighted]):
+		// re-slide when the active child's marker attribute moves, or when items are
+		// added/removed, so newly-mounted items land under the same observer.
+		const mo = new MutationObserver(() => {
+			syncObservedItems();
+			queueMicrotask(measure);
+		});
+		mo.observe(containerRef, {
+			childList: true,
+			subtree: !!local.activeSelector,
+			attributes: !!local.activeSelector,
+		});
 		// Focus-based selection (e.g. Kobalte menus mark the highlighted item with
 		// roving focus, which is not an attribute mutation).
 		const onFocusIn = () => queueMicrotask(measure);
-		if (local.activeSelector) {
-			mo = new MutationObserver(() => queueMicrotask(measure));
-			mo.observe(containerRef, { subtree: true, attributes: true, childList: true });
-			containerRef.addEventListener("focusin", onFocusIn);
-		}
+		if (local.activeSelector) containerRef.addEventListener("focusin", onFocusIn);
+		syncObservedItems();
 		queueMicrotask(measure);
+		// Web fonts can finish loading after the first measure and grow glyphs
+		// (the same class of bug the item-level ResizeObserver above fixes for
+		// icons); one extra pass once fonts settle catches that too.
+		if (typeof document !== "undefined" && document.fonts) {
+			document.fonts.ready.then(() => {
+				if (!disposed) measure();
+			});
+		}
 		onCleanup(() => {
-			ro.disconnect();
-			mo?.disconnect();
+			disposed = true;
+			ro?.disconnect();
+			mo.disconnect();
 			containerRef?.removeEventListener("focusin", onFocusIn);
 		});
 	});
@@ -187,7 +236,7 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 						data-sliding-indicator
 						aria-hidden="true"
 						class={cn(
-							"pointer-events-none absolute -z-10 ease-out",
+							"pointer-events-none absolute -z-10",
 							horizontal() ? "inset-y-0 left-0" : "inset-x-0 top-0",
 							"glass glass-tint",
 							local.indicatorClass ?? "rounded-lg",

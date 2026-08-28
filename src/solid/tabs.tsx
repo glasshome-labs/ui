@@ -1,10 +1,16 @@
 import { Tabs as TabsPrimitive } from "@kobalte/core/tabs";
 import { type Component, type ComponentProps, splitProps } from "solid-js";
 import { TRACK_SURFACE } from "../lib/card-classes.js";
+import { SEGMENT_ITEM } from "../lib/segment-classes.js";
 import { cn } from "../lib/utils.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
 
-const Tabs = TabsPrimitive;
+const Tabs: Component<ComponentProps<typeof TabsPrimitive>> = (props) => {
+	const [local, others] = splitProps(props, ["class"]);
+	return (
+		<TabsPrimitive data-slot="tabs" class={cn("flex flex-col gap-2", local.class)} {...others} />
+	);
+};
 
 const TabsList: Component<ComponentProps<typeof TabsPrimitive.List>> = (props) => {
 	const [local, others] = splitProps(props, ["class", "children"]);
@@ -19,6 +25,7 @@ const TabsList: Component<ComponentProps<typeof TabsPrimitive.List>> = (props) =
 		>
 			<SlidingIndicator
 				activeSelector="[data-selected]"
+				indicatorClass="rounded-md"
 				class="flex h-full w-full items-center gap-1"
 			>
 				{local.children}
@@ -32,10 +39,7 @@ const TabsTrigger: Component<ComponentProps<typeof TabsPrimitive.Trigger>> = (pr
 	return (
 		<TabsPrimitive.Trigger
 			data-slot="tabs-trigger"
-			class={cn(
-				"inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1 font-medium text-sm outline-none transition-colors hover:text-primary/80 focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-[selected]:text-primary",
-				local.class,
-			)}
+			class={cn(SEGMENT_ITEM, "hover:text-primary/80 data-[selected]:text-primary", local.class)}
 			{...others}
 		/>
 	);
@@ -47,7 +51,7 @@ const TabsContent: Component<ComponentProps<typeof TabsPrimitive.Content>> = (pr
 		<TabsPrimitive.Content
 			data-slot="tabs-content"
 			class={cn(
-				"mt-2 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+				"outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
 				local.class,
 			)}
 			{...others}

@@ -38,6 +38,7 @@ export {
 	carouselItem,
 	carouselTrack,
 } from "./lib/carousel-classes.js";
+export { DOT, DOT_ACTIVE } from "./lib/dot-classes.js";
 export { glassToneText, toneTextMix } from "./lib/glass-tone.js";
 export {
 	CONTROL_H,
@@ -83,5 +84,6 @@ export {
 	SECTION_PADDING,
 	SECTION_ROW_CLASS,
 } from "./lib/section-tokens.js";
+export { SEGMENT_ITEM } from "./lib/segment-classes.js";
 export { createIsMobile, MOBILE_BREAKPOINT } from "./lib/use-is-mobile.js";
 export { cn } from "./lib/utils.js";
