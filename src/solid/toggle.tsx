@@ -9,7 +9,11 @@ const toggleVariants = cva({
 	base: `${SEGMENT_ITEM} border border-transparent aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0`,
 	variants: {
 		variant: {
-			default: "bg-transparent hover:bg-muted hover:text-muted-foreground",
+			// `hover:bg-muted` only paints when the element isn't glass yet (unpressed);
+			// once `data-[pressed]:glass` (below) engages, bg-*/text-* hover are no-ops,
+			// so the pressed hover bumps the glass wash through a knob instead.
+			default:
+				"bg-transparent not-data-[pressed]:hover:bg-muted not-data-[pressed]:hover:text-muted-foreground data-[pressed]:hover:[--glass-wash:40%]",
 			// Same material as Button's outline variant: a real border-input box was a
 			// no-op the moment `data-[pressed]:glass` engaged, since glass owns the
 			// background/border of the element it's on.
