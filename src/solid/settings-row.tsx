@@ -21,7 +21,11 @@ export function SectionAddButton(props: { onClick: () => void }) {
 }
 
 export function SectionEmpty(props: { children: JSX.Element }) {
-	return <p class="py-4 text-center text-muted-foreground text-sm">{props.children}</p>;
+	return (
+		<p data-slot="section-empty" class="py-4 text-center text-muted-foreground text-sm">
+			{props.children}
+		</p>
+	);
 }
 
 export function RowActions(props: {
@@ -32,7 +36,7 @@ export function RowActions(props: {
 	showDelete?: boolean;
 }) {
 	return (
-		<div class="flex items-center gap-1">
+		<div data-slot="row-actions" class="flex items-center gap-1">
 			<Button variant="ghost" size="icon" class="size-8" onClick={props.onEdit}>
 				<Icon icon="lucide:pencil" width={14} height={14} />
 			</Button>
@@ -54,8 +58,10 @@ export function RowActions(props: {
 
 export function LabeledField(props: { label: string; children: JSX.Element }) {
 	return (
-		<div>
-			<p class="mb-1 font-medium text-sm">{props.label}</p>
+		<div data-slot="labeled-field" class="flex flex-col gap-1">
+			<p data-slot="labeled-field-label" class="font-medium text-sm">
+				{props.label}
+			</p>
 			{props.children}
 		</div>
 	);

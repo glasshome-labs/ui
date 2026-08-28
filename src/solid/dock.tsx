@@ -11,9 +11,11 @@ import {
 	splitProps,
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
-import { OVERLAY_SURFACE } from "../lib/overlay-classes.js";
+import { CARD_SURFACE } from "../lib/card-classes.js";
 import { cn } from "../lib/utils.js";
+import { Badge } from "./badge.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip.js";
 
 interface DockItem {
 	id: string;
@@ -38,59 +40,55 @@ interface DockIconButtonProps extends ComponentProps<"button"> {
 }
 
 const DockIconButton: Component<DockIconButtonProps> = (props) => {
-	const [local, rest] = splitProps(props, ["icon", "label", "class", "isActive", "badge"]);
+	// Kobalte's button root narrows `type`; Solid's ComponentProps<"button"> also
+	// admits "menu", so it is split off rather than spread.
+	const [local, rest] = splitProps(props, ["icon", "label", "class", "isActive", "badge", "type"]);
 	const isElement = () => typeof local.icon !== "function";
 
 	return (
-		<button
-			type="button"
-			class={cn(
-				"group relative flex size-11 touch-manipulation items-center justify-center rounded-lg sm:size-12",
-				local.class,
-			)}
-			aria-label={local.label}
-			aria-current={local.isActive ? "page" : undefined}
-			{...rest}
-		>
-			<div
+		<Tooltip openDelay={150} placement="top">
+			<TooltipTrigger
+				type="button"
+				data-slot="dock-item"
 				class={cn(
-					"flex items-center justify-center transition-colors duration-300",
-					local.isActive ? "text-primary" : "text-foreground group-hover:text-primary/80",
+					"group relative flex size-11 touch-manipulation items-center justify-center rounded-lg sm:size-12",
+					local.class,
 				)}
+				aria-label={local.label}
+				aria-current={local.isActive ? "page" : undefined}
+				{...rest}
 			>
-				{isElement() ? (
-					(local.icon as JSX.Element)
-				) : (
-					<Dynamic
-						component={local.icon as Component<{ class?: string }>}
-						class="h-5 w-5 sm:h-6 sm:w-6"
-					/>
-				)}
-			</div>
-			<Show when={typeof local.badge === "number" && local.badge > 0}>
-				<span
-					role="status"
-					class="absolute top-0 right-0 inline-flex h-5 min-w-[20px] translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-primary/15 px-1 font-semibold text-[10px] text-primary"
-					aria-label={`${local.badge} pending`}
+				<div
+					data-slot="dock-item-icon"
+					class={cn(
+						"flex items-center justify-center transition-colors duration-300",
+						local.isActive ? "text-primary" : "text-foreground group-hover:text-primary/80",
+					)}
 				>
-					{local.badge != null && local.badge > 9 ? "9+" : local.badge}
-				</span>
-			</Show>
-			<span
-				class={cn(
-					"absolute -top-8 left-1/2 -translate-x-1/2",
-					"rounded px-2 py-1 text-xs",
-					OVERLAY_SURFACE,
-					"text-popover-foreground",
-					"opacity-0 group-hover:opacity-100",
-					"pointer-events-none whitespace-nowrap transition-opacity",
-					"z-10",
-					"hidden sm:block",
-				)}
-			>
-				{local.label}
-			</span>
-		</button>
+					{isElement() ? (
+						(local.icon as JSX.Element)
+					) : (
+						<Dynamic
+							component={local.icon as Component<{ class?: string }>}
+							class="h-5 w-5 sm:h-6 sm:w-6"
+						/>
+					)}
+				</div>
+				<Show when={typeof local.badge === "number" && local.badge > 0}>
+					{/* Inside the item box: an overhanging badge inflates the bar's
+					 * scrollWidth and trips the overflow-to-scroll check below. */}
+					<Badge
+						role="status"
+						tone="var(--primary)"
+						class="absolute top-0 right-0 h-4 min-w-4 justify-center px-1 py-0 font-semibold text-[10px]"
+						aria-label={`${local.badge} pending`}
+					>
+						{local.badge != null && local.badge > 9 ? "9+" : local.badge}
+					</Badge>
+				</Show>
+			</TooltipTrigger>
+			<TooltipContent class="hidden sm:block">{local.label}</TooltipContent>
+		</Tooltip>
 	);
 };
 
@@ -150,9 +148,11 @@ const Dock: Component<DockProps> = (props) => {
 			<div class="relative flex items-center justify-center">
 				<div
 					ref={containerRef}
+					data-slot="dock-bar"
 					class={cn(
 						"flex items-center gap-0.5 p-1.5 sm:gap-1 sm:p-2",
-						"glass backdrop-blur-md backdrop-saturate-[1.8] [--glass-base:color-mix(in_srgb,var(--card)_80%,transparent)] [--glass-lift:0.55] [--glass-rim:0.3]",
+						CARD_SURFACE,
+						"[--glass-lift:0.55]",
 						dockMode() === "floating" ? "rounded-xl" : "rounded-t-xl",
 						needsScroll() ? "scrollbar-hide overflow-x-auto" : "overflow-visible",
 						!needsScroll() && "justify-center",

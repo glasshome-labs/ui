@@ -13,25 +13,30 @@ export const CARD_SURFACE = `${CARD_SURFACE_BASE} ${CARD_BLUR}`;
  * contexts where backdrop-blur can't run. */
 export const CARD_SURFACE_OPAQUE = CARD_KNOBS;
 
+/* Rows inside a section: the card material again, one step in, so a row never
+ * reads as a flat plate on a glass panel. */
+export const SECTION_ROW_SURFACE =
+	"glass [--glass-rim:0.3] [--glass-base:color-mix(in_srgb,var(--card)_60%,transparent)]";
+
 /* Recessed track frame (tabs, segmented controls). */
 export const TRACK_SURFACE = "border border-border/50 bg-card/40 backdrop-blur-sm";
 
 export const CARD_PADDING = {
-	slots: "flex flex-col gap-3 py-3 md:gap-4 md:py-4",
-	md: "p-4",
-	sm: "p-3",
+	slots: "flex flex-col gap-3 p-3 md:gap-4 md:p-4",
+	md: "flex flex-col gap-3 p-4",
+	sm: "flex flex-col gap-2 p-3",
 	none: "",
 } as const;
 
 export type CardPadding = keyof typeof CARD_PADDING;
 
 export const CARD_INTERACTIVE =
-	"cursor-pointer transition-colors duration-200 hover:border-border hover:bg-foreground/[0.03] focus-within:border-border";
+	"cursor-pointer transition-colors duration-200 hover:[--glass-light:0.09] focus-within:[--glass-edge:var(--border)]";
 
 export const CARD_HEADER_CLASS =
-	"@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] md:px-4";
+	"@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 has-data-[slot=card-action]:grid-cols-[1fr_auto]";
 export const CARD_TITLE_CLASS = "font-semibold leading-none";
 export const CARD_DESCRIPTION_CLASS = "text-muted-foreground text-sm";
 export const CARD_ACTION_CLASS = "col-start-2 row-span-2 row-start-1 self-start justify-self-end";
-export const CARD_CONTENT_CLASS = "px-3 md:px-4";
-export const CARD_FOOTER_CLASS = "flex items-center px-3 md:px-4 [.border-t]:pt-6";
+export const CARD_CONTENT_CLASS = "min-w-0";
+export const CARD_FOOTER_CLASS = "flex items-center";

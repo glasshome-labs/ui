@@ -46,9 +46,15 @@ export function FeedbackCatalog() {
 				</div>
 			</CatalogItem>
 
-			<CatalogItem name="Progress" hint="value 60">
-				<Progress value={60} class="w-full" />
-				<CatalogNote>fixed 60%</CatalogNote>
+			<CatalogItem name="Progress" hint="recessed rail, tinted glass fill">
+				<div class="flex w-full flex-col gap-3">
+					<Progress value={60} class="w-full" />
+					<Progress value={92} tone="var(--success)" class="w-full" />
+					<Progress value={18} tone="var(--destructive)" class="w-full" />
+				</div>
+				<CatalogNote>
+					tone is any CSS color; the rail is FIELD_CHROME, never a flat primary/15
+				</CatalogNote>
 			</CatalogItem>
 
 			<CatalogItem name="Skeleton" hint="loading placeholder">
@@ -114,13 +120,19 @@ export function FeedbackCatalog() {
 				</CatalogNote>
 			</CatalogItem>
 
-			<CatalogItem name="Tooltip" hint="hover a Button">
-				<Tooltip openDelay={150}>
-					<TooltipTrigger as={Button} variant="outline">
-						Hover me
-					</TooltipTrigger>
-					<TooltipContent>Turn off lights</TooltipContent>
-				</Tooltip>
+			<CatalogItem name="Tooltip" hint="glass panel · click to pin it open" span={2}>
+				<div class="relative flex h-32 w-full items-end justify-center overflow-hidden rounded-md">
+					<div class="absolute inset-0 bg-gradient-to-br from-primary/60 via-accent/40 to-muted" />
+					<Tooltip open placement="top">
+						<TooltipTrigger as={Button} variant="outline" class="relative mb-4">
+							Hover me
+						</TooltipTrigger>
+						<TooltipContent>Turn off lights</TooltipContent>
+					</Tooltip>
+				</div>
+				<CatalogNote>
+					pinned open over a busy ground: FLOATING_PANEL glass, not an opaque primary plate
+				</CatalogNote>
 			</CatalogItem>
 
 			<CatalogItem name="HoverCard" hint="hover a Button">

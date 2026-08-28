@@ -2,13 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { type JSX, mergeProps, Show } from "solid-js";
 import { cn } from "../lib/utils.js";
 import { Card } from "./card.js";
-import {
-	formatWidgetCount,
-	WidgetIdentity,
-	WidgetMeta,
-	type WidgetSummary,
-	widgetHref,
-} from "./widget-identity.js";
+import { WidgetIdentity, WidgetMeta, type WidgetSummary, widgetHref } from "./widget-identity.js";
 
 /**
  * The registry widget card: `row` for dense lists, `tile` for grids/galleries.
@@ -67,15 +61,14 @@ function WidgetCardRow(props: InternalProps) {
 			onClick={props.onClick}
 			interactive={props.interactive}
 			padding="sm"
-			class={cn("group flex items-center gap-3", props.class)}
+			class={cn("group flex-row items-center gap-3", props.class)}
 		>
-			<div class="min-w-0 flex-1">
-				<WidgetIdentity
-					widget={props.widget}
-					iconSize="sm"
-					showScopeIndicator={props.showScopeIndicator}
-				/>
-			</div>
+			<WidgetIdentity
+				widget={props.widget}
+				iconSize="sm"
+				showScopeIndicator={props.showScopeIndicator}
+				class="flex-1"
+			/>
 			<Show when={hasMeta()}>
 				<WidgetMeta widget={props.widget} showVersions={props.showVersions} class="shrink-0" />
 			</Show>
@@ -108,25 +101,17 @@ function WidgetCardTile(props: InternalProps) {
 			onClick={props.onClick}
 			interactive={props.interactive}
 			padding="md"
-			class={cn("group flex h-full flex-col", props.class)}
+			class={cn("group h-full", props.class)}
 		>
-			<WidgetIdentity widget={props.widget} iconSize="md" showVersionInline={false} />
-			<Show when={showDescription() && props.widget.description}>
-				<p class="mt-3 line-clamp-2 text-muted-foreground text-xs leading-relaxed">
-					{props.widget.description}
-				</p>
-			</Show>
-			<div class="mt-auto flex items-center gap-4 pt-3 text-muted-foreground text-xs">
-				<Show when={props.widget.downloadCount != null}>
-					<span class="flex items-center gap-1 tabular-nums">
-						<Icon icon="lucide:arrow-down-to-line" width={12} height={12} class="size-3" />
-						{formatWidgetCount(props.widget.downloadCount)}
-					</span>
-				</Show>
-				<Show when={props.widget.latestVersion}>
-					<span class="tabular-nums">v{props.widget.latestVersion}</span>
+			<div data-slot="widget-card-body" class="flex flex-1 flex-col gap-3">
+				<WidgetIdentity widget={props.widget} iconSize="md" showVersionInline={false} />
+				<Show when={showDescription() && props.widget.description}>
+					<p class="line-clamp-2 text-muted-foreground text-xs leading-relaxed">
+						{props.widget.description}
+					</p>
 				</Show>
 			</div>
+			<WidgetMeta widget={props.widget} showLatestVersion />
 		</Card>
 	);
 }

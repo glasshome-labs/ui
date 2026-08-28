@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "cva";
 import { type Component, type ComponentProps, splitProps, type ValidComponent } from "solid-js";
 import { Dynamic } from "solid-js/web";
+import { ICON_PILL } from "../lib/pill-classes.js";
 import { cn } from "../lib/utils.js";
 import { Separator } from "./separator.js";
 
@@ -66,30 +67,33 @@ const Item: Component<
 	);
 };
 
-const itemMediaVariants = cva({
-	base: "flex shrink-0 items-center justify-center gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start [&_svg]:pointer-events-none",
-	variants: {
-		variant: {
-			default: "bg-transparent",
-			icon: "size-8 rounded-md bg-foreground/10 text-foreground/80 shadow-[inset_0_1px_0_oklch(1_0_0_/_0.08)] [&_svg:not([class*='size-'])]:size-4",
-			image: "size-10 overflow-hidden rounded-sm [&_img]:size-full [&_img]:object-cover",
-		},
-	},
-	defaultVariants: {
-		variant: "default",
-	},
-});
+type ItemMediaKind = "icon" | "image";
 
-const ItemMedia: Component<ComponentProps<"div"> & VariantProps<typeof itemMediaVariants>> = (
-	props,
-) => {
-	const [local, rest] = splitProps(props, ["class", "variant"] as const);
-	const variant = () => local.variant ?? "default";
+const ITEM_MEDIA: Record<ItemMediaKind, string> = {
+	icon: `${ICON_PILL} size-8 rounded-md text-foreground/80 [&_svg:not([class*='size-'])]:size-4`,
+	image: "size-10 overflow-hidden rounded-sm [&_img]:size-full [&_img]:object-cover",
+};
+
+const ItemMedia: Component<
+	ComponentProps<"div"> & {
+		/** The well the media sits in. Omit for bare content. */
+		media?: ItemMediaKind;
+		/** @deprecated `media` */
+		variant?: ItemMediaKind | "default";
+	}
+> = (props) => {
+	const [local, rest] = splitProps(props, ["class", "media", "variant"] as const);
+	const media = () => local.media ?? (local.variant === "default" ? undefined : local.variant);
 	return (
 		<div
 			data-slot="item-media"
-			data-variant={variant()}
-			class={cn(itemMediaVariants({ variant: variant() }), local.class)}
+			data-media={media()}
+			data-variant={local.variant ?? media() ?? "default"}
+			class={cn(
+				"flex shrink-0 items-center justify-center gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start [&_svg]:pointer-events-none",
+				media() && ITEM_MEDIA[media() as ItemMediaKind],
+				local.class,
+			)}
 			{...rest}
 		/>
 	);

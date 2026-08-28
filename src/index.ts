@@ -28,6 +28,7 @@ export {
 	CARD_SURFACE,
 	CARD_SURFACE_BASE,
 	CARD_SURFACE_OPAQUE,
+	SECTION_ROW_SURFACE,
 	TRACK_SURFACE,
 } from "./lib/card-classes.js";
 export {

@@ -2,6 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 import {
 	Button,
+	Dock,
 	LabeledField,
 	LabeledInput,
 	PageHeader,
@@ -27,7 +28,35 @@ export function AppKitCatalog() {
 	const [dir, setDir] = createSignal<"asc" | "desc">("asc");
 
 	return (
-		<CatalogGroup id="cat-appkit" title="App kit (settings + tables)">
+		<CatalogGroup id="cat-appkit" title="App kit (chrome, settings + tables)">
+			<CatalogItem name="Dock badge" hint="pending count rides the item as a Badge" span={2}>
+				<Dock
+					items={[
+						{
+							id: "home",
+							icon: <Icon icon="lucide:house" width={20} height={20} />,
+							label: "Home",
+							isActive: true,
+						},
+						{
+							id: "inbox",
+							icon: <Icon icon="lucide:inbox" width={20} height={20} />,
+							label: "Inbox",
+							badge: 3,
+						},
+						{
+							id: "updates",
+							icon: <Icon icon="lucide:arrow-up-circle" width={20} height={20} />,
+							label: "Updates",
+							badge: 12,
+						},
+					]}
+				/>
+				<CatalogNote>
+					counts over 9 read as 9+; the label is a real Tooltip, not a hidden hover span
+				</CatalogNote>
+			</CatalogItem>
+
 			<CatalogItem name="PageHeader" hint="banner — icon + title + count + actions" span={3}>
 				<div class="w-full">
 					<PageHeader

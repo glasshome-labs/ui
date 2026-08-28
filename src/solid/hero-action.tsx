@@ -2,6 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show } from "solid-js";
 import { ALERT_ICON_BG_CLASS, alertIconBgStyle } from "../lib/alert-tones.js";
 import { glassToneText } from "../lib/glass-tone.js";
+import { SECTION_OUTER_RADIUS } from "../lib/section-tokens.js";
 import { cn } from "../lib/utils.js";
 import { Badge } from "./badge.js";
 import { RadioGroupItem } from "./radio-group.js";
@@ -11,8 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip.js";
  * wizard's connect/sign-in steps and People's pick-one dialogs. Chrome lives
  * here once; the two call shapes below (nav button vs. grouped radio item)
  * share it so neither surface can drift from the other. */
-const HERO_ACTION_CHROME =
-	"onboard-card glass group relative flex min-h-[6.25rem] items-center gap-4 overflow-hidden rounded-2xl p-5 text-left transition-all duration-200 [--glass-lift:0.4] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 hover:[--glass-lift:0.85] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[disabled]:hover:translate-y-0";
+const HERO_ACTION_CHROME = `glass group relative flex min-h-[6.25rem] items-center gap-4 overflow-hidden ${SECTION_OUTER_RADIUS} p-4 text-left transition-all duration-200 [--glass-lift:0.4] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 hover:[--glass-lift:0.85] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[disabled]:hover:translate-y-0`;
 
 /* glassToneText tints a label toward its own tone, which stops being legible
  * on a dark surface once the tone itself is dark (the GlassHome deep blue).
@@ -74,7 +74,7 @@ function HeroActionContent(props: HeroActionContentProps) {
 						{(src) => <img src={src()} alt="" class="size-14 object-contain" aria-hidden="true" />}
 					</Show>
 				</span>
-				<div class="relative min-w-0 flex-1">
+				<div class="relative flex min-w-0 flex-1 flex-col gap-1">
 					<div class="flex items-center gap-2">
 						<h3
 							class="font-semibold text-lg leading-tight"
@@ -93,7 +93,7 @@ function HeroActionContent(props: HeroActionContentProps) {
 							</Tooltip>
 						</Show>
 					</div>
-					<p class="mt-1 truncate text-foreground/80 text-sm">{props.description}</p>
+					<p class="truncate text-foreground/80 text-sm">{props.description}</p>
 				</div>
 
 				<Show when={props.ornament === "check"}>
@@ -128,6 +128,7 @@ export function HeroAction(props: {
 	return (
 		<button
 			type="button"
+			data-slot="hero-action"
 			onClick={() => !props.disabled && props.onClick()}
 			disabled={props.disabled}
 			class={cn(HERO_ACTION_CHROME, props.class)}
