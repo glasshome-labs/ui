@@ -392,7 +392,7 @@ describe("ImagePicker", () => {
 		expect(failure.querySelector('[data-slot="empty-description"]')?.textContent).toMatch(
 			/your photos couldn't be listed/i,
 		);
-		expect(failure.querySelector('[data-slot="empty-icon"]')).toBeTruthy();
+		expect(failure.querySelector('[data-slot="empty-media"]')).toBeTruthy();
 		expect(
 			failure.querySelector('[data-slot="empty-content"] [data-slot="image-picker-retry"]'),
 		).toBeTruthy();
