@@ -2,12 +2,15 @@ import {
 	type Component,
 	type ComponentProps,
 	createContext,
+	createEffect,
 	createMemo,
 	createSignal,
 	createUniqueId,
+	type JSX,
 	onCleanup,
 	onMount,
 	type ParentComponent,
+	Show,
 	splitProps,
 	useContext,
 	type ValidComponent,
@@ -117,31 +120,69 @@ const FormLabel: Component<ComponentProps<typeof FieldLabel>> = (props) => {
 	);
 };
 
+let warnedFormControlWrapper = false;
+
+function warnFormControlWrapper() {
+	if (warnedFormControlWrapper) return;
+	if (typeof process !== "undefined" && process.env?.NODE_ENV === "production") return;
+	warnedFormControlWrapper = true;
+	console.warn(
+		'[FormControl] The wrapper shape (<FormControl><Input /></FormControl>) is deprecated: an aria-describedby on a div around an input is read by nothing. Render the control itself instead: <FormControl type="email" /> or <FormControl as={Textarea} />.',
+	);
+}
+
 /**
  * Renders THE control (default: `Input`, any other through `as`) with the id and
- * aria the field context knows. There is no wrapper: a describedby on a div
- * around an input is read by nothing.
+ * aria the field context knows.
+ *
+ * Passing children keeps the old wrapper shape working: a `div` carrying the
+ * same id and aria, with the children inside.
+ *
+ * @deprecated with `children`. Render the control itself, so the id and the
+ * describedby land on the element a screen reader announces.
  */
 const FormControl = <T extends ValidComponent = typeof Input>(
 	props: { as?: T } & ComponentProps<T>,
 ) => {
 	const { error, hasDescription, formItemId, formDescriptionId, formMessageId } = useFormField();
-	const [local, rest] = splitProps(props as { as?: ValidComponent }, ["as"]);
+	const [local, rest] = splitProps(props as { as?: ValidComponent; children?: JSX.Element }, [
+		"as",
+		"children",
+	]);
 	// Only the ids that actually render: a dangling idref reads as nothing.
 	const describedBy = () => {
 		const ids = [hasDescription() ? formDescriptionId() : "", error() ? formMessageId() : ""];
 		const rendered = ids.filter((id) => id !== "");
 		return rendered.length > 0 ? rendered.join(" ") : undefined;
 	};
+	const wrapped = createMemo(() => local.children !== undefined);
+	createEffect(() => {
+		if (wrapped()) warnFormControlWrapper();
+	});
 
 	return (
-		<Dynamic
-			component={local.as ?? Input}
-			id={formItemId()}
-			aria-describedby={describedBy()}
-			aria-invalid={error() ? true : undefined}
-			{...rest}
-		/>
+		<Show
+			when={wrapped()}
+			fallback={
+				<Dynamic
+					component={local.as ?? Input}
+					id={formItemId()}
+					aria-describedby={describedBy()}
+					aria-invalid={error() ? true : undefined}
+					{...rest}
+				/>
+			}
+		>
+			<div
+				data-slot="form-control"
+				id={formItemId()}
+				aria-describedby={describedBy()}
+				aria-invalid={error() ? true : undefined}
+				{...(rest as ComponentProps<"div">)}
+			>
+				{local.children}
+			</div>
+		</Show>
 	);
 };
 

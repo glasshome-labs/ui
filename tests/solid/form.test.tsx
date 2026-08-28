@@ -2,7 +2,7 @@
  * the id and aria wiring the context knows. The wiring is the whole point, so
  * it is asserted on the control element itself, not on a wrapper. */
 import { cleanup, render } from "@solidjs/testing-library";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	Form,
 	FormControl,
@@ -12,6 +12,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "../../src/solid/form.js";
+import { Input } from "../../src/solid/input.js";
 
 afterEach(cleanup);
 
@@ -53,7 +54,7 @@ describe("Form", () => {
 		expect(input.id).not.toBe("");
 		expect(label.getAttribute("for")).toBe(input.id);
 		expect(input.getAttribute("aria-describedby")).toBe(description.id);
-		expect(container.querySelector('[data-slot="form-control"]')).toBeNull();
+		expect(input.getAttribute("data-slot")).toBe("input");
 	});
 
 	it("adds the message to aria-describedby and marks the control invalid", () => {
@@ -83,6 +84,39 @@ describe("Form", () => {
 		expect(textarea?.getAttribute("rows")).toBe("3");
 		// Nothing described it, so there is no idref pointing at an absent element.
 		expect(textarea?.hasAttribute("aria-describedby")).toBe(false);
+	});
+
+	it("keeps the legacy wrapper shape alive when a child is passed", () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		const { container } = render(() => (
+			<Form errors={{ email: "Email is required." }}>
+				<FormField name="email">
+					<FormItem>
+						<FormLabel>Email</FormLabel>
+						<FormControl>
+							<Input type="email" />
+						</FormControl>
+						<FormDescription>We only use it for account recovery.</FormDescription>
+						<FormMessage />
+					</FormItem>
+				</FormField>
+			</Form>
+		));
+		const wrapper = container.querySelector<HTMLElement>('[data-slot="form-control"]');
+		const input = container.querySelector<HTMLInputElement>("input");
+		const description = container.querySelector<HTMLElement>('[data-slot="field-description"]');
+		const message = container.querySelector<HTMLElement>('[data-slot="field-error"]');
+		if (!wrapper || !input || !description || !message) throw new Error("form parts missing");
+
+		expect(wrapper.contains(input)).toBe(true);
+		expect(wrapper.id).not.toBe("");
+		expect(wrapper.getAttribute("aria-describedby")?.split(" ")).toEqual([
+			description.id,
+			message.id,
+		]);
+		expect(wrapper.getAttribute("aria-invalid")).toBe("true");
+		expect(warn).toHaveBeenCalledTimes(1);
+		warn.mockRestore();
 	});
 
 	it("drops the description id when the field renders no description", () => {
