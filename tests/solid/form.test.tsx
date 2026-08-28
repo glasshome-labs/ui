@@ -81,5 +81,24 @@ describe("Form", () => {
 		const textarea = container.querySelector<HTMLTextAreaElement>("textarea");
 		expect(textarea?.id).not.toBe("");
 		expect(textarea?.getAttribute("rows")).toBe("3");
+		// Nothing described it, so there is no idref pointing at an absent element.
+		expect(textarea?.hasAttribute("aria-describedby")).toBe(false);
+	});
+
+	it("drops the description id when the field renders no description", () => {
+		const { container } = render(() => (
+			<Form errors={{ email: "Email is required." }}>
+				<FormField name="email">
+					<FormItem>
+						<FormLabel>Email</FormLabel>
+						<FormControl type="email" />
+						<FormMessage />
+					</FormItem>
+				</FormField>
+			</Form>
+		));
+		const input = container.querySelector<HTMLInputElement>("input");
+		const message = container.querySelector<HTMLElement>('[data-slot="field-error"]');
+		expect(input?.getAttribute("aria-describedby")).toBe(message?.id);
 	});
 });

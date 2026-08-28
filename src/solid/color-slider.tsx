@@ -70,10 +70,11 @@ const ColorSlider: Component<ColorSliderProps> = (props) => {
 		>
 			<KColorSlider.Track
 				data-slot="color-slider-track"
-				class={cn(
-					"relative h-7 w-full bg-none",
-					local.disabled ? "cursor-not-allowed" : "cursor-pointer",
-				)}
+				class={cn("relative h-7 w-full", local.disabled ? "cursor-not-allowed" : "cursor-pointer")}
+				// Kobalte paints the channel gradient as an inline background here, which
+				// no class can beat; clearing it inline is what keeps the root's
+				// full-width gradient the only one.
+				style={{ background: "none" }}
 			>
 				<KColorSlider.Thumb
 					data-slot="color-slider-thumb"

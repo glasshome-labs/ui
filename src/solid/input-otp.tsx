@@ -145,7 +145,9 @@ const InputOTPSlot: Component<ComponentProps<"div"> & { index: number }> = (prop
 			data-slot="input-otp-slot"
 			data-active={isSlotActive()}
 			class={cn(
-				`relative flex ${CONTROL_H.default} w-9 items-center justify-center rounded-md ${INPUT_SURFACE} text-sm transition-all ${FOCUS_RING}`,
+				// Same constraint as the checkbox box: the theme's smallest radius token
+				// fully rounds a cell this size, and a digit cell is not a dot.
+				`relative flex ${CONTROL_H.default} w-9 items-center justify-center rounded-[5px] ${INPUT_SURFACE} text-sm transition-all ${FOCUS_RING}`,
 				"data-[active=true]:z-10 data-[active=true]:ring-[3px] data-[active=true]:ring-ring/50 data-[active=true]:[--glass-edge:var(--ring)]",
 				"aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:[--glass-edge:var(--destructive)]",
 				local.class,

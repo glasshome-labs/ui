@@ -3,7 +3,10 @@ import {
 	type ComponentProps,
 	createContext,
 	createMemo,
+	createSignal,
 	createUniqueId,
+	onCleanup,
+	onMount,
 	type ParentComponent,
 	splitProps,
 	useContext,
@@ -20,6 +23,8 @@ interface FormFieldContextValue {
 
 interface FormItemContextValue {
 	id: string;
+	hasDescription: () => boolean;
+	setHasDescription: (value: boolean) => void;
 }
 
 interface FormContextValue {
@@ -69,6 +74,7 @@ function useFormField() {
 	return {
 		id,
 		name,
+		hasDescription: () => itemContext?.hasDescription() ?? false,
 		formItemId: () => `${id()}-form-item`,
 		formDescriptionId: () => `${id()}-form-item-description`,
 		formMessageId: () => `${id()}-form-item-message`,
@@ -87,9 +93,10 @@ const FormField: ParentComponent<{ name: string }> = (props) => {
 /** @deprecated Use `Field`. Form* is the same stack with the id wiring attached. */
 const FormItem: ParentComponent<ComponentProps<typeof Field>> = (props) => {
 	const id = createUniqueId();
+	const [hasDescription, setHasDescription] = createSignal(false);
 
 	return (
-		<FormItemContext.Provider value={{ id }}>
+		<FormItemContext.Provider value={{ id, hasDescription, setHasDescription }}>
 			<Field {...props} />
 		</FormItemContext.Provider>
 	);
@@ -118,14 +125,20 @@ const FormLabel: Component<ComponentProps<typeof FieldLabel>> = (props) => {
 const FormControl = <T extends ValidComponent = typeof Input>(
 	props: { as?: T } & ComponentProps<T>,
 ) => {
-	const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
+	const { error, hasDescription, formItemId, formDescriptionId, formMessageId } = useFormField();
 	const [local, rest] = splitProps(props as { as?: ValidComponent }, ["as"]);
+	// Only the ids that actually render: a dangling idref reads as nothing.
+	const describedBy = () => {
+		const ids = [hasDescription() ? formDescriptionId() : "", error() ? formMessageId() : ""];
+		const rendered = ids.filter((id) => id !== "");
+		return rendered.length > 0 ? rendered.join(" ") : undefined;
+	};
 
 	return (
 		<Dynamic
 			component={local.as ?? Input}
 			id={formItemId()}
-			aria-describedby={error() ? `${formDescriptionId()} ${formMessageId()}` : formDescriptionId()}
+			aria-describedby={describedBy()}
 			aria-invalid={error() ? true : undefined}
 			{...rest}
 		/>
@@ -134,7 +147,11 @@ const FormControl = <T extends ValidComponent = typeof Input>(
 
 /** @deprecated Use `FieldDescription`. */
 const FormDescription: Component<ComponentProps<typeof FieldDescription>> = (props) => {
+	const itemContext = useContext(FormItemContext);
 	const { formDescriptionId } = useFormField();
+
+	onMount(() => itemContext?.setHasDescription(true));
+	onCleanup(() => itemContext?.setHasDescription(false));
 
 	return <FieldDescription id={formDescriptionId()} {...props} />;
 };
