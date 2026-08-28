@@ -48,6 +48,23 @@ describe("ToggleGroup", () => {
 		}
 	});
 
+	it("gives a multi-select segment hover feedback without a fill", () => {
+		const { container } = render(() => (
+			<ToggleGroup multiple value={["left"]}>
+				<ToggleGroupItem value="left">Left</ToggleGroupItem>
+				<ToggleGroupItem value="right">Right</ToggleGroupItem>
+			</ToggleGroup>
+		));
+		// No sliding indicator paints this group, so each pressed segment keeps its
+		// own fill, and the unpressed ones still have to answer the pointer.
+		expect(container.querySelector("[data-sliding-indicator]")).toBeNull();
+		for (const item of container.querySelectorAll<HTMLElement>('[data-slot="toggle-group-item"]')) {
+			expect(item.className).toContain("not-data-[pressed]:hover:text-primary");
+			expect(item.className).not.toContain("hover:bg-muted");
+			expect(item.className).toContain("data-[pressed]:bg-muted");
+		}
+	});
+
 	it("matches the item radius on the sliding indicator", async () => {
 		const { container } = render(() => (
 			<ToggleGroup value="left">

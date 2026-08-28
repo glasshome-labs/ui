@@ -19,6 +19,7 @@ import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
 export function ActionsCatalog() {
 	const [pressed, setPressed] = createSignal(true);
 	const [align, setAlign] = createSignal("center");
+	const [styles, setStyles] = createSignal<string[]>(["bold"]);
 	const [dock, setDock] = createSignal("home");
 	const [seg, setSeg] = createSignal(0);
 
@@ -69,6 +70,14 @@ export function ActionsCatalog() {
 					<ToggleGroupItem value="left">Left</ToggleGroupItem>
 					<ToggleGroupItem value="center">Center</ToggleGroupItem>
 					<ToggleGroupItem value="right">Right</ToggleGroupItem>
+				</ToggleGroup>
+			</CatalogItem>
+
+			<CatalogItem name="ToggleGroup, multiple" hint={`value: ${styles().join(", ") || "none"}`}>
+				<ToggleGroup multiple value={styles()} onChange={(v) => setStyles(v as string[])}>
+					<ToggleGroupItem value="bold">Bold</ToggleGroupItem>
+					<ToggleGroupItem value="italic">Italic</ToggleGroupItem>
+					<ToggleGroupItem value="underline">Underline</ToggleGroupItem>
 				</ToggleGroup>
 			</CatalogItem>
 

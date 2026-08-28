@@ -87,10 +87,11 @@ const ToggleGroupItem: Component<
 				// Single-select: the sliding indicator paints the active segment, so the
 				// item needs no pressed fill of its own and hover only tints the text.
 				// Multi-select has no single indicator, so each pressed segment carries
-				// its own neutral fill.
+				// its own neutral fill; hover still tints text only, since a fill there
+				// would read as a second, squarer selection.
 				context.sliding
 					? "hover:text-primary"
-					: "data-[pressed]:bg-muted data-[pressed]:text-foreground",
+					: "not-data-[pressed]:hover:text-primary data-[pressed]:bg-muted data-[pressed]:text-foreground",
 				local.class,
 			)}
 			{...rest}
