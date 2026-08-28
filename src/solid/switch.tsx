@@ -1,11 +1,7 @@
-import { type Component, type ComponentProps, splitProps } from "solid-js";
-import { FIELD_CHROME } from "../lib/input-classes.js";
+import { type Component, type ComponentProps, createSignal, splitProps } from "solid-js";
+import { FIELD_CHROME, FOCUS_RING } from "../lib/input-classes.js";
+import { THUMB_CLASS } from "../lib/thumb-classes.js";
 import { cn } from "../lib/utils.js";
-
-const TRACK_HEIGHT = 28;
-const THUMB_SIZE = 28;
-const TRACK_WIDTH = THUMB_SIZE * 2;
-const THUMB_TRAVEL = TRACK_WIDTH - THUMB_SIZE;
 
 type SwitchProps = Omit<ComponentProps<"button">, "onChange" | "children"> & {
 	checked?: boolean;
@@ -22,46 +18,47 @@ const Switch: Component<SwitchProps> = (props) => {
 		"disabled",
 		"name",
 	]);
+	const [uncontrolled, setUncontrolled] = createSignal(props.defaultChecked ?? false);
+	const checked = () => local.checked ?? uncontrolled();
 
 	return (
 		<button
 			{...rest}
 			type="button"
 			role="switch"
-			aria-checked={local.checked ?? false}
+			aria-checked={checked()}
 			data-slot="switch"
+			data-checked={checked() ? "" : undefined}
 			disabled={local.disabled}
 			class={cn(
 				// Unchecked wears the recessed input surface, the same dug-out glass as
 				// the slider rail; checked matches the slider fill. A `border-input`
 				// utility here would beat `:where(.glass)` and flatten the rim.
-				"peer relative inline-flex shrink-0 cursor-pointer items-center rounded-xl outline-none transition-all duration-200 ease-out focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
-				local.checked ? "glass glass-tint [--glass-tone:var(--primary)]" : FIELD_CHROME,
+				`group/switch peer relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-xl transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS_RING}`,
+				checked() ? "glass glass-tint [--glass-tone:var(--primary)]" : FIELD_CHROME,
 				local.class,
 			)}
-			style={{
-				width: `${TRACK_WIDTH}px`,
-				height: `${TRACK_HEIGHT}px`,
+			onClick={() => {
+				const next = !checked();
+				setUncontrolled(next);
+				local.onChange?.(next);
 			}}
-			onClick={() => local.onChange?.(!local.checked)}
 		>
 			<span
 				data-slot="switch-thumb"
-				class="pointer-events-none block rounded-xl transition-transform duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]"
+				class={cn(
+					THUMB_CLASS,
+					"pointer-events-none transition-transform duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] group-data-[checked]/switch:translate-x-full",
+				)}
 				style={{
-					width: `${THUMB_SIZE}px`,
-					height: `${THUMB_SIZE}px`,
 					// Only ON wears the accent. A knob painted --primary in both states
 					// makes an off switch read as on, which is the one thing a switch
 					// has to say; off takes the neutral the rest of the system uses for
 					// inert chrome. Inline, so a caller cannot fix it with a class.
-					background: local.checked ? "var(--primary)" : "var(--muted-foreground)",
-					"box-shadow":
-						"0 2px 5px oklch(0 0 0 / 0.35), inset 0 1px 0 oklch(1 0 0 / 0.35), inset 0 -2px 3px oklch(0 0 0 / 0.2)",
-					transform: `translateX(${local.checked ? THUMB_TRAVEL : 0}px)`,
+					background: checked() ? "var(--primary)" : "var(--muted-foreground)",
 				}}
 			/>
-			{local.name && <input type="hidden" name={local.name} value={local.checked ? "on" : "off"} />}
+			{local.name && <input type="hidden" name={local.name} value={checked() ? "on" : "off"} />}
 		</button>
 	);
 };

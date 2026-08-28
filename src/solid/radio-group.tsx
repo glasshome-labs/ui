@@ -6,7 +6,11 @@ import { cn } from "../lib/utils.js";
 const RadioGroup: Component<ComponentProps<typeof RadioGroupPrimitive>> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	return (
-		<RadioGroupPrimitive data-slot="radio-group" class={cn("grid gap-3", local.class)} {...rest} />
+		<RadioGroupPrimitive
+			data-slot="radio-group"
+			class={cn("flex flex-col gap-3", local.class)}
+			{...rest}
+		/>
 	);
 };
 
@@ -21,14 +25,26 @@ const RadioGroupItem: Component<
 			{...rest}
 		>
 			<RadioGroupPrimitive.ItemInput class="peer" />
-			<RadioGroupPrimitive.ItemLabel class="flex flex-1 cursor-pointer select-none items-center gap-2.5 data-[disabled]:cursor-not-allowed">
+			<RadioGroupPrimitive.ItemLabel
+				data-slot="radio-group-item-label"
+				class="flex flex-1 cursor-pointer select-none items-center gap-2.5 data-[disabled]:cursor-not-allowed"
+			>
 				<Show when={local.showControl ?? true}>
 					<RadioGroupPrimitive.ItemControl
-						class={`relative flex aspect-square size-7 shrink-0 items-center justify-center overflow-hidden rounded-full ${FIELD_CHROME} shadow-xs outline-none transition-all duration-200 ease-out active:scale-90 peer-focus-visible:border-ring peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50 data-[checked]:border-transparent data-[invalid]:border-destructive data-[disabled]:border-dashed data-[disabled]:opacity-40 data-[invalid]:ring-destructive/20`}
+						data-slot="radio-group-item-control"
+						class={cn(
+							"relative flex aspect-square size-7 shrink-0 items-center justify-center overflow-hidden rounded-full transition-all duration-200 ease-out active:scale-90",
+							FIELD_CHROME,
+							"peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50 peer-focus-visible:[--glass-edge:var(--ring)]",
+							"data-[disabled]:opacity-40 data-[invalid]:ring-destructive/20 data-[invalid]:[--glass-edge:var(--destructive)]",
+						)}
 					>
 						{/* Gradient backgrounds can't transition; the glass rides an inner element
 						    that animates in. */}
-						<RadioGroupPrimitive.ItemIndicator class="glass glass-tint zoom-in-50 fade-in absolute inset-0 animate-in rounded-full duration-200 [--glass-tone:var(--primary)]" />
+						<RadioGroupPrimitive.ItemIndicator
+							data-slot="radio-group-item-indicator"
+							class="glass glass-tint zoom-in-50 fade-in absolute inset-0 animate-in rounded-full duration-200 [--glass-tone:var(--primary)]"
+						/>
 					</RadioGroupPrimitive.ItemControl>
 				</Show>
 				{local.children && (

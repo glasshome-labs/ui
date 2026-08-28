@@ -1,11 +1,9 @@
 import { Slider as KSlider } from "@kobalte/core/slider";
 import type { Component } from "solid-js";
 import { Index, splitProps } from "solid-js";
-import { FIELD_CHROME } from "../lib/input-classes.js";
+import { FIELD_CHROME, FOCUS_RING } from "../lib/input-classes.js";
+import { THUMB_CLASS, THUMB_RAIL_BLEED, THUMB_RAIL_PAD } from "../lib/thumb-classes.js";
 import { cn } from "../lib/utils.js";
-
-const THUMB_SIZE = 28;
-const HALF_THUMB = THUMB_SIZE / 2;
 
 interface SliderProps {
 	value?: number[];
@@ -72,47 +70,44 @@ const Slider: Component<SliderProps> = (props) => {
 			disabled={local.disabled}
 			onChange={local.onChange}
 			onChangeEnd={local.onChangeEnd}
+			data-slot="slider"
 			class={cn(
 				// The rail wears the shared toggle/rail chrome, so it reads as an empty
 				// well in both themes (a field's light-theme fill rises to the card).
 				"relative flex w-full touch-none select-none items-center rounded-xl",
+				THUMB_RAIL_PAD,
 				FIELD_CHROME,
 				local.disabled && "cursor-not-allowed opacity-50",
 				local.class,
 			)}
-			style={{
-				"padding-left": `${HALF_THUMB}px`,
-				"padding-right": `${HALF_THUMB}px`,
-			}}
 		>
 			<KSlider.Track
-				class={cn("relative w-full", local.trackClass)}
-				style={{
-					height: `${THUMB_SIZE}px`,
-					cursor: local.disabled ? "not-allowed" : "pointer",
-				}}
+				data-slot="slider-track"
+				class={cn(
+					"relative h-7 w-full",
+					local.disabled ? "cursor-not-allowed" : "cursor-pointer",
+					local.trackClass,
+				)}
 			>
 				<KSlider.Fill
-					class={cn("glass glass-tint", Array.isArray(local.fillTone) && "glass-edge-gradient")}
-					style={{
-						position: "absolute",
-						top: "0",
-						bottom: "0",
-						"margin-left": `${-HALF_THUMB}px`,
-						"margin-right": `${-HALF_THUMB}px`,
-						"border-radius": "var(--radius-xl)",
+					data-slot="slider-fill"
+					class={cn(
 						// The fill sits sunk inside the recessed rail: the tinted-surface
 						// outer drop shadow would read as a halo leaking out of the groove.
-						"--glass-drop": "0%",
-						...(Array.isArray(local.fillTone)
+						"glass glass-tint absolute inset-y-0 rounded-xl [--glass-drop:0%]",
+						THUMB_RAIL_BLEED,
+						Array.isArray(local.fillTone) && "glass-edge-gradient",
+					)}
+					style={
+						Array.isArray(local.fillTone)
 							? {
 									"--glass-tone": local.fillTone[0],
 									"--glass-tone-2": local.fillTone[1],
 									"--glass-wash-2": "var(--glass-wash)",
 									"--glass-wash-angle": "90deg",
 								}
-							: { "--glass-tone": local.fillTone ?? "var(--primary)" }),
-					}}
+							: { "--glass-tone": local.fillTone ?? "var(--primary)" }
+					}
 				/>
 				<Index each={local.markers ?? []}>
 					{(marker) => (
@@ -129,20 +124,17 @@ const Slider: Component<SliderProps> = (props) => {
 				<Index each={local.value ?? local.defaultValue ?? [0]}>
 					{(_, thumbIndex) => (
 						<KSlider.Thumb
+							data-slot="slider-thumb"
 							class={cn(
-								"absolute top-0 block rounded-xl transition-transform duration-200 ease-out hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-110",
+								THUMB_CLASS,
+								FOCUS_RING,
+								"absolute top-0 transition-transform duration-200 ease-out hover:scale-125 active:scale-110",
 								local.disabled && "cursor-not-allowed",
 								local.thumbClass,
 							)}
 							aria-label={local["aria-label"]}
 							aria-labelledby={local["aria-labelledby"]}
-							style={{
-								width: `${THUMB_SIZE}px`,
-								height: `${THUMB_SIZE}px`,
-								background: local.thumbColors?.[thumbIndex] ?? "var(--primary)",
-								"box-shadow":
-									"0 2px 5px oklch(0 0 0 / 0.35), inset 0 1px 0 oklch(1 0 0 / 0.35), inset 0 -2px 3px oklch(0 0 0 / 0.2)",
-							}}
+							style={{ background: local.thumbColors?.[thumbIndex] ?? "var(--primary)" }}
 						>
 							<KSlider.Input />
 						</KSlider.Thumb>

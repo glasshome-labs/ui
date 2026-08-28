@@ -2,10 +2,9 @@ import { ColorSlider as KColorSlider } from "@kobalte/core/color-slider";
 import type { Color, ColorChannel } from "@kobalte/core/colors";
 import type { Component } from "solid-js";
 import { splitProps } from "solid-js";
+import { FOCUS_RING } from "../lib/input-classes.js";
+import { THUMB_CLASS, THUMB_RAIL_PAD } from "../lib/thumb-classes.js";
 import { cn } from "../lib/utils.js";
-
-const THUMB_SIZE = 28;
-const HALF_THUMB = THUMB_SIZE / 2;
 
 interface ColorSliderProps {
 	value?: Color;
@@ -30,10 +29,8 @@ const ColorSlider: Component<ColorSliderProps> = (props) => {
 		"aria-label",
 	]);
 
-	// Same geometry as slider.tsx: the root is padded by half a thumb on each
-	// side so the thumb stays fully inside at min/max. Kobalte paints the
-	// channel gradient on the (padded) track, which leaves naked strips at the
-	// ends, so we rebuild the gradient on the full-width root instead.
+	// Kobalte paints the channel gradient on the (half-thumb padded) track, which
+	// leaves naked strips at the ends, so we rebuild it on the full-width root.
 	const gradient = () => {
 		const color = local.value ?? local.defaultValue;
 		if (!color) return undefined;
@@ -62,39 +59,32 @@ const ColorSlider: Component<ColorSliderProps> = (props) => {
 			onChange={local.onChange}
 			onChangeEnd={local.onChangeEnd}
 			disabled={local.disabled}
+			data-slot="color-slider"
 			class={cn(
 				"relative flex w-full touch-none select-none items-center rounded-xl",
+				THUMB_RAIL_PAD,
 				local.disabled && "cursor-not-allowed opacity-50",
 				local.class,
 			)}
-			style={{
-				"padding-left": `${HALF_THUMB}px`,
-				"padding-right": `${HALF_THUMB}px`,
-				background: gradient(),
-			}}
+			style={{ background: gradient() }}
 		>
 			<KColorSlider.Track
-				class="relative w-full"
-				style={{
-					height: `${THUMB_SIZE}px`,
-					background: "none",
-					cursor: local.disabled ? "not-allowed" : "pointer",
-				}}
+				data-slot="color-slider-track"
+				class={cn(
+					"relative h-7 w-full bg-none",
+					local.disabled ? "cursor-not-allowed" : "cursor-pointer",
+				)}
 			>
 				<KColorSlider.Thumb
+					data-slot="color-slider-thumb"
 					class={cn(
-						"absolute top-0 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+						THUMB_CLASS,
+						FOCUS_RING,
+						"absolute top-0",
 						local.disabled && "cursor-not-allowed",
 					)}
 					aria-label={local["aria-label"] ?? local.channel}
-					style={{
-						width: `${THUMB_SIZE}px`,
-						height: `${THUMB_SIZE}px`,
-						"border-radius": "var(--radius-xl)",
-						background: "var(--kb-color-current)",
-						border: "2px solid var(--background)",
-						"box-shadow": "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-					}}
+					style={{ background: "var(--kb-color-current)" }}
 				>
 					<KColorSlider.Input />
 				</KColorSlider.Thumb>

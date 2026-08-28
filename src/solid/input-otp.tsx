@@ -9,6 +9,7 @@ import {
 	splitProps,
 	useContext,
 } from "solid-js";
+import { CONTROL_H, FOCUS_RING, INPUT_SURFACE } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
 
 interface InputOTPContextValue {
@@ -123,7 +124,13 @@ const InputOTP: ParentComponent<
 
 const InputOTPGroup: Component<ComponentProps<"div">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
-	return <div data-slot="input-otp-group" class={cn("flex items-center", local.class)} {...rest} />;
+	return (
+		<div
+			data-slot="input-otp-group"
+			class={cn("flex items-center gap-1.5", local.class)}
+			{...rest}
+		/>
+	);
 };
 
 const InputOTPSlot: Component<ComponentProps<"div"> & { index: number }> = (props) => {
@@ -138,7 +145,9 @@ const InputOTPSlot: Component<ComponentProps<"div"> & { index: number }> = (prop
 			data-slot="input-otp-slot"
 			data-active={isSlotActive()}
 			class={cn(
-				"relative flex h-9 w-9 items-center justify-center border-input border-y border-r bg-input/30 text-sm outline-none transition-all first:rounded-l-md first:border-l last:rounded-r-md aria-invalid:border-destructive data-[active=true]:z-10 data-[active=true]:border-ring data-[active=true]:ring-[3px] data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:border-destructive data-[active=true]:aria-invalid:ring-destructive/20 dark:bg-input/30 dark:data-[active=true]:aria-invalid:ring-destructive/40",
+				`relative flex ${CONTROL_H.default} w-9 items-center justify-center rounded-md ${INPUT_SURFACE} text-sm transition-all ${FOCUS_RING}`,
+				"data-[active=true]:z-10 data-[active=true]:ring-[3px] data-[active=true]:ring-ring/50 data-[active=true]:[--glass-edge:var(--ring)]",
+				"aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:[--glass-edge:var(--destructive)]",
 				local.class,
 			)}
 			{...rest}
