@@ -1,12 +1,17 @@
 import { createMemo, createSignal, createUniqueId, For, Show } from "solid-js";
 import { FIELD_CHROME } from "../lib/input-classes.js";
+import { cn } from "../lib/utils.js";
+import { Overlay } from "./overlay.js";
 import { Tabs, TabsList, TabsTrigger } from "./tabs.js";
 
 const numberFmt = new Intl.NumberFormat("en-US");
 
 /* Bars and chart backings wear the field chrome so a ranked bar reads as a
- * static slider; fills are the slider's own tinted glass. */
+ * static slider; fills are the slider's own tinted glass. One radius for the
+ * pill-shaped wells (BarList/StackedBar); AreaChart's rectangular sparkline
+ * background is a legitimately different shape and keeps its own rounded-xl. */
 const SLIDER_WELL = FIELD_CHROME;
+const SLIDER_WELL_RADIUS = "rounded-full";
 const SLIDER_FILL = "glass glass-tint [--glass-tone:var(--primary)]";
 
 function formatDayLabel(day: string): string {
@@ -80,8 +85,8 @@ function ChartHover(props: {
 				class="pointer-events-none absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-background bg-primary"
 				style={{ left: `${props.leftPct}%`, top: `${props.topPct}%` }}
 			/>
-			<div
-				class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md border border-border/60 bg-popover px-2 py-1 text-[11px] shadow-md"
+			<Overlay
+				class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap px-2 py-1 text-xs"
 				style={{
 					left: `${Math.min(92, Math.max(8, props.leftPct))}%`,
 					top: `${Math.max(0, props.topPct - 6)}%`,
@@ -89,7 +94,7 @@ function ChartHover(props: {
 			>
 				<span class="font-mono font-semibold tabular-nums">{label()}</span>
 				<span class="ml-1 text-muted-foreground">{formatDayLabel(props.point.day)}</span>
-			</div>
+			</Overlay>
 		</>
 	);
 }
@@ -127,7 +132,8 @@ export function AreaChart(props: {
 			when={geom()}
 			fallback={
 				<div
-					class={`flex items-center justify-center text-muted-foreground text-xs ${props.class ?? ""}`}
+					data-slot="area-chart"
+					class={cn("flex items-center justify-center text-muted-foreground text-xs", props.class)}
 					style={{ height: `${height()}px` }}
 				>
 					Not enough data yet
@@ -136,7 +142,8 @@ export function AreaChart(props: {
 		>
 			{(g) => (
 				<div
-					class={`relative overflow-hidden rounded-xl px-px ${SLIDER_WELL}`}
+					data-slot="area-chart"
+					class={cn("relative overflow-hidden rounded-xl px-px", SLIDER_WELL)}
 					style={{ height: `${height()}px` }}
 					onPointerMove={onMove}
 					onPointerLeave={() => setHover(null)}
@@ -144,7 +151,7 @@ export function AreaChart(props: {
 					<svg
 						viewBox="0 0 100 32"
 						preserveAspectRatio="none"
-						class={`h-full w-full text-primary ${props.class ?? ""}`}
+						class={cn("h-full w-full text-primary", props.class)}
 						role="img"
 						aria-label={`Peak ${g().max} per day`}
 					>
@@ -194,25 +201,37 @@ export function BarList(props: {
 	return (
 		<Show
 			when={props.items.length > 0}
-			fallback={<div class="py-2 text-muted-foreground text-xs">{props.empty ?? "No data"}</div>}
+			fallback={
+				<div data-slot="bar-list" class="py-2 text-muted-foreground text-xs">
+					{props.empty ?? "No data"}
+				</div>
+			}
 		>
-			<div class="space-y-1.5">
+			<div data-slot="bar-list" class="space-y-1.5">
 				<For each={props.items}>
 					{(item) => {
 						const pct = () => `${Math.max(2, (item.value / max()) * 100).toFixed(1)}%`;
 						const Row = (
 							<div class="group flex items-center gap-2 text-xs">
-								<div class={`relative min-w-0 flex-1 overflow-hidden rounded-full ${SLIDER_WELL}`}>
+								<div
+									class={cn(
+										"relative min-w-0 flex-1 overflow-hidden",
+										SLIDER_WELL_RADIUS,
+										SLIDER_WELL,
+									)}
+								>
 									<div
-										class={`absolute inset-y-0 left-0 rounded-full transition-[width] ${SLIDER_FILL}`}
+										class={cn(
+											"absolute inset-y-0 left-0 transition-[width]",
+											SLIDER_WELL_RADIUS,
+											SLIDER_FILL,
+										)}
 										style={{ width: pct() }}
 									/>
 									<div class="relative flex items-center justify-between gap-2 px-2 py-1">
 										<span class="truncate">{item.label}</span>
 										<Show when={item.sublabel}>
-											<span class="shrink-0 text-[10px] text-muted-foreground">
-												{item.sublabel}
-											</span>
+											<span class="shrink-0 text-muted-foreground text-xs">{item.sublabel}</span>
 										</Show>
 									</div>
 								</div>
@@ -248,45 +267,73 @@ const RANGE_OPTIONS = [
 export function RangeToggle(props: { value: number; onChange: (days: number) => void }) {
 	return (
 		<Tabs value={String(props.value)} onChange={(v) => props.onChange(Number(v))}>
-			<TabsList class="h-8 w-auto">
+			<TabsList>
 				<For each={RANGE_OPTIONS}>
-					{(opt) => (
-						<TabsTrigger value={String(opt.value)} class="px-2.5 py-0.5 text-xs">
-							{opt.label}
-						</TabsTrigger>
-					)}
+					{(opt) => <TabsTrigger value={String(opt.value)}>{opt.label}</TabsTrigger>}
 				</For>
 			</TabsList>
 		</Tabs>
 	);
 }
 
+type StackedBarSegment = {
+	label: string;
+	value: number;
+	/** CSS color driving the segment's own glass tint. */
+	tone?: string;
+	/** @deprecated pass `tone` instead */
+	class?: string;
+};
+
+function segmentClass(s: StackedBarSegment) {
+	return cn(s.tone && "glass glass-tint", s.class);
+}
+
+function segmentStyle(s: StackedBarSegment) {
+	return s.tone ? { "--glass-tone": s.tone } : undefined;
+}
+
 /** Segmented proportion bar (e.g. staleness fresh/aging/stale). */
-export function StackedBar(props: { segments: { label: string; value: number; class: string }[] }) {
+export function StackedBar(props: { segments: StackedBarSegment[] }) {
 	const total = createMemo(() => props.segments.reduce((a, s) => a + s.value, 0) || 1);
 	return (
-		<div class="space-y-2">
-			<div class={`relative flex h-2.5 overflow-hidden rounded-full ${SLIDER_WELL}`}>
+		<div data-slot="stacked-bar" class="space-y-2">
+			<div
+				class={cn(
+					"relative flex h-2.5 overflow-hidden [--glass-rim:1]",
+					SLIDER_WELL_RADIUS,
+					SLIDER_WELL,
+				)}
+			>
 				<For each={props.segments}>
 					{(s) => (
 						<Show when={s.value > 0}>
 							<div
-								class={s.class}
-								style={{ width: `${(s.value / total()) * 100}%` }}
+								class={segmentClass(s)}
+								style={{ width: `${(s.value / total()) * 100}%`, ...segmentStyle(s) }}
 								title={`${s.label}: ${s.value}`}
 							/>
 						</Show>
 					)}
 				</For>
-				{/* the material's own top rim, re-laid over the opaque segments so the
-            filled bar catches light like every other glass surface */}
-				<div class="pointer-events-none absolute inset-0 rounded-full shadow-[inset_0_1px_0_oklch(1_0_0/var(--glass-rim))]" />
+				{/* re-laid over the opaque segments (which paint above the well's own
+            box-shadow) so the filled bar still catches light like glass; the
+            rim value is redeclared here since --glass-rim doesn't inherit. */}
+				<div
+					class={cn(
+						"pointer-events-none absolute inset-0 shadow-[inset_0_1px_0_oklch(1_0_0/var(--glass-rim))] [--glass-rim:1]",
+						SLIDER_WELL_RADIUS,
+					)}
+				/>
 			</div>
-			<div class="flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
+			<div class="flex flex-wrap gap-x-3 gap-y-1 text-xs">
 				<For each={props.segments}>
 					{(s) => (
 						<span class="inline-flex items-center gap-1.5 text-muted-foreground">
-							<span class={`inline-block size-2 rounded-full ${s.class}`} />
+							<span
+								class={cn("inline-block size-2 rounded-full", segmentClass(s))}
+								style={segmentStyle(s)}
+							/>
 							{s.label}
 							<span class="font-mono text-foreground tabular-nums">{s.value}</span>
 						</span>
