@@ -12,16 +12,23 @@ const Checkbox: Component<ComponentProps<typeof CheckboxPrimitive>> = (props) =>
 			{/* One <label> row: the box is a plain span, not a Kobalte Control, so a
 			    click anywhere toggles exactly once. */}
 			{(state) => (
-				<CheckboxPrimitive.Label class="group inline-flex cursor-pointer select-none items-center gap-2.5 data-[disabled]:cursor-not-allowed">
+				<CheckboxPrimitive.Label
+					data-slot="checkbox-label"
+					class="group inline-flex cursor-pointer select-none items-center gap-2.5 data-[disabled]:cursor-not-allowed"
+				>
 					<CheckboxPrimitive.Input class="peer" />
 					<span
 						aria-hidden="true"
+						data-slot="checkbox-box"
 						class={cn(
-							"box-border inline-flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-[5px] shadow-xs transition-all duration-200 ease-out group-active:scale-90 peer-focus-visible:border-ring peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50",
+							// The theme's smallest radius token fully rounds a box this size, which
+							// would make the checkbox read as a radio.
+							"box-border inline-flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-[5px] transition-all duration-200 ease-out group-active:scale-90",
+							"peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50 peer-focus-visible:[--glass-edge:var(--ring)]",
 							state.checked()
 								? "glass glass-tint text-foreground [--glass-tone:var(--primary)]"
 								: FIELD_CHROME,
-							props.disabled && "cursor-not-allowed border-dashed opacity-40",
+							props.disabled && "cursor-not-allowed opacity-40",
 							local.class,
 						)}
 					>
@@ -36,7 +43,11 @@ const Checkbox: Component<ComponentProps<typeof CheckboxPrimitive>> = (props) =>
 							)}
 						/>
 					</span>
-					{local.children && <span class="text-sm leading-none">{label()}</span>}
+					{local.children && (
+						<span data-slot="checkbox-text" class="text-sm leading-none">
+							{label()}
+						</span>
+					)}
 				</CheckboxPrimitive.Label>
 			)}
 		</CheckboxPrimitive>

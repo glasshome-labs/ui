@@ -36,11 +36,15 @@ describe("Switch", () => {
 	it("moves the thumb and reports state through aria-checked", () => {
 		const off = render(() => <Switch checked={false} />);
 		expect(parts(off.container).root.getAttribute("aria-checked")).toBe("false");
-		expect(parts(off.container).thumb.style.transform).toBe("translateX(0px)");
+		expect(parts(off.container).root.hasAttribute("data-checked")).toBe(false);
 
 		const on = render(() => <Switch checked />);
 		expect(parts(on.container).root.getAttribute("aria-checked")).toBe("true");
-		expect(parts(on.container).thumb.style.transform).not.toBe("translateX(0px)");
+		// The thumb travels one thumb width, driven by the track's data-checked.
+		expect(parts(on.container).root.hasAttribute("data-checked")).toBe(true);
+		expect(parts(on.container).thumb.className).toContain(
+			"group-data-[checked]/switch:translate-x-full",
+		);
 	});
 
 	it("carries an accessible name through to the role=switch element", () => {

@@ -10,10 +10,10 @@ import { Button } from "./button.js";
 import { Card } from "./card.js";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible.js";
 import { EntitySelector } from "./entity-selector.js";
+import { Field, FieldDescription, FieldLabel, FieldLegend, FieldSet } from "./field.js";
 import { IconPicker, type IconPickerProps } from "./icon-picker.js";
 import { ImagePicker } from "./image-picker.js";
 import { Input } from "./input.js";
-import { Label } from "./label.js";
 import { createListReorder } from "./list-reorder.js";
 import { useMediaStore } from "./media-store.js";
 import { NumberField } from "./number-field.js";
@@ -187,7 +187,7 @@ export function SchemaForm(props: SchemaFormProps) {
 	};
 
 	return (
-		<div class={cn("w-full min-w-0 space-y-5", props.class)} data-slot="schema-form">
+		<div class={cn("flex w-full min-w-0 flex-col gap-6", props.class)} data-slot="schema-form">
 			<For each={properties()}>
 				{([key, prop]) => (
 					<LabeledField
@@ -202,12 +202,11 @@ export function SchemaForm(props: SchemaFormProps) {
 			</For>
 
 			<Show when={props.errors && props.errors.length > 0}>
-				<div class="rounded border border-destructive bg-destructive/10 p-3 text-destructive text-sm">
-					<p class="mb-2 font-semibold">Validation errors:</p>
-					<ul class="list-inside list-disc space-y-1">
+				<Alert tone="destructive" title="Validation errors">
+					<ul class="flex list-inside list-disc flex-col gap-1">
 						<For each={props.errors}>{(err) => <li>{err}</li>}</For>
 					</ul>
-				</div>
+				</Alert>
 			</Show>
 		</div>
 	);
@@ -231,18 +230,19 @@ interface FieldProps {
 	bare?: boolean;
 }
 
+/* A control's own hint sits below the control; a group carries its legend and
+ * explanation above its rows, so the group branch renders its own caption. */
 function LabeledField(props: FieldProps) {
-	const groupRoot = () => props.bare === true && isObjectGroup(props.prop);
 	return (
-		<div class="flex flex-col gap-1.5" data-slot="schema-form-field">
-			<Show when={!groupRoot()}>
-				<Label for={props.id}>{props.prop.title || props.name}</Label>
-			</Show>
-			<Show when={props.prop.description}>
-				<p class="text-muted-foreground text-xs">{props.prop.description}</p>
-			</Show>
-			<FieldControl {...props} />
-		</div>
+		<Show when={!isObjectGroup(props.prop)} fallback={<FieldControl {...props} />}>
+			<Field>
+				<FieldLabel for={props.id}>{props.prop.title || props.name}</FieldLabel>
+				<FieldControl {...props} />
+				<Show when={props.prop.description}>
+					{(description) => <FieldDescription>{description()}</FieldDescription>}
+				</Show>
+			</Field>
+		</Show>
 	);
 }
 
@@ -342,13 +342,16 @@ function FieldControl(props: FieldProps) {
 				/>
 			</Match>
 			<Match when={isObjectGroup(props.prop)}>
-				<div
-					class={cn(
-						"flex flex-col gap-3",
-						props.bare !== true && "rounded-lg border border-border p-3",
-					)}
+				<FieldSet
+					class={cn(props.bare !== true && "rounded-lg border border-border p-3")}
 					data-slot="schema-form-object"
 				>
+					<Show when={props.bare !== true}>
+						<FieldLegend variant="label">{props.prop.title || props.name}</FieldLegend>
+					</Show>
+					<Show when={props.prop.description}>
+						{(description) => <FieldDescription>{description()}</FieldDescription>}
+					</Show>
 					<For each={propertiesOf(props.prop)}>
 						{([subKey, subProp]) => (
 							<LabeledField
@@ -361,11 +364,15 @@ function FieldControl(props: FieldProps) {
 							/>
 						)}
 					</For>
-				</div>
+				</FieldSet>
 			</Match>
 		</SwitchFlow>
 	);
 }
+
+/* The drop slot the drag preview opens is the list's own gap, so both faces of
+ * it come from here. */
+const LIST_GAP = { class: "gap-2", px: 8 } as const;
 
 function ListControl(props: FieldProps) {
 	const itemSchema = () => itemsOf(props.prop);
@@ -444,10 +451,9 @@ function ListControl(props: FieldProps) {
 		}
 	};
 
-	// gapPx mirrors the container's gap-2 so the drop slot reads visually.
 	const listDrag = createListReorder({
 		count: () => items().length,
-		gapPx: 8,
+		gapPx: LIST_GAP.px,
 		onReorder: reorder,
 		onDragStart: (index) => {
 			if (openIndex() === index) setOpenIndex(-1);
@@ -460,7 +466,7 @@ function ListControl(props: FieldProps) {
 	};
 
 	return (
-		<div class="flex w-full min-w-0 flex-col gap-2" data-slot="schema-form-list">
+		<div class={cn("flex w-full min-w-0 flex-col", LIST_GAP.class)} data-slot="schema-form-list">
 			<Index each={items()}>
 				{(item, index) => (
 					<Card
@@ -480,8 +486,9 @@ function ListControl(props: FieldProps) {
 							}}
 						>
 							<div
+								data-slot="schema-form-list-row"
 								class={cn(
-									"relative flex min-h-11 select-none items-center gap-0.5 py-1 pr-1.5 pl-2",
+									"relative flex min-h-11 select-none items-center gap-1.5 py-1 pr-1.5 pl-2",
 									"transition-colors duration-(--duration-micro) hover:bg-muted/40",
 								)}
 								onPointerDown={(e: PointerEvent) => {
@@ -510,7 +517,7 @@ function ListControl(props: FieldProps) {
 									<span
 										class={cn(
 											FIELD_CHROME,
-											"pointer-events-none relative ml-1.5 flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md text-muted-foreground",
+											"pointer-events-none relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md text-muted-foreground",
 										)}
 										data-slot="schema-form-list-item-thumb"
 									>
@@ -539,12 +546,12 @@ function ListControl(props: FieldProps) {
 										</Show>
 									</span>
 								</Show>
-								<span class="pointer-events-none relative ml-2 min-w-0 flex-1 truncate text-left text-sm">
+								<span class="pointer-events-none relative min-w-0 flex-1 truncate text-left text-sm">
 									{caption(item(), index)}
 								</span>
 								<Show when={kindLabel(item())}>
 									{(label) => (
-										<Badge class="pointer-events-none relative mr-1 shrink-0">{label()}</Badge>
+										<Badge class="pointer-events-none relative shrink-0">{label()}</Badge>
 									)}
 								</Show>
 								<Button
@@ -594,13 +601,13 @@ function ListControl(props: FieldProps) {
 				)}
 			</Index>
 			<Show when={items().length < minItems()}>
-				<p class="text-muted-foreground text-xs">
+				<p class="text-muted-foreground text-sm">
 					Add at least {minItems()} {minItems() === 1 ? "item" : "items"}.
 				</p>
 			</Show>
 			<Button
 				variant="outline"
-				class="self-start"
+				class="w-full"
 				disabled={atMax()}
 				onClick={add}
 				data-slot="schema-form-list-add"
@@ -698,26 +705,17 @@ function StringListField(props: { value: string[]; onChange: (value: string[]) =
 				<div class="flex flex-wrap gap-1.5">
 					<For each={props.value}>
 						{(item) => (
-							<span class="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-secondary-foreground text-xs">
+							<Badge>
 								{item}
 								<button
 									type="button"
 									aria-label={`Remove ${item}`}
 									onClick={() => props.onChange(props.value.filter((v) => v !== item))}
-									class="ml-0.5 rounded-sm hover:text-destructive"
+									class="cursor-pointer rounded-sm hover:text-destructive"
 								>
-									<svg
-										class="h-3 w-3"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										aria-hidden="true"
-									>
-										<path d="M18 6L6 18M6 6l12 12" />
-									</svg>
+									<Icon icon="lucide:x" width={12} height={12} aria-hidden="true" />
 								</button>
-							</span>
+							</Badge>
 						)}
 					</For>
 				</div>

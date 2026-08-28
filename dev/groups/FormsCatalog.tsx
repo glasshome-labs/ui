@@ -3,6 +3,7 @@ import { createSignal } from "solid-js";
 import type { ExtendedJSONSchema } from "../../src/solid";
 import {
 	Checkbox,
+	ColorSlider,
 	Field,
 	FieldContent,
 	FieldDescription,
@@ -37,6 +38,8 @@ import {
 	NumberField,
 	OptionCard,
 	OptionCardGroup,
+	PasswordInput,
+	parseColor,
 	RadioGroup,
 	RadioGroupItem,
 	SchemaForm,
@@ -99,12 +102,15 @@ export function FormsCatalog() {
 	const [setpoints, setSetpoints] = createSignal([12, 30]);
 	const [boilerTarget, setBoilerTarget] = createSignal([52]);
 	const [otp, setOtp] = createSignal("12");
+	const [hue, setHue] = createSignal(parseColor("hsl(200, 98%, 39%)"));
 	const [fruit, setFruit] = createSignal<string | null>("Banana");
 	const [schemaData, setSchemaData] = createSignal<Record<string, unknown>>({
 		name: "Living Room",
 		brightness: 80,
 		mode: "auto",
 		enabled: true,
+		placement: { room: "Living Room", pinned: false },
+		tags: ["evening"],
 	});
 	const [listData, setListData] = createSignal<Record<string, unknown>>({
 		nodes: [
@@ -298,7 +304,25 @@ export function FormsCatalog() {
 
 			<CatalogItem name="Switch" hint={switchOn() ? "on" : "off"}>
 				<Switch checked={switchOn()} onChange={setSwitchOn} />
+				<Switch defaultChecked aria-label="Uncontrolled, starts on" />
 				<Switch checked={false} disabled />
+				<CatalogNote>controlled, defaultChecked (uncontrolled), disabled</CatalogNote>
+			</CatalogItem>
+
+			<CatalogItem name="Thumbs" hint="one knob: switch, slider, colour slider" span={2}>
+				<Switch checked={switchOn()} onChange={setSwitchOn} />
+				<Slider value={slider()} onChange={setSlider} min={0} max={100} aria-label="Brightness" />
+				<ColorSlider channel="hue" value={hue()} onChange={setHue} aria-label="Hue" />
+			</CatalogItem>
+
+			<CatalogItem name="PasswordInput" hint="leading well + reveal, one w-10 column each">
+				<PasswordInput aria-label="Password" value="hunter2" class="w-full" />
+				<PasswordInput
+					aria-label="Password"
+					value="hunter2"
+					class="w-full"
+					leading={<Icon icon="lucide:lock" width={16} height={16} />}
+				/>
 			</CatalogItem>
 
 			<CatalogItem name="Slider" hint={`value: ${slider()[0]}`}>
@@ -371,9 +395,7 @@ export function FormsCatalog() {
 					<FormField name="email">
 						<FormItem>
 							<FormLabel>Email</FormLabel>
-							<FormControl>
-								<Input type="email" placeholder="you@example.com" />
-							</FormControl>
+							<FormControl type="email" placeholder="you@example.com" />
 							<FormDescription>We only use it for account recovery.</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -396,9 +418,20 @@ export function FormsCatalog() {
 								title: "Brightness",
 								minimum: 0,
 								maximum: 100,
+								description: "Percent of full output.",
 							},
 							mode: { type: "string", title: "Mode", enum: ["auto", "manual", "off"] },
 							enabled: { type: "boolean", title: "Enabled" },
+							placement: {
+								type: "object",
+								title: "Placement",
+								description: "Where the scene shows up in the app.",
+								properties: {
+									room: { type: "string", title: "Room" },
+									pinned: { type: "boolean", title: "Pinned to the top" },
+								},
+							},
+							tags: { type: "array", title: "Tags", items: { type: "string" } },
 						},
 					}}
 					data={schemaData()}

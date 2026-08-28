@@ -3,6 +3,11 @@ import { type Component, type ComponentProps, splitProps } from "solid-js";
 import { INPUT_CLASS } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
 
+/* The spinner column and the padding that reserves it: one pair, so the value
+ * can never run under the chevrons. */
+const SPINNER_COLUMN = "w-10";
+const SPINNER_RESERVE = "pr-10";
+
 const NumberField: Component<Omit<ComponentProps<"input">, "type">> = (props) => {
 	const [local, others] = splitProps(props, ["class", "step", "min", "max"]);
 	let ref: HTMLInputElement | undefined;
@@ -18,7 +23,7 @@ const NumberField: Component<Omit<ComponentProps<"input">, "type">> = (props) =>
 	};
 
 	return (
-		<div class="relative">
+		<div data-slot="number-field-root" class="relative">
 			<input
 				ref={ref}
 				type="number"
@@ -28,12 +33,19 @@ const NumberField: Component<Omit<ComponentProps<"input">, "type">> = (props) =>
 				max={local.max}
 				class={cn(
 					INPUT_CLASS,
-					"pr-11 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+					SPINNER_RESERVE,
+					"[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
 					local.class,
 				)}
 				{...others}
 			/>
-			<div class="absolute inset-y-0 right-0 flex w-10 flex-col divide-y divide-border overflow-hidden rounded-r-md border-border border-l">
+			<div
+				data-slot="number-field-spinner"
+				class={cn(
+					"absolute inset-y-0 right-0 flex flex-col divide-y divide-border overflow-hidden rounded-r-md border-border border-l",
+					SPINNER_COLUMN,
+				)}
+			>
 				<button
 					type="button"
 					tabindex={-1}

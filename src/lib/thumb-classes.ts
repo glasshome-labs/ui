@@ -1,0 +1,16 @@
+/* Ring thickness for the colour wheel, whose Kobalte prop takes a number
+ * rather than a class; every other thumb dimension is the size-7 below. */
+export const THUMB_SIZE = 28;
+
+/* The one draggable knob: switch, slider, colour slider, colour wheel. Colour
+ * is the caller's (state, per-thumb tint, live channel value), everything else
+ * is this recipe, so the four controls read as the same physical object. The
+ * focus ring is not part of it: on a slider the thumb takes focus, on a switch
+ * the track does. */
+export const THUMB_CLASS =
+	"block size-7 shrink-0 rounded-xl shadow-[0_2px_5px_oklch(0_0_0/0.35),inset_0_1px_0_oklch(1_0_0/0.35),inset_0_-2px_3px_oklch(0_0_0/0.2)]";
+
+/* A rail pads by half a thumb so the knob stays inside the track at both ends;
+ * the fill cancels the same inset to reach the rounded edges. */
+export const THUMB_RAIL_PAD = "px-3.5";
+export const THUMB_RAIL_BLEED = "-mx-3.5";
