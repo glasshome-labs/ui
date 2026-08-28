@@ -267,7 +267,7 @@ const RANGE_OPTIONS = [
 export function RangeToggle(props: { value: number; onChange: (days: number) => void }) {
 	return (
 		<Tabs value={String(props.value)} onChange={(v) => props.onChange(Number(v))}>
-			<TabsList>
+			<TabsList class="w-auto">
 				<For each={RANGE_OPTIONS}>
 					{(opt) => <TabsTrigger value={String(opt.value)}>{opt.label}</TabsTrigger>}
 				</For>
@@ -298,13 +298,7 @@ export function StackedBar(props: { segments: StackedBarSegment[] }) {
 	const total = createMemo(() => props.segments.reduce((a, s) => a + s.value, 0) || 1);
 	return (
 		<div data-slot="stacked-bar" class="space-y-2">
-			<div
-				class={cn(
-					"relative flex h-2.5 overflow-hidden [--glass-rim:1]",
-					SLIDER_WELL_RADIUS,
-					SLIDER_WELL,
-				)}
-			>
+			<div class={cn("relative flex h-2.5 overflow-hidden", SLIDER_WELL_RADIUS, SLIDER_WELL)}>
 				<For each={props.segments}>
 					{(s) => (
 						<Show when={s.value > 0}>
@@ -316,12 +310,11 @@ export function StackedBar(props: { segments: StackedBarSegment[] }) {
 						</Show>
 					)}
 				</For>
-				{/* re-laid over the opaque segments (which paint above the well's own
-            box-shadow) so the filled bar still catches light like glass; the
-            rim value is redeclared here since --glass-rim doesn't inherit. */}
+				{/* re-laid over the opaque segments, which paint above the well's own
+            box-shadow, so the filled bar still catches light like glass. */}
 				<div
 					class={cn(
-						"pointer-events-none absolute inset-0 shadow-[inset_0_1px_0_oklch(1_0_0/var(--glass-rim))] [--glass-rim:1]",
+						"pointer-events-none absolute inset-0 shadow-[inset_0_1px_0_oklch(1_0_0/var(--glass-rim))]",
 						SLIDER_WELL_RADIUS,
 					)}
 				/>
