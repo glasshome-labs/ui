@@ -1,11 +1,12 @@
 import { type Component, type ComponentProps, splitProps } from "solid-js";
 import { cn } from "../lib/utils.js";
 
-/* The one cell inset for the real <table> element family (TableHead/TableCell);
- * data-table.tsx's flex-row family paddings its own row and reuses this same
- * class for its header label text. */
+/* The one cell inset for the real <table> element family (TableHead/TableCell).
+ * data-table.tsx's flex-row family pads its own row, so its head labels take
+ * TABLE_HEAD_LABEL_CLASS, the typography the head cell adds the inset to. */
 export const TABLE_CELL_INSET = "px-3 py-2";
-export const TABLE_HEAD_CELL_CLASS = `${TABLE_CELL_INSET} text-left font-medium text-muted-foreground text-xs`;
+export const TABLE_HEAD_LABEL_CLASS = "font-medium text-muted-foreground text-xs";
+export const TABLE_HEAD_CELL_CLASS = `${TABLE_CELL_INSET} text-left ${TABLE_HEAD_LABEL_CLASS}`;
 
 const Table: Component<ComponentProps<"table">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);

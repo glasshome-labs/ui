@@ -7,7 +7,7 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia } from "
 import { Input } from "./input.js";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select.js";
 import { Skeleton } from "./skeleton.js";
-import { TABLE_HEAD_CELL_CLASS } from "./table.js";
+import { TABLE_HEAD_CELL_CLASS, TABLE_HEAD_LABEL_CLASS } from "./table.js";
 
 /**
  * Generic data-table vocabulary: sticky-less header, row height/padding, border
@@ -19,7 +19,7 @@ import { TABLE_HEAD_CELL_CLASS } from "./table.js";
  * card's p-3) and re-add the inset via the cell padding tokens.
  */
 
-export { TABLE_HEAD_CELL_CLASS };
+export { TABLE_HEAD_CELL_CLASS, TABLE_HEAD_LABEL_CLASS };
 
 // Literal counterpart of SECTION_PADDING's spacing number, kept for
 // Tailwind's static scanner (same split as lib/layers.ts's Z/Z_CLASS). Keying

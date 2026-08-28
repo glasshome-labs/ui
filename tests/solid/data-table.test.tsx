@@ -5,7 +5,13 @@
  * with no height of their own) while gaining the shared scrollbar. */
 import { cleanup, render } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it } from "vitest";
-import { TABLE_SCROLL_CLASS, TableEmpty, TableSkeleton } from "../../src/solid/data-table.js";
+import {
+	TABLE_HEAD_LABEL_CLASS,
+	TABLE_SCROLL_CLASS,
+	TableEmpty,
+	TableSkeleton,
+} from "../../src/solid/data-table.js";
+import { TABLE_HEAD_CELL_CLASS } from "../../src/solid/table.js";
 
 afterEach(cleanup);
 
@@ -37,5 +43,22 @@ describe("TABLE_SCROLL_CLASS", () => {
 	it("carries the shared scrollbar and keeps its default max height", () => {
 		expect(TABLE_SCROLL_CLASS).toContain("gh-scroll");
 		expect(TABLE_SCROLL_CLASS).toContain("max-h-[600px]");
+	});
+});
+
+describe("TABLE_HEAD_LABEL_CLASS", () => {
+	it("is the head-cell typography without the <table> family's cell inset", () => {
+		const tokens = TABLE_HEAD_LABEL_CLASS.split(/\s+/);
+		expect(tokens).toContain("font-medium");
+		expect(tokens).toContain("text-muted-foreground");
+		expect(tokens).toContain("text-xs");
+		expect(tokens.some((t) => /^p[xytblr]?-/.test(t))).toBe(false);
+		expect(tokens).not.toContain("text-left");
+	});
+
+	it("is the part TABLE_HEAD_CELL_CLASS adds its inset to", () => {
+		for (const token of TABLE_HEAD_LABEL_CLASS.split(/\s+/)) {
+			expect(TABLE_HEAD_CELL_CLASS.split(/\s+/)).toContain(token);
+		}
 	});
 });
