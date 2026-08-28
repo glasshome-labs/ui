@@ -48,7 +48,7 @@ function DeviceCard() {
     <Card>
       <CardHeader>
         <CardTitle>Living Room</CardTitle>
-        <Badge tone="var(--success)" dot>Online</Badge>
+        <Badge tone="var(--success)">Online</Badge>
       </CardHeader>
       <CardContent>
         <Button onClick={() => console.log("toggled")}>Toggle Light</Button>
@@ -58,9 +58,9 @@ function DeviceCard() {
 }
 ```
 
-Component families: `Accordion` · `Alert` · `AlertDialog` · `AreaPicker` · `AspectRatio` · `Avatar` · `Badge` · `BottomSheet` · `Breadcrumb` · `Button` · `ButtonGroup` · `Calendar` · `Card` · `Carousel` · `Charts (AreaChart, BarList)` · `Checkbox` · `Collapsible` · `ColorSlider` · `ColorWheel` · `Command` · `ContextMenu` · `CopyButton` · `CountPill` · `DataTable` · `Dialog` · `Dock` · `DropdownMenu` · `Empty` · `EntitySelector` · `Field` · `Form` · `HoverCard` · `Input` · `InputGroup` · `InputOTP` · `Item` · `Kbd` · `Label` · `Logo` · `Menubar` · `NavigationMenu` · `NumberField` · `Overlay` · `PageHeader` · `Pagination` · `Popover` · `Progress` · `RadioGroup` · `Resizable` · `ResponsiveDialog` · `SchemaForm` · `ScopeIndicator` · `ScrollArea` · `SectionCard` · `Select` · `Separator` · `SettingsRow` · `Sheet` · `Sidebar` · `Skeleton` · `Slider` · `SlidingIndicator` · `Sonner (toast)` · `Spinner` · `Switch` · `Table` · `Tabs` · `Textarea` · `TierBadge` · `Toggle` · `ToggleGroup` · `Tooltip` · `WidgetCard` · `WidgetIdentity` · `WidgetTrustBadge`
+Component families: `Accordion` · `Alert` · `AlertDialog` · `AreaPicker` · `AspectRatio` · `Avatar` · `Badge` · `BottomSheet` · `Breadcrumb` · `Button` · `ButtonGroup` · `Card` · `Carousel` · `Charts (AreaChart, BarList, StackedBar, RangeToggle)` · `Checkbox` · `Collapsible` · `ColorSlider` · `ColorWheel` · `ContextMenu` · `CopyButton` · `CountPill` · `DataTable (TableSearchInput, TableFilterSelect, TableSortHeader, TableSkeleton, TableEmpty, TableError, TableBulkBar)` · `Dialog` · `Dock` · `DropdownMenu` · `Empty` · `EntitySelector` · `Field` · `Form` · `HeroAction` · `HoverCard` · `IconPicker` · `ImagePicker` · `Input` · `InputGroup` · `InputOTP` · `Item` · `Kbd` · `Label` · `Logo` · `MediaTile` · `NumberField` · `OptionCard` · `Overlay` · `PageHeader` · `Pagination` · `PasswordInput` · `PickerSearch` · `Popover` · `Progress` · `RadioGroup` · `Resizable` · `ResponsiveDialog` · `SchemaForm` · `ScopeIndicator` · `ScrollArea` · `SectionCard` · `Select` · `Separator` · `SettingsRow (SwitchRow, LabeledField, LabeledInput, LabeledIconPicker, RowActions, SectionAddButton, SectionEmpty)` · `Sheet` · `Skeleton` · `Slider` · `SlidingIndicator` · `Sonner (toast)` · `Spinner` · `StepIndicator` · `Switch` · `Table` · `Tabs` · `Textarea` · `TierBadge` · `Toggle` · `ToggleGroup` · `Tooltip` · `WidgetCard` · `WidgetIdentity` · `WidgetTrustBadge`
 
-`Badge` is glass-only: `tone` takes any CSS color (`<Badge tone="var(--success)" dot>`); there are no solid variant badges.
+`Badge` is glass-only: `tone` takes any CSS color (`<Badge tone="var(--success)">`); there are no solid variant badges.
 
 ### `@glasshome/ui/tokens` — design tokens as data
 
