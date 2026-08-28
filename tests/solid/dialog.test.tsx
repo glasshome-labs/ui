@@ -27,6 +27,7 @@ import {
 	DialogTrigger,
 } from "../../src/solid/dialog.js";
 import { Sheet, SheetBody, SheetClose, SheetContent, SheetTitle } from "../../src/solid/sheet.js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../src/solid/tabs.js";
 
 afterEach(cleanup);
 
@@ -175,7 +176,7 @@ describe("Dialog header action", () => {
 		if (!header) throw new Error("no header");
 		// The text column takes the free width, so the action sits at the far edge
 		// whether or not the header also carries media.
-		expect(header.querySelector('[data-slot="dialog-header-text"]')?.className).toContain("flex-1");
+		expect(header.querySelector('[data-slot="dialog-header-text"]')?.className).toContain("grow");
 		const parts = Array.from(header.children).map((el) => el.getAttribute("data-slot"));
 		expect(parts).toEqual(["dialog-header-text", "dialog-header-action"]);
 		expect(header.querySelector('[data-slot="dialog-header-action"]')?.textContent).toBe("Reset");
@@ -676,5 +677,54 @@ describe("modal parts as", () => {
 		));
 
 		expect(panel().tagName).toBe("FORM");
+	});
+});
+
+describe("a tab row hosted by the modal Header", () => {
+	it("wraps the header on request and keeps Header, Body and Footer the panel's own children", () => {
+		render(() => (
+			<Dialog open>
+				<DialogContent>
+					<Tabs value="a" layout="split">
+						<DialogHeader
+							wrap
+							action={
+								<TabsList>
+									<TabsTrigger value="a">Controls</TabsTrigger>
+									<TabsTrigger value="b">Edit</TabsTrigger>
+								</TabsList>
+							}
+						>
+							<DialogTitle>Living room lamp</DialogTitle>
+						</DialogHeader>
+						<DialogBody>
+							<TabsContent value="a">controls</TabsContent>
+							<TabsContent value="b">edit</TabsContent>
+						</DialogBody>
+						<DialogFooter>
+							<Button>Save</Button>
+						</DialogFooter>
+					</Tabs>
+				</DialogContent>
+			</Dialog>
+		));
+
+		const content = panel();
+		// display:contents on the Tabs root: the parts stay siblings of each other,
+		// so the panel's flex column and the Body's `~` inset rules still apply.
+		const tabsRoot = content.querySelector<HTMLElement>('[data-slot="tabs"]');
+		if (!tabsRoot) throw new Error("no tabs root");
+		expect(tabsRoot.className.split(/\s+/)).toContain("contents");
+		expect(
+			Array.from(tabsRoot.children)
+				.map((el) => el.getAttribute("data-slot"))
+				.filter(Boolean),
+		).toEqual(["dialog-header", "dialog-body", "dialog-footer"]);
+		const header = content.querySelector<HTMLElement>('[data-slot="dialog-header"]');
+		expect(header?.className).toContain("flex-wrap");
+		expect(header?.querySelector('[data-slot="tabs-list"]')).not.toBeNull();
+		expect(
+			content.querySelector('[data-slot="dialog-body"] [data-slot="tabs-content"]'),
+		).not.toBeNull();
 	});
 });

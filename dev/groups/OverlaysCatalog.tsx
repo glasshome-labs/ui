@@ -11,6 +11,8 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	AlertDialogTrigger,
+	Avatar,
+	AvatarFallback,
 	BottomSheet,
 	BottomSheetBody,
 	BottomSheetContent,
@@ -72,6 +74,10 @@ import {
 	SheetHeader,
 	SheetTitle,
 	SheetTrigger,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
 } from "../../src/solid";
 import { CatalogGroup, CatalogItem } from "../CatalogKit";
 
@@ -114,6 +120,8 @@ function HeaderAction() {
 export function OverlaysCatalog() {
 	const [dialogOpen, setDialogOpen] = usePersistentOpen("dialog");
 	const [sheetOpen, setSheetOpen] = usePersistentOpen("sheet");
+	const [tabsOpen, setTabsOpen] = usePersistentOpen("dialog-header-tabs");
+	const [tab, setTab] = createSignal("controls");
 	return (
 		<CatalogGroup id="cat-overlays" title="Overlays">
 			<CatalogItem name="Dialog" hint="modal · click to open">
@@ -122,7 +130,14 @@ export function OverlaysCatalog() {
 						Open dialog
 					</DialogTrigger>
 					<DialogContent>
-						<DialogHeader action={<HeaderAction />}>
+						<DialogHeader
+							media={
+								<Avatar class="size-11">
+									<AvatarFallback>AL</AvatarFallback>
+								</Avatar>
+							}
+							action={<HeaderAction />}
+						>
 							<DialogTitle>Package dialog</DialogTitle>
 							<DialogDescription>Confirm actions, edit records, link devices.</DialogDescription>
 						</DialogHeader>
@@ -291,6 +306,46 @@ export function OverlaysCatalog() {
 						</div>
 					</CollapsibleContent>
 				</Collapsible>
+			</CatalogItem>
+
+			<CatalogItem name="DialogHeaderTabs" hint="tabs in the header · click to open">
+				<Dialog open={tabsOpen()} onOpenChange={setTabsOpen}>
+					<DialogTrigger as={Button} variant="outline">
+						Open tabbed dialog
+					</DialogTrigger>
+					<DialogContent size="xl">
+						<Tabs value={tab()} onChange={setTab} layout="split">
+							<DialogHeader
+								wrap
+								action={
+									<TabsList class="w-auto">
+										<TabsTrigger value="controls">Controls</TabsTrigger>
+										<TabsTrigger value="edit">Edit</TabsTrigger>
+										<TabsTrigger value="debug">Debug</TabsTrigger>
+									</TabsList>
+								}
+							>
+								<DialogTitle>Living room lamp</DialogTitle>
+								<DialogDescription>The tab row rides the header action slot.</DialogDescription>
+							</DialogHeader>
+							<DialogBody>
+								<TabsContent value="controls">
+									<DemoRows count={12} />
+								</TabsContent>
+								<TabsContent value="edit">
+									<DemoRows count={4} />
+								</TabsContent>
+								<TabsContent value="debug">
+									<p class="text-muted-foreground text-sm">No debug payload.</p>
+								</TabsContent>
+							</DialogBody>
+							<DialogFooter>
+								<DialogClose>Cancel</DialogClose>
+								<Button>Save</Button>
+							</DialogFooter>
+						</Tabs>
+					</DialogContent>
+				</Dialog>
 			</CatalogItem>
 
 			<CatalogItem name="ResponsiveDialog" hint="adaptive · click to open">

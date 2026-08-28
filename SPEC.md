@@ -104,6 +104,9 @@ role clears 4.5:1 against `--background`/`--card`/`--popover`/`--muted` (3:1 for
 | a panel | `<Card>` (Solid or `astro/Card.astro`) | `border bg-card/NN backdrop-blur` |
 | a floating panel | `<Overlay>` / the overlay-wearing primitive | raw `bg-popover shadow` |
 | a modal | `<ResponsiveDialog>` (desktop dialog + mobile bottom sheet), `<Dialog>` for desktop-only | `<Sheet side="bottom">` as a modal |
+| an avatar or icon beside a modal title | `<Header media={…}>` | a hand-rolled row inside the header |
+| a tab row in a modal header | `<Tabs layout="split">` around the parts, `<Header wrap action={<TabsList class="w-auto">…}>` | `class="contents"` on `Tabs` and `flex-wrap` by hand |
+| a form inside a modal | `<Body as="form" id="…">` + a footer button with `form="…"` | a `display: contents` form wrapper inside the Body |
 | a status chip | `<Badge tone="var(--success)">` | `rounded-full bg-green-500/10` |
 | a callout | `<Alert tone="warning">` | `border-amber-500/30 bg-amber-500/10` |
 | a titled group of form rows | `<FieldSet>` + `<FieldLegend>` (+ `<FieldDescription>`) | a tracked uppercase `SectionLabel` eyebrow |

@@ -50,7 +50,10 @@ export const MODAL_SCRIM = `data-[closed]:fade-out-0 data-[expanded]:fade-in-0 f
 
 const MODAL_HEADER = "flex shrink-0 items-start gap-4 px-6 pt-6 pb-3";
 const MODAL_HEADER_MEDIA = "flex shrink-0 items-center";
-const MODAL_HEADER_TEXT = "flex min-w-0 flex-1 flex-col gap-1.5 text-left";
+/* `grow`, not `flex-1`: a zero basis would make the text column shrink to a
+ * word per line beside a wide action instead of pushing it onto the next line
+ * when the Header wraps. */
+const MODAL_HEADER_TEXT = "flex min-w-0 grow flex-col gap-1.5 text-left";
 const MODAL_HEADER_ACTION = "flex shrink-0 items-center gap-2";
 
 /* The only scroll container.
@@ -75,6 +78,9 @@ export type ModalHeaderProps = ComponentProps<"div"> & {
 	/** Avatar or icon, rendered ahead of the title column. */
 	media?: JSX.Element;
 	action?: JSX.Element;
+	/** Lets a wide action (a tab row) drop below the title instead of squeezing
+	 *  it; a phone has no room for both on one line. */
+	wrap?: boolean;
 };
 
 /** `as="form"` makes the scroll container the form, so a footer submit button
@@ -89,9 +95,13 @@ export interface ModalParts {
 
 export function createModalParts(slot: string): ModalParts {
 	const Header: Component<ModalHeaderProps> = (props) => {
-		const [local, rest] = splitProps(props, ["class", "media", "action", "children"]);
+		const [local, rest] = splitProps(props, ["class", "media", "action", "wrap", "children"]);
 		return (
-			<div data-slot={`${slot}-header`} class={cn(MODAL_HEADER, local.class)} {...rest}>
+			<div
+				data-slot={`${slot}-header`}
+				class={cn(MODAL_HEADER, local.wrap && "flex-wrap", local.class)}
+				{...rest}
+			>
 				<Show when={local.media}>
 					<div data-slot={`${slot}-header-media`} class={MODAL_HEADER_MEDIA}>
 						{local.media}
