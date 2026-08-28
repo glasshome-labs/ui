@@ -2,7 +2,8 @@
  * the id and aria wiring the context knows. The wiring is the whole point, so
  * it is asserted on the control element itself, not on a wrapper. */
 import { cleanup, render } from "@solidjs/testing-library";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { onMount } from "solid-js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	Form,
 	FormControl,
@@ -11,10 +12,15 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
+	resetFormControlWrapperWarning,
 } from "../../src/solid/form.js";
 import { Input } from "../../src/solid/input.js";
 
 afterEach(cleanup);
+
+// The deprecation warning fires once per process, so every test that looks at
+// it starts from a clean flag instead of racing whichever test ran first.
+beforeEach(resetFormControlWrapperWarning);
 
 function renderForm(errors: Record<string, string> = {}) {
 	return render(() => (
@@ -86,6 +92,51 @@ describe("Form", () => {
 		expect(textarea?.hasAttribute("aria-describedby")).toBe(false);
 	});
 
+	it("mounts a wrapped child exactly once", () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		let mounts = 0;
+		const Probe = () => {
+			onMount(() => {
+				mounts += 1;
+			});
+			return <input data-testid="probe" />;
+		};
+		const { container } = render(() => (
+			<Form>
+				<FormField name="email">
+					<FormItem>
+						<FormControl>
+							<Probe />
+						</FormControl>
+					</FormItem>
+				</FormField>
+			</Form>
+		));
+		expect(mounts).toBe(1);
+		expect(container.querySelectorAll('[data-testid="probe"]')).toHaveLength(1);
+		warn.mockRestore();
+	});
+
+	it("warns once for the deprecated wrapper shape, however many render", () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		const wrapper = () => (
+			<Form>
+				<FormField name="email">
+					<FormItem>
+						<FormControl>
+							<Input type="email" />
+						</FormControl>
+					</FormItem>
+				</FormField>
+			</Form>
+		);
+		render(wrapper);
+		render(wrapper);
+		expect(warn).toHaveBeenCalledTimes(1);
+		expect(String(warn.mock.calls[0]?.[0])).toContain("[FormControl]");
+		warn.mockRestore();
+	});
+
 	it("keeps the legacy wrapper shape alive when a child is passed", () => {
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 		const { container } = render(() => (
@@ -115,7 +166,6 @@ describe("Form", () => {
 			message.id,
 		]);
 		expect(wrapper.getAttribute("aria-invalid")).toBe("true");
-		expect(warn).toHaveBeenCalledTimes(1);
 		warn.mockRestore();
 	});
 

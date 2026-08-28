@@ -1,6 +1,7 @@
 import {
 	type Component,
 	type ComponentProps,
+	children,
 	createContext,
 	createEffect,
 	createMemo,
@@ -122,6 +123,11 @@ const FormLabel: Component<ComponentProps<typeof FieldLabel>> = (props) => {
 
 let warnedFormControlWrapper = false;
 
+/** @internal Lets a test assert the once-per-process warning more than once. */
+export function resetFormControlWrapperWarning() {
+	warnedFormControlWrapper = false;
+}
+
 function warnFormControlWrapper() {
 	if (warnedFormControlWrapper) return;
 	if (typeof process !== "undefined" && process.env?.NODE_ENV === "production") return;
@@ -155,7 +161,10 @@ const FormControl = <T extends ValidComponent = typeof Input>(
 		const rendered = ids.filter((id) => id !== "");
 		return rendered.length > 0 ? rendered.join(" ") : undefined;
 	};
-	const wrapped = createMemo(() => local.children !== undefined);
+	// Resolved once: `local.children` is a getter, so reading it for the presence
+	// check and again in the JSX would instantiate the child component twice.
+	const body = children(() => local.children);
+	const wrapped = createMemo(() => body() !== undefined);
 	createEffect(() => {
 		if (wrapped()) warnFormControlWrapper();
 	});
@@ -180,7 +189,7 @@ const FormControl = <T extends ValidComponent = typeof Input>(
 				aria-invalid={error() ? true : undefined}
 				{...(rest as ComponentProps<"div">)}
 			>
-				{local.children}
+				{body()}
 			</div>
 		</Show>
 	);
