@@ -2,6 +2,7 @@
  * panel anchored over the trigger, one trigger recipe, one search row, and the
  * package's own controls inside the rows. */
 import { cleanup, fireEvent, render, waitFor } from "@solidjs/testing-library";
+import type { JSX } from "solid-js";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -59,7 +60,7 @@ const mediaStore: MediaStore = {
 	url: (id) => `/api/images/${id}`,
 };
 
-const withData = (ui: () => never) =>
+const withData = (ui: () => JSX.Element) =>
 	render(() => <EntityDataContext.Provider value={adapter}>{ui()}</EntityDataContext.Provider>);
 
 const panel = () => document.querySelector<HTMLElement>('[data-slot="popover-content"]');
@@ -189,17 +190,9 @@ describe("EntitySelector rows", () => {
 	});
 
 	it("shows no checkbox in single mode", async () => {
-		const { container } = withData(
-			() =>
-				(
-					<EntitySelector
-						domain="light"
-						entityIds={[]}
-						onEntityIdsChange={() => {}}
-						multiple={false}
-					/>
-				) as never,
-		);
+		const { container } = withData(() => (
+			<EntitySelector domain="light" entityIds={[]} onEntityIdsChange={() => {}} multiple={false} />
+		));
 		fireEvent.click(firstButton(container));
 		await waitFor(() => expect(document.querySelector('[role="option"]')).not.toBeNull());
 		expect(document.querySelector('[data-slot="checkbox"]')).toBeNull();
@@ -233,5 +226,51 @@ describe("AreaPicker indicator", () => {
 			'[data-slot="area-picker-row"][data-highlighted]',
 		);
 		expect(highlighted?.textContent).toContain("Kitchen");
+	});
+});
+
+describe("EntitySelector listbox wiring", () => {
+	it("names the highlighted row on the search input", async () => {
+		const { container } = withData(() => (
+			<EntitySelector domain="light" entityIds={["light.counter"]} onEntityIdsChange={() => {}} />
+		));
+		fireEvent.click(firstButton(container));
+		await waitFor(() => expect(document.querySelector('[role="option"]')).not.toBeNull());
+
+		const highlighted = document.querySelector<HTMLElement>("[role=option][data-highlighted]");
+		const input = document.querySelector<HTMLInputElement>('[data-slot="picker-search-input"]');
+		expect(highlighted?.id).toBeTruthy();
+		expect(input?.getAttribute("aria-activedescendant")).toBe(highlighted?.id);
+		expect(input?.getAttribute("aria-controls")).toBe(
+			document.querySelector('[role="listbox"]')?.id,
+		);
+		// light.counter is the selected id in this case, so the row says so.
+		expect(highlighted?.getAttribute("aria-selected")).toBe("true");
+	});
+
+	it("keeps the option rows a direct concern of the listbox", async () => {
+		const { container } = withData(() => (
+			<EntitySelector domain="light" entityIds={[]} onEntityIdsChange={() => {}} />
+		));
+		fireEvent.click(firstButton(container));
+		await waitFor(() => expect(document.querySelector('[role="option"]')).not.toBeNull());
+		const option = document.querySelector<HTMLElement>('[role="option"]');
+		// Everything between the listbox and its options is layout, so nothing in
+		// between may claim a role of its own.
+		for (
+			let el = option?.parentElement;
+			el && el.getAttribute("role") !== "listbox";
+			el = el.parentElement
+		) {
+			expect(el.getAttribute("role")).toBe("presentation");
+		}
+	});
+});
+
+describe("Popover statics", () => {
+	it("keeps the Kobalte parts reachable off the root", () => {
+		for (const part of ["Portal", "Content", "Trigger", "Anchor", "Title", "CloseButton"]) {
+			expect(typeof (Popover as unknown as Record<string, unknown>)[part]).toBe("function");
+		}
 	});
 });
