@@ -1,41 +1,73 @@
 import { Popover as PopoverPrimitive } from "@kobalte/core/popover";
-import { type Component, type ComponentProps, splitProps } from "solid-js";
+import {
+	type Component,
+	type ComponentProps,
+	createContext,
+	splitProps,
+	useContext,
+} from "solid-js";
 import { INPUT_SURFACE } from "../lib/input-classes.js";
-import { OVERLAY_SURFACE } from "../lib/overlay-classes.js";
+import { Z_CLASS } from "../lib/layers.js";
+import {
+	anchorToTriggerTop,
+	FIELD_MOTION,
+	FLOATING_PANEL,
+	OVERLAY_MOTION,
+} from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 
-const Popover = PopoverPrimitive;
+type PopoverSurface = "overlay" | "field";
+
+const PopoverSurfaceContext = createContext<() => PopoverSurface>(
+	() => "overlay" as PopoverSurface,
+);
+
+/* The expanding field panel: opaque (the trigger sits underneath it), bound to
+ * the anchor width and radius, and padded by whatever part needs padding, never
+ * by the panel, so the panel edge and the trigger edge are one rectangle. */
+const FIELD_PANEL = `${INPUT_SURFACE} ${FIELD_MOTION} relative ${Z_CLASS.overlay} w-[var(--kb-popper-anchor-width)] overflow-hidden rounded-md text-popover-foreground outline-hidden`;
+
+const OVERLAY_PANEL = `${FLOATING_PANEL} ${OVERLAY_MOTION} w-72 p-4`;
+
+type PopoverProps = ComponentProps<typeof PopoverPrimitive> & {
+	/** "field" anchors the panel over the trigger's top edge, so the field reads
+	 *  as expanding into its panel instead of a box dropping in below it. */
+	surface?: PopoverSurface;
+};
+
+const Popover: Component<PopoverProps> = (props) => {
+	const [local, rest] = splitProps(props, ["surface", "gutter", "getAnchorRect"]);
+	const surface = () => local.surface ?? "overlay";
+	const field = () => surface() === "field";
+	return (
+		<PopoverSurfaceContext.Provider value={surface}>
+			<PopoverPrimitive
+				gutter={local.gutter ?? (field() ? 0 : undefined)}
+				getAnchorRect={local.getAnchorRect ?? (field() ? anchorToTriggerTop : undefined)}
+				{...rest}
+			/>
+		</PopoverSurfaceContext.Provider>
+	);
+};
 
 const PopoverTrigger: Component<ComponentProps<typeof PopoverPrimitive.Trigger>> = (props) => {
 	return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
 };
 
-const OVERLAY_MOTION =
-	"data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[closed]:animate-out data-[expanded]:animate-in";
-
-/* Paired with gutter={0} + anchorToTriggerTop, the clip-path reveal is what makes
- * the panel read as the field expanding rather than a box dropping in. */
-const FIELD_MOTION = "data-[closed]:animate-select-out data-[expanded]:animate-select-in";
-
 type PopoverContentProps = ComponentProps<typeof PopoverPrimitive.Content> & {
-	/** "field" wears the concave input surface, the way SelectContent does. */
-	surface?: "overlay" | "field";
+	surface?: PopoverSurface;
 };
 
 const PopoverContent: Component<PopoverContentProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "surface"]);
-	const surface = () => local.surface ?? "overlay";
+	const fromRoot = useContext(PopoverSurfaceContext);
+	const surface = () => local.surface ?? fromRoot();
 	return (
 		<PopoverPrimitive.Portal>
 			<PopoverPrimitive.Content
 				data-slot="popover-content"
 				data-surface={surface()}
-				class={cn(
-					surface() === "field" ? INPUT_SURFACE : OVERLAY_SURFACE,
-					surface() === "field" ? FIELD_MOTION : OVERLAY_MOTION,
-					"relative z-50 w-72 rounded-md p-4 text-popover-foreground outline-hidden",
-					local.class,
-				)}
+				class={cn(surface() === "field" ? FIELD_PANEL : OVERLAY_PANEL, local.class)}
 				{...rest}
 			/>
 		</PopoverPrimitive.Portal>
@@ -46,18 +78,4 @@ const PopoverAnchor: Component<ComponentProps<typeof PopoverPrimitive.Anchor>> =
 	return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />;
 };
 
-// Anchor popover content to the trigger's TOP edge (a zero-height rect). With
-// `gutter={0}` the content's top lands on the trigger's top and — since the
-// picker sets its content width to --kb-popper-anchor-width (= trigger width) —
-// it covers the trigger and the options grow downward. Paired with the
-// `animate-select-in` clip-path reveal, the trigger appears to expand into the
-// panel instead of a separate box dropping in. Mirrors the Select's native
-// expand so every select-like control opens the same way.
-const anchorToTriggerTop = (anchor?: HTMLElement) => {
-	const r = anchor?.getBoundingClientRect();
-	return r
-		? { x: r.left, y: r.top, width: r.width, height: 0 }
-		: { x: 0, y: 0, width: 0, height: 0 };
-};
-
-export { anchorToTriggerTop, Popover, PopoverAnchor, PopoverContent, PopoverTrigger };
+export { Popover, PopoverAnchor, PopoverContent, PopoverTrigger };
