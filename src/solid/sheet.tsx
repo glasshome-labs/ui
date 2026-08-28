@@ -25,6 +25,7 @@ import {
 import {
 	createModalParts,
 	MODAL_DESCRIPTION,
+	MODAL_MAX_H,
 	MODAL_TITLE,
 	ModalScrollLock,
 } from "./dialog-parts.js";
@@ -101,7 +102,7 @@ const SHEET_SIDE = {
 	right:
 		"data-[closed]:slide-out-to-right data-[expanded]:slide-in-from-right inset-y-3 right-3 w-3/4 sm:max-w-sm",
 	left: "data-[closed]:slide-out-to-left data-[expanded]:slide-in-from-left inset-y-3 left-3 w-3/4 sm:max-w-sm",
-	top: "data-[closed]:slide-out-to-top data-[expanded]:slide-in-from-top inset-x-3 top-3 max-h-[85dvh]",
+	top: `data-[closed]:slide-out-to-top data-[expanded]:slide-in-from-top inset-x-3 top-3 ${MODAL_MAX_H}`,
 } as const;
 
 type SheetSide = keyof typeof SHEET_SIDE | "bottom";
@@ -113,6 +114,14 @@ type SheetContentProps = ComponentProps<typeof DialogPrimitive.Content> & {
 	/** Names a panel that has no `SheetTitle`. */
 	ariaLabel?: string;
 };
+
+const SheetAbove: Component<{ above?: JSX.Element }> = (props) => (
+	<Show when={props.above}>
+		<div data-slot="sheet-content-above" class="flex w-full shrink-0 items-end justify-center">
+			{props.above}
+		</div>
+	</Show>
+);
 
 const SheetContent: ParentComponent<SheetContentProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "children", "side", "above", "ariaLabel"]);
@@ -129,7 +138,8 @@ const SheetContent: ParentComponent<SheetContentProps> = (props) => {
 				>
 					<BottomSheetPortal>
 						<BottomSheetOverlay />
-						<BottomSheetContent class={local.class} ariaLabel={local.ariaLabel}>
+						<BottomSheetContent {...rest} class={local.class} ariaLabel={local.ariaLabel}>
+							<SheetAbove above={local.above} />
 							<BottomSheetHandle />
 							{local.children}
 						</BottomSheetContent>
@@ -148,14 +158,7 @@ const SheetContent: ParentComponent<SheetContentProps> = (props) => {
 					onOpenAutoFocus={(e: Event) => e.preventDefault()}
 					{...rest}
 				>
-					<Show when={local.above}>
-						<div
-							data-slot="sheet-content-above"
-							class="flex w-full shrink-0 items-end justify-center"
-						>
-							{local.above}
-						</div>
-					</Show>
+					<SheetAbove above={local.above} />
 					{local.children}
 				</DialogPrimitive.Content>
 			</DialogPrimitive.Portal>

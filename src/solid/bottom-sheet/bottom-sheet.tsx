@@ -21,11 +21,12 @@ import {
 	createModalLabels,
 	createModalParts,
 	MODAL_DESCRIPTION,
+	MODAL_MAX_H,
 	MODAL_TITLE,
 	ModalLabelsProvider,
 	useModalLabels,
 } from "../dialog-parts.js";
-import { EASE, MAX_HEIGHT, TRANSITION_MS } from "./constants.js";
+import { EASE, TRANSITION_MS } from "./constants.js";
 import { attachDrag } from "./drag-controller.js";
 import { type InitialFocus, trapFocus } from "./focus-trap.js";
 import { watchKeyboard } from "./keyboard.js";
@@ -351,14 +352,13 @@ const BottomSheetContent: ParentComponent<BottomSheetContentProps> = (props) => 
 					"z-index": Z.sheet,
 					"--bs-duration": `${TRANSITION_MS}ms`,
 					"--bs-ease": EASE,
-					"--bs-max-h": MAX_HEIGHT,
 					"will-change": "transform",
 					"touch-action": "pan-y",
 					"-webkit-tap-highlight-color": "transparent",
 				}}
 				class={cn(
 					"bs-content",
-					`fixed inset-x-0 bottom-0 flex max-h-[var(--bs-max-h)] flex-col rounded-t-xl ${OVERLAY_SURFACE_OPAQUE} outline-none`,
+					`fixed inset-x-0 bottom-0 flex ${MODAL_MAX_H} flex-col rounded-t-xl ${OVERLAY_SURFACE_OPAQUE} outline-none`,
 					"after:absolute after:inset-x-0 after:top-full after:h-1/2 after:bg-inherit",
 					local.class,
 				)}
@@ -401,27 +401,24 @@ const BottomSheetFooter = SharedFooter;
 const BottomSheetTitle: Component<ComponentProps<"h2">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	const labels = useModalLabels();
-	labels?.registerTitle();
+	const id = rest.id ?? labels?.titleId;
+	labels?.registerTitle(id);
 	return (
-		<h2
-			data-slot="bottom-sheet-title"
-			class={cn(MODAL_TITLE, local.class)}
-			{...rest}
-			id={labels?.titleId}
-		/>
+		<h2 data-slot="bottom-sheet-title" id={id} class={cn(MODAL_TITLE, local.class)} {...rest} />
 	);
 };
 
 const BottomSheetDescription: Component<ComponentProps<"p">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	const labels = useModalLabels();
-	labels?.registerDescription();
+	const id = rest.id ?? labels?.descriptionId;
+	labels?.registerDescription(id);
 	return (
 		<p
 			data-slot="bottom-sheet-description"
+			id={id}
 			class={cn(MODAL_DESCRIPTION, local.class)}
 			{...rest}
-			id={labels?.descriptionId}
 		/>
 	);
 };

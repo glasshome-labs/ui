@@ -198,11 +198,17 @@
  * scroll surface that isn't a bare page — <ScrollArea>, dialogs, sheets.
  */
 .gh-scroll {
+	/* The width the bar reserves, published so a scroll container can subtract it
+	   from its own inset and keep its content column aligned with the panel's
+	   other parts. Blink and Gecko decide that width from scrollbar-width: thin
+	   and ignore the pseudo below; 10px is what they reserve, and the pseudo uses
+	   the same number so a WebKit build without scrollbar-width matches. */
+	--scrollbar-w: 10px;
 	scrollbar-width: thin;
 	scrollbar-color: color-mix(in srgb, var(--foreground) 22%, transparent) transparent;
 	&::-webkit-scrollbar {
-		width: 8px;
-		height: 8px;
+		width: var(--scrollbar-w);
+		height: var(--scrollbar-w);
 	}
 	&::-webkit-scrollbar-track {
 		background: transparent;

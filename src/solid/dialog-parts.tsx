@@ -17,12 +17,16 @@ import { OVERLAY_SURFACE, SCRIM_CLASS } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 import { acquireScrollLock, releaseScrollLock } from "./bottom-sheet/scroll-lock.js";
 
-/* kobalte 0.13.11 builds AlertDialog with Object.assign(DialogRoot, ...), the
+/* kobalte 0.13.13 builds AlertDialog with Object.assign(DialogRoot, ...), the
  * same object Dialog is built from, so whichever of the two modules a bundle
  * evaluates last owns .Content for both. Every family therefore states its own
  * role instead of trusting the primitive's default. */
 
 export type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
+
+/* The height cap every modal panel shares. Declared and consumed in one string,
+ * so the sheet's keyboard rule in theme.css subtracts from the same length. */
+export const MODAL_MAX_H = "[--modal-max-h:85dvh] max-h-[var(--modal-max-h)]";
 
 export const MODAL_WIDTH: Record<ModalSize, string> = {
 	sm: "max-w-sm",
@@ -35,7 +39,7 @@ export const MODAL_WIDTH: Record<ModalSize, string> = {
 /* The panel: it clips, it never scrolls, and it carries no padding. Every inset
  * belongs to Header, Body or Footer, so the Body scrollbar rides inside the
  * panel edge instead of under the header. */
-export const MODAL_PANEL = `${OVERLAY_SURFACE} data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 fixed top-1/2 left-1/2 flex max-h-[85dvh] w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg outline-none ${Z_CLASS.overlay} duration-200 data-[closed]:animate-out data-[expanded]:animate-in`;
+export const MODAL_PANEL = `${OVERLAY_SURFACE} data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 fixed top-1/2 left-1/2 flex ${MODAL_MAX_H} w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg outline-none ${Z_CLASS.overlay} duration-200 data-[closed]:animate-out data-[expanded]:animate-in`;
 
 export const MODAL_SCRIM = `data-[closed]:fade-out-0 data-[expanded]:fade-in-0 fixed inset-0 ${Z_CLASS.overlay} ${SCRIM_CLASS} data-[closed]:animate-out data-[expanded]:animate-in`;
 
@@ -43,11 +47,17 @@ const MODAL_HEADER = "flex shrink-0 items-start justify-between gap-4 px-6 pt-6 
 const MODAL_HEADER_TEXT = "flex min-w-0 flex-col gap-1.5 text-left";
 const MODAL_HEADER_ACTION = "flex shrink-0 items-center gap-2";
 
-/* The only scroll container. The `of-type` variants restore the full inset when
- * the Header or the Footer is absent; plain `first:`/`last:` cannot, because
- * kobalte parks a focus-trap <span> at each end of the panel. */
+/* The only scroll container.
+ * - The inset is the full one and a Header or Footer sibling shortens it, keyed
+ *   on data-slot rather than on position: kobalte parks a focus-trap <span> at
+ *   each end of the panel, and Sheet's `above` and the sheet handle add more
+ *   element siblings, so `first:`/`first-of-type:` all lie.
+ * - `pan-y pinch-zoom` leaves the single-finger vertical gesture to the sheet's
+ *   drag arbitration without taking two-finger zoom away.
+ * - The reserved scrollbar lives inside the right inset, so the content column
+ *   ends where the Header's and Footer's do. */
 const MODAL_BODY =
-	"gh-scroll flex min-h-0 flex-1 touch-pan-y flex-col gap-4 overflow-y-auto overscroll-contain px-6 py-3 first-of-type:pt-6 last-of-type:pb-6 [scrollbar-gutter:stable]";
+	"gh-scroll flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain [touch-action:pan-y_pinch-zoom] [scrollbar-gutter:stable] pl-6 pr-[calc(var(--spacing)*6-var(--scrollbar-w))] pt-6 pb-6 [[data-slot$='-header']~&]:pt-3 [&:has(~[data-slot$='-footer'])]:pb-3";
 
 const MODAL_FOOTER =
 	"flex shrink-0 flex-col-reverse gap-2 px-6 pt-3 pb-6 sm:flex-row sm:justify-end";
@@ -116,30 +126,31 @@ export interface ModalLabels {
 	descriptionId: string;
 	labelledBy: Accessor<string | undefined>;
 	describedBy: Accessor<string | undefined>;
-	registerTitle: () => void;
-	registerDescription: () => void;
+	registerTitle: (id: string | undefined) => void;
+	registerDescription: (id: string | undefined) => void;
 }
 
 const ModalLabelsContext = createContext<ModalLabels>();
 
 /** Kobalte wires title/description ids for its own families; the hand-rolled
- *  surfaces (BottomSheet) wire them through this. */
+ *  surfaces (BottomSheet) wire them through this. The part registers the id it
+ *  actually rendered, so a caller's own `id` still labels the panel. */
 export function createModalLabels(): ModalLabels {
 	const titleId = createUniqueId();
 	const descriptionId = createUniqueId();
-	const [titles, setTitles] = createSignal(0);
-	const [descriptions, setDescriptions] = createSignal(0);
-	const register = (set: (fn: (n: number) => number) => void) => {
-		set((n) => n + 1);
-		onCleanup(() => set((n) => n - 1));
+	const [labelledBy, setLabelledBy] = createSignal<string>();
+	const [describedBy, setDescribedBy] = createSignal<string>();
+	const register = (set: (id: string | undefined) => void, id: string | undefined) => {
+		set(id);
+		onCleanup(() => set(undefined));
 	};
 	return {
 		titleId,
 		descriptionId,
-		labelledBy: () => (titles() > 0 ? titleId : undefined),
-		describedBy: () => (descriptions() > 0 ? descriptionId : undefined),
-		registerTitle: () => register(setTitles),
-		registerDescription: () => register(setDescriptions),
+		labelledBy,
+		describedBy,
+		registerTitle: (id) => register(setLabelledBy, id),
+		registerDescription: (id) => register(setDescribedBy, id),
 	};
 }
 

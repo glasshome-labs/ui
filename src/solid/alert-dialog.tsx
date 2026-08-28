@@ -15,7 +15,7 @@ import {
 } from "./dialog-parts.js";
 
 const AlertDialog: ParentComponent<ComponentProps<typeof AlertDialogPrimitive>> = (props) => (
-	<AlertDialogPrimitive preventScroll={false} {...props} />
+	<AlertDialogPrimitive {...props} preventScroll={false} />
 );
 
 const AlertDialogTrigger: Component<ComponentProps<typeof AlertDialogPrimitive.Trigger>> = (

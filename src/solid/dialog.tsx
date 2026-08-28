@@ -18,7 +18,7 @@ import {
  * (bottom-sheet/scroll-lock.ts) serves every modal family, so a nested modal
  * cannot release the page early. */
 const Dialog: ParentComponent<ComponentProps<typeof DialogPrimitive>> = (props) => (
-	<DialogPrimitive preventScroll={false} {...props} />
+	<DialogPrimitive {...props} preventScroll={false} />
 );
 
 const DialogTrigger: Component<ComponentProps<typeof DialogPrimitive.Trigger>> = (props) => (

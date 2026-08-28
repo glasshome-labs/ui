@@ -496,14 +496,15 @@
 		transform: translate3d(0, 100%, 0);
 	}
 }
-/* --bs-duration, --bs-ease and --bs-max-h are published inline by
-   BottomSheetContent from bottom-sheet/constants.ts; that file is the source. */
+/* --bs-duration and --bs-ease are published inline by BottomSheetContent from
+   bottom-sheet/constants.ts; --modal-max-h comes from MODAL_MAX_H, the height
+   cap every modal panel shares. */
 .bs-content {
 	transform: translate3d(0, 100%, 0);
 	bottom: var(--bs-keyboard-offset, 0);
 }
 .bs-content[data-keyboard-open] {
-	max-height: calc(var(--bs-max-h) - var(--bs-keyboard-offset, 0px));
+	max-height: calc(var(--modal-max-h) - var(--bs-keyboard-offset, 0px));
 }
 .bs-content[data-state="opening"] {
 	animation: bs-slide-up var(--bs-duration) var(--bs-ease) forwards;

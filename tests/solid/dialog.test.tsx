@@ -37,6 +37,21 @@ const scrollers = (root: HTMLElement) =>
 const pageLocked = () =>
 	document.body.style.overflow === "hidden" || document.body.style.position === "fixed";
 
+/* happy-dom runs no animations, so kobalte's exit presence never resolves on its
+ * own; the browser's animationend is supplied by hand. Both the panel and the
+ * scrim have to finish, because kobalte keeps the portal (and everything in it)
+ * mounted until the last of the two is gone. */
+function endExitAnimations() {
+	const nodes = Array.from(
+		document.querySelectorAll('[data-slot$="-content"], [data-slot$="-overlay"]'),
+	);
+	for (const el of nodes) {
+		const event = new Event("animationend");
+		Object.defineProperty(event, "animationName", { value: "" });
+		el.dispatchEvent(event);
+	}
+}
+
 describe("Dialog scroll contract", () => {
 	it("scrolls in Body only; the panel clips", () => {
 		render(() => (
@@ -88,6 +103,40 @@ describe("Dialog scroll contract", () => {
 		expect(footer?.className).toContain("shrink-0");
 	});
 
+	it("keeps two-finger zoom over the scrolling region", () => {
+		render(() => (
+			<Dialog open>
+				<DialogContent>
+					<DialogBody>body</DialogBody>
+				</DialogContent>
+			</Dialog>
+		));
+
+		const body = panel().querySelector<HTMLElement>('[data-slot="dialog-body"]');
+		expect(body?.className).toContain("pinch-zoom");
+		expect(body?.className).not.toContain("touch-pan-y");
+	});
+
+	it("shortens the Body inset from its Header and Footer siblings, not from its position", () => {
+		render(() => (
+			<Dialog open>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Title</DialogTitle>
+					</DialogHeader>
+					<DialogBody>body</DialogBody>
+					<DialogFooter>footer</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		));
+
+		const body = panel().querySelector<HTMLElement>('[data-slot="dialog-body"]');
+		expect(body?.className).toContain("[[data-slot$='-header']~&]:pt-3");
+		expect(body?.className).toContain("[&:has(~[data-slot$='-footer'])]:pb-3");
+		expect(body?.className).not.toContain("first-of-type");
+		expect(body?.className).not.toContain("last-of-type");
+	});
+
 	it("puts the inset padding on the parts, never on the panel", () => {
 		render(() => (
 			<Dialog open>
@@ -99,7 +148,7 @@ describe("Dialog scroll contract", () => {
 
 		const content = panel();
 		expect(content.className).not.toMatch(/(^|\s)p-\d/);
-		expect(content.querySelector('[data-slot="dialog-body"]')?.className).toContain("px-6");
+		expect(content.querySelector('[data-slot="dialog-body"]')?.className).toContain("pl-6");
 	});
 });
 
@@ -286,6 +335,71 @@ describe("one page-scroll lock", () => {
 		expect(pageLocked()).toBe(false);
 	});
 
+	it("does not lock the page for a closed kobalte-family modal", () => {
+		const { unmount } = render(() => (
+			<>
+				<Dialog>
+					<DialogContent ariaLabel="d">d</DialogContent>
+				</Dialog>
+				<AlertDialog>
+					<AlertDialogContent ariaLabel="a">a</AlertDialogContent>
+				</AlertDialog>
+				<Sheet>
+					<SheetContent ariaLabel="s">s</SheetContent>
+				</Sheet>
+			</>
+		));
+
+		expect(pageLocked()).toBe(false);
+		unmount();
+		expect(pageLocked()).toBe(false);
+	});
+
+	it("releases the lock when a Dialog closes", () => {
+		const [open, setOpen] = createSignal(true);
+		render(() => (
+			<Dialog open={open()} onOpenChange={setOpen}>
+				<DialogContent ariaLabel="d">d</DialogContent>
+			</Dialog>
+		));
+
+		expect(pageLocked()).toBe(true);
+		setOpen(false);
+		endExitAnimations();
+		expect(document.querySelector('[data-slot="dialog-content"]')).toBeNull();
+		expect(pageLocked()).toBe(false);
+	});
+
+	it("releases the lock when an AlertDialog closes", () => {
+		const [open, setOpen] = createSignal(true);
+		render(() => (
+			<AlertDialog open={open()} onOpenChange={setOpen}>
+				<AlertDialogContent ariaLabel="a">a</AlertDialogContent>
+			</AlertDialog>
+		));
+
+		expect(pageLocked()).toBe(true);
+		setOpen(false);
+		endExitAnimations();
+		expect(document.querySelector('[data-slot="alert-dialog-content"]')).toBeNull();
+		expect(pageLocked()).toBe(false);
+	});
+
+	it("releases the lock when a Sheet closes", () => {
+		const [open, setOpen] = createSignal(true);
+		render(() => (
+			<Sheet open={open()} onOpenChange={setOpen}>
+				<SheetContent ariaLabel="s">s</SheetContent>
+			</Sheet>
+		));
+
+		expect(pageLocked()).toBe(true);
+		setOpen(false);
+		endExitAnimations();
+		expect(document.querySelector('[data-slot="sheet-content"]')).toBeNull();
+		expect(pageLocked()).toBe(false);
+	});
+
 	it("does not lock the page for a bottom sheet that is mounted but closed", () => {
 		const { unmount } = render(() => (
 			<BottomSheet>
@@ -316,6 +430,40 @@ describe("Sheet", () => {
 		const found = scrollers(content);
 		expect(found).toHaveLength(1);
 		expect(found[0]?.getAttribute("data-slot")).toBe("sheet-body");
+	});
+
+	it("keeps the Body's own inset when an `above` node precedes it", () => {
+		render(() => (
+			<Sheet open>
+				<SheetContent side="right" above={<span>toolbar</span>}>
+					<SheetBody>rows</SheetBody>
+				</SheetContent>
+			</Sheet>
+		));
+
+		const content = document.querySelector<HTMLElement>('[data-slot="sheet-content"]');
+		const slots = Array.from(content?.children ?? [])
+			.map((el) => el.getAttribute("data-slot"))
+			.filter(Boolean);
+		expect(slots).toEqual(["sheet-content-above", "sheet-body"]);
+		const body = content?.querySelector<HTMLElement>('[data-slot="sheet-body"]');
+		expect(body?.className).toContain("pt-6");
+		expect(body?.className).toContain("pb-6");
+		expect(body?.className).not.toContain("first-of-type");
+	});
+
+	it("carries `above` and the rest of the props into the deprecated bottom variant", () => {
+		render(() => (
+			<Sheet open>
+				<SheetContent side="bottom" above={<span>toolbar</span>} id="filters">
+					<SheetBody>rows</SheetBody>
+				</SheetContent>
+			</Sheet>
+		));
+
+		const sheet = document.querySelector<HTMLElement>("[data-sheet-content]");
+		expect(sheet?.getAttribute("id")).toBe("filters");
+		expect(sheet?.querySelector('[data-slot="sheet-content-above"]')?.textContent).toBe("toolbar");
 	});
 
 	it("renders side=bottom as a bottom sheet", () => {
