@@ -35,7 +35,7 @@ type PopoverProps = ComponentProps<typeof PopoverPrimitive> & {
 	surface?: PopoverSurface;
 };
 
-const Popover: Component<PopoverProps> = (props) => {
+const PopoverRoot: Component<PopoverProps> = (props) => {
 	const [local, rest] = splitProps(props, ["surface", "gutter", "getAnchorRect"]);
 	const surface = () => local.surface ?? "overlay";
 	const field = () => surface() === "field";
@@ -49,6 +49,16 @@ const Popover: Component<PopoverProps> = (props) => {
 		</PopoverSurfaceContext.Provider>
 	);
 };
+
+/* Omit<T, never> keeps the statics and drops the call signature, so the
+ * intersection has one call signature: ours, with `surface`. */
+type PopoverStatics = Omit<typeof PopoverPrimitive, never>;
+
+/* Kobalte hangs Anchor/Content/Portal/Title/Trigger/CloseButton/Arrow off the
+ * root; carry them across so `Popover.Portal` keeps resolving for hosts that
+ * reach past the wrapped parts. */
+const Popover = Object.assign(PopoverRoot, PopoverPrimitive) as Component<PopoverProps> &
+	PopoverStatics;
 
 const PopoverTrigger: Component<ComponentProps<typeof PopoverPrimitive.Trigger>> = (props) => {
 	return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
