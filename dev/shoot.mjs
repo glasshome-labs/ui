@@ -100,13 +100,16 @@ if (missing.length) {
 }
 
 const slug = (s) => s.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+// Width in the name, so a mobile run cannot overwrite the desktop shot of the
+// same specimen (the default width stays bare, to keep existing names).
+const widthSuffix = width === 1280 ? "" : `@${width}`;
 for (const name of wanted) {
 	const cell = page.locator(`[data-specimen="${name}"]`);
 	await cell.scrollIntoViewIfNeeded();
 	if (click) {
 		await cell.getByText(String(click), { exact: true }).first().click();
 		await page.waitForTimeout(700);
-		const out = join(outDir, `${slug(name)}--${slug(String(click))}.png`);
+		const out = join(outDir, `${slug(name)}--${slug(String(click))}${widthSuffix}.png`);
 		await page.screenshot({ path: out });
 		console.log(out);
 		await page.keyboard.press("Escape");
@@ -116,7 +119,10 @@ for (const name of wanted) {
 			await cell.getByText(String(hover), { exact: true }).first().hover();
 			await page.waitForTimeout(400);
 		}
-		const out = join(outDir, `${slug(name)}${hover ? `--hover-${slug(String(hover))}` : ""}.png`);
+		const out = join(
+			outDir,
+			`${slug(name)}${hover ? `--hover-${slug(String(hover))}` : ""}${widthSuffix}.png`,
+		);
 		await cell.screenshot({ path: out });
 		console.log(out);
 	}
