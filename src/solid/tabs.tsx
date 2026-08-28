@@ -5,10 +5,27 @@ import { SEGMENT_ITEM } from "../lib/segment-classes.js";
 import { cn } from "../lib/utils.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
 
-const Tabs: Component<ComponentProps<typeof TabsPrimitive>> = (props) => {
-	const [local, others] = splitProps(props, ["class"]);
+/** `split`: the root is `display: contents`, so a host (a modal panel) lays the
+ *  list and the content out in its own regions while the tab state still spans
+ *  them. */
+export type TabsLayout = "stack" | "split";
+
+const TABS_LAYOUT: Record<TabsLayout, string> = {
+	stack: "flex flex-col gap-2",
+	split: "contents",
+};
+
+type TabsProps = ComponentProps<typeof TabsPrimitive> & { layout?: TabsLayout };
+
+const Tabs: Component<TabsProps> = (props) => {
+	const [local, others] = splitProps(props, ["class", "layout"]);
 	return (
-		<TabsPrimitive data-slot="tabs" class={cn("flex flex-col gap-2", local.class)} {...others} />
+		<TabsPrimitive
+			data-slot="tabs"
+			data-layout={local.layout ?? "stack"}
+			class={cn(TABS_LAYOUT[local.layout ?? "stack"], local.class)}
+			{...others}
+		/>
 	);
 };
 

@@ -59,3 +59,42 @@ describe("Tabs", () => {
 		expect(container.querySelector(".probe-trigger")).not.toBeNull();
 	});
 });
+
+describe("Tabs layout", () => {
+	it("stacks the list over the content by default", () => {
+		const { container } = render(() => (
+			<Tabs value="a" class="probe-root">
+				<TabsList>
+					<TabsTrigger value="a">A</TabsTrigger>
+				</TabsList>
+				<TabsContent value="a">content</TabsContent>
+			</Tabs>
+		));
+		const tokens = container.querySelector<HTMLElement>(".probe-root")?.className.split(/\s+/);
+		expect(tokens).toContain("flex");
+		expect(tokens).not.toContain("contents");
+	});
+
+	it("layout=split lets the host lay the parts out, and still shares the tab state", () => {
+		const { container } = render(() => (
+			<div class="panel">
+				<Tabs value="a" layout="split" class="probe-root">
+					<div class="host-header">
+						<TabsList>
+							<TabsTrigger value="a">A</TabsTrigger>
+						</TabsList>
+					</div>
+					<div class="host-body">
+						<TabsContent value="a">content</TabsContent>
+					</div>
+				</Tabs>
+			</div>
+		));
+		const tokens = container.querySelector<HTMLElement>(".probe-root")?.className.split(/\s+/);
+		expect(tokens).toContain("contents");
+		expect(tokens).not.toContain("flex");
+		expect(container.querySelector('.host-body [data-slot="tabs-content"]')?.textContent).toBe(
+			"content",
+		);
+	});
+});
