@@ -1,14 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import {
-	type Component,
-	type ComponentProps,
-	createSignal,
-	type JSX,
-	mergeProps,
-	onCleanup,
-	onMount,
-	Show,
-} from "solid-js";
+import { type Component, type ComponentProps, type JSX, mergeProps, Show } from "solid-js";
 import { type ExternalToast, Toaster as SolidSonner, toast as sonnerToast } from "solid-sonner";
 import {
 	ALERT_CLASS,
@@ -20,6 +11,7 @@ import {
 	alertIconBgStyle,
 } from "../lib/alert-tones.js";
 import { glassToneText } from "../lib/glass-tone.js";
+import { createIsMobile } from "../lib/use-is-mobile.js";
 import { cn } from "../lib/utils.js";
 import { Spinner } from "./spinner.js";
 
@@ -209,24 +201,8 @@ const toast = Object.assign(
 	},
 );
 
-function useIsMobile(breakpoint = 768) {
-	const [mobile, setMobile] = createSignal(
-		typeof window !== "undefined" ? window.innerWidth < breakpoint : false,
-	);
-
-	onMount(() => {
-		const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
-		setMobile(mq.matches);
-		const handler = (e: MediaQueryListEvent) => setMobile(e.matches);
-		mq.addEventListener("change", handler);
-		onCleanup(() => mq.removeEventListener("change", handler));
-	});
-
-	return mobile;
-}
-
 const Toaster: Component<ComponentProps<typeof SolidSonner>> = (rawProps) => {
-	const isMobile = useIsMobile();
+	const isMobile = createIsMobile();
 	const props = mergeProps({ duration: 3000, gap: 8, visibleToasts: 3 }, rawProps);
 	const position = (): Position => props.position ?? (isMobile() ? "top-center" : "bottom-right");
 
