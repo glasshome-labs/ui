@@ -224,7 +224,7 @@ describe("ContextMenuContent", () => {
 		expect(slidingIndicatorOf(content)).not.toBeNull();
 	});
 
-	it("gives a destructive item a tone through --glass-tone, with no `!` in its class", () => {
+	it("gives a destructive item its tone through --glass-tone, not a color variant", () => {
 		const { container } = render(() => (
 			<ContextMenu>
 				<ContextMenuTrigger class="block h-8 w-8">Right-click</ContextMenuTrigger>
@@ -239,7 +239,9 @@ describe("ContextMenuContent", () => {
 		const item = document.querySelector<HTMLElement>('[data-slot="context-menu-item"]');
 		if (!item) throw new Error("no item rendered");
 		expect(item.style.getPropertyValue("--glass-tone")).toBe("var(--destructive)");
-		expect(item.className).not.toContain("!");
+		// data-tone is what MENU_ITEM's svg guard keys off, so the row and its
+		// icons follow one source instead of a second colour variant axis.
+		expect(item.dataset.tone).toBe("");
 	});
 
 	it("lets a toned item's real svg child inherit the tone instead of muted-foreground", () => {

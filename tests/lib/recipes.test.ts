@@ -10,7 +10,7 @@ import {
 	OVERLAY_SURFACE,
 } from "../../src/lib/overlay-classes.js";
 import { CHIP, ICON_PILL } from "../../src/lib/pill-classes.js";
-import { SECTION_INNER_RADIUS } from "../../src/lib/section-tokens.js";
+import { SECTION_INNER_RADIUS, SECTION_PADDING } from "../../src/lib/section-tokens.js";
 import { MOBILE_BREAKPOINT } from "../../src/lib/use-is-mobile.js";
 
 describe("field recipes compose from named parts", () => {
@@ -88,8 +88,8 @@ describe("layers and breakpoints", () => {
 });
 
 describe("section tokens", () => {
-	it("inner radius subtracts the real padding, not a literal rem", () => {
-		expect(SECTION_INNER_RADIUS).toContain("var(--spacing)");
-		expect(SECTION_INNER_RADIUS).not.toContain("0.75rem");
+	it("inner radius subtracts the same number of units SECTION_PADDING spends", () => {
+		expect(SECTION_PADDING).toBe("p-3");
+		expect(SECTION_INNER_RADIUS).toContain("var(--spacing)*3");
 	});
 });

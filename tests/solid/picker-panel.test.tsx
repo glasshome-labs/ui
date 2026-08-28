@@ -162,9 +162,8 @@ describe("picker triggers", () => {
 			expect(trigger.className).toContain("h-9");
 			expect(trigger.className).toContain("md:text-sm");
 			expect(trigger.className).toContain("data-[expanded]:ring-0");
-			// The retyped focus/invalid tail: the lib recipe moves the edge through
-			// the glass knob, so a border utility here means a copy came back.
-			expect(trigger.className).not.toContain("focus-visible:border-ring");
+			// The lib recipe moves the focused edge through the glass knob.
+			expect(trigger.className).toContain("focus-visible:[--glass-edge:var(--ring)]");
 		});
 
 		it(`${name} marks the trigger expanded while the panel covers it`, async () => {

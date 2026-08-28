@@ -103,9 +103,12 @@ describe("Tooltip", () => {
 		}
 	});
 
-	it("Kbd no longer re-skins itself inside a tooltip", () => {
+	it("Kbd wears one recipe, wherever it renders", () => {
 		const { container } = render(() => <Kbd>Esc</Kbd>);
-		expect(slot(container, "kbd").className).not.toContain("tooltip-content");
+		const tokens = slot(container, "kbd").className.split(/\s+/);
+		expect(tokens).toEqual(
+			expect.arrayContaining(["bg-muted", "text-muted-foreground", "rounded-sm"]),
+		);
 	});
 });
 

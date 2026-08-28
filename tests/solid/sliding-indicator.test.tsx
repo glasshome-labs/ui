@@ -136,7 +136,7 @@ describe("SlidingIndicator", () => {
 		Object.defineProperty(document, "fonts", { value: originalFonts, configurable: true });
 	});
 
-	it("drops the dead ease-out class from the indicator", async () => {
+	it("times the slide from one inline transition", async () => {
 		const { container } = render(() => (
 			<SlidingIndicator active={0}>
 				<button type="button">One</button>
@@ -152,7 +152,8 @@ describe("SlidingIndicator", () => {
 		await flush();
 
 		const indicator = container.querySelector<HTMLElement>("[data-sliding-indicator]");
-		expect(indicator?.className).not.toContain("ease-out");
+		expect(indicator?.style.transition).toContain("transform 220ms ease-in-out");
+		expect(indicator?.style.transition).toContain("width 220ms ease-in-out");
 	});
 
 	it("does not re-measure after unmount once document.fonts.ready resolves late", async () => {

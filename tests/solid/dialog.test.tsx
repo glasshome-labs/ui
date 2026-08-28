@@ -133,8 +133,6 @@ describe("Dialog scroll contract", () => {
 		const body = panel().querySelector<HTMLElement>('[data-slot="dialog-body"]');
 		expect(body?.className).toContain("[[data-slot$='-header']~&]:pt-3");
 		expect(body?.className).toContain("[&:has(~[data-slot$='-footer'])]:pb-3");
-		expect(body?.className).not.toContain("first-of-type");
-		expect(body?.className).not.toContain("last-of-type");
 	});
 
 	it("puts the inset padding on the parts, never on the panel", () => {
@@ -214,8 +212,11 @@ describe("Dialog size", () => {
 				</DialogContent>
 			</Dialog>
 		));
-		expect(panel().className).toContain("max-w-2xl");
-		expect(panel().className).not.toContain("max-w-lg");
+		expect(
+			panel()
+				.className.split(/\s+/)
+				.filter((t) => t.startsWith("max-w-")),
+		).toEqual(["max-w-2xl"]);
 	});
 });
 

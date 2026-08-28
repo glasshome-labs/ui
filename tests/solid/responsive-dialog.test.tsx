@@ -114,11 +114,13 @@ describe("ResponsiveDialog mobile branch", () => {
 		expect(found[0]?.getAttribute("data-slot")).toBe("responsive-dialog-body");
 	});
 
-	it("puts a caller class on the sheet panel and never clamps it with size", () => {
+	it("puts a caller class on the sheet panel and leaves it spanning the viewport", () => {
 		render(() => <Specimen class="border-dashed" />);
 		const el = dialogEl();
 		expect(el.className).toContain("border-dashed");
-		expect(el.className).not.toContain("max-w-sm");
+		// The desktop `size` clamp must not reach the sheet: it is edge to edge.
+		expect(el.className).toContain("inset-x-0");
+		expect(el.className.split(/\s+/).filter((t) => t.startsWith("max-w-"))).toEqual([]);
 	});
 
 	it("keeps Header and Footer out of the scrolling Body", () => {

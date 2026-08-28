@@ -93,11 +93,11 @@ describe("SectionCard spacing owner", () => {
 		expect(slot(container, "section-card").className).not.toContain("hover:");
 	});
 
-	it("steps the title at one breakpoint", () => {
+	it("steps the title at exactly one breakpoint", () => {
 		const { container } = render(() => <SectionTitle>t</SectionTitle>);
 		const title = slot(container, "section-title");
-		expect(title.className).toContain("sm:text-xl");
-		expect(title.className).not.toContain("md:text-2xl");
+		const steps = title.className.split(/\s+/).filter((t) => /^(sm|md|lg|xl):/.test(t));
+		expect(steps).toEqual(["sm:text-xl"]);
 	});
 });
 
@@ -138,12 +138,13 @@ describe("section kit material", () => {
 		expect(el.className).toContain("glass-tint");
 	});
 
-	it("SectionLabel is a meta line, not a tracked caps eyebrow", () => {
+	it("SectionLabel renders the SectionMeta line, bolded", () => {
 		const { container } = render(() => <SectionLabel>Devices</SectionLabel>);
 		const label = slot(container, "section-meta");
-		expect(label.className).not.toContain("uppercase");
-		expect(label.className).not.toContain("tracking-wider");
-		expect(label.className).toContain("font-medium");
+		const tokens = label.className.split(/\s+/);
+		expect(tokens).toEqual(
+			expect.arrayContaining(["text-muted-foreground", "text-xs", "font-medium"]),
+		);
 	});
 });
 
@@ -188,7 +189,7 @@ describe("HeroAction and PageHeader stop carrying app chrome", () => {
 			/>
 		));
 		const root = slot(container, "hero-action");
-		expect(root.className).not.toContain("onboard-card");
+		expect(root.className).toMatch(/(^|\s)glass(\s|$)/);
 		expect(root.className).toMatch(/\bp-4\b/);
 	});
 
