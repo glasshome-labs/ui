@@ -4,6 +4,7 @@ import {
 	createContext,
 	createEffect,
 	createMemo,
+	createRenderEffect,
 	createSignal,
 	type JSX,
 	onCleanup,
@@ -120,10 +121,11 @@ function callClickHandler(handler: ComponentProps<"button">["onClick"], event: M
 const BottomSheetTrigger: ParentComponent<SheetButtonProps> = (props) => {
 	const [local, rest] = splitProps(props, ["children", "onClick", "as"]);
 	const ctx = useBottomSheetContext();
+	const component = () => local.as ?? "button";
 	return (
 		<Dynamic
-			component={local.as ?? "button"}
-			type="button"
+			component={component()}
+			type={component() === "button" ? "button" : undefined}
 			data-slot="bottom-sheet-trigger"
 			aria-haspopup="dialog"
 			aria-expanded={ctx.open()}
@@ -401,22 +403,22 @@ const BottomSheetFooter = SharedFooter;
 const BottomSheetTitle: Component<ComponentProps<"h2">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	const labels = useModalLabels();
-	const id = rest.id ?? labels?.titleId;
-	labels?.registerTitle(id);
+	const id = () => rest.id ?? labels?.titleId;
+	createRenderEffect(() => labels?.registerTitle(id()));
 	return (
-		<h2 data-slot="bottom-sheet-title" id={id} class={cn(MODAL_TITLE, local.class)} {...rest} />
+		<h2 data-slot="bottom-sheet-title" id={id()} class={cn(MODAL_TITLE, local.class)} {...rest} />
 	);
 };
 
 const BottomSheetDescription: Component<ComponentProps<"p">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	const labels = useModalLabels();
-	const id = rest.id ?? labels?.descriptionId;
-	labels?.registerDescription(id);
+	const id = () => rest.id ?? labels?.descriptionId;
+	createRenderEffect(() => labels?.registerDescription(id()));
 	return (
 		<p
 			data-slot="bottom-sheet-description"
-			id={id}
+			id={id()}
 			class={cn(MODAL_DESCRIPTION, local.class)}
 			{...rest}
 		/>
@@ -426,10 +428,11 @@ const BottomSheetDescription: Component<ComponentProps<"p">> = (props) => {
 const BottomSheetClose: ParentComponent<SheetButtonProps> = (props) => {
 	const [local, rest] = splitProps(props, ["children", "onClick", "as"]);
 	const ctx = useBottomSheetContext();
+	const component = () => local.as ?? "button";
 	return (
 		<Dynamic
-			component={local.as ?? "button"}
-			type="button"
+			component={component()}
+			type={component() === "button" ? "button" : undefined}
 			data-slot="bottom-sheet-close"
 			onClick={(event: MouseEvent) => {
 				callClickHandler(local.onClick, event);

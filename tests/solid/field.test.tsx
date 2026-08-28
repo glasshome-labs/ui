@@ -121,6 +121,18 @@ describe("Field stack", () => {
 		expect(label).toContain("has-data-[checked]:");
 	});
 
+	it("tints only the card-shaped label when the control inside is checked", () => {
+		const { container } = render(() => <FieldLabel>Plan</FieldLabel>);
+		const tokens = classOf(container, '[data-slot="field-label"]').split(/\s+/);
+		const checkedTints = tokens.filter((t) => t.includes("has-data-[checked]:"));
+		expect(checkedTints.length).toBeGreaterThan(0);
+		for (const token of checkedTints) {
+			// A plain checkbox label is not a card, so the tint has to be gated on
+			// the label actually wrapping a Field.
+			expect(token, token).toContain("has-[>[data-slot=field]]:");
+		}
+	});
+
 	it("masks the separator rule against the card it sits on", () => {
 		const { container } = render(() => <FieldSeparator>or</FieldSeparator>);
 		const content = classOf(container, '[data-slot="field-separator-content"]');
