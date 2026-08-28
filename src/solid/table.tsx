@@ -1,6 +1,12 @@
 import { type Component, type ComponentProps, splitProps } from "solid-js";
 import { cn } from "../lib/utils.js";
 
+/* The one cell inset for the real <table> element family (TableHead/TableCell);
+ * data-table.tsx's flex-row family paddings its own row and reuses this same
+ * class for its header label text. */
+export const TABLE_CELL_INSET = "px-3 py-2";
+export const TABLE_HEAD_CELL_CLASS = `${TABLE_CELL_INSET} text-left font-medium text-muted-foreground text-xs`;
+
 const Table: Component<ComponentProps<"table">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
 	return (
@@ -53,7 +59,8 @@ const TableHead: Component<ComponentProps<"th">> = (props) => {
 		<th
 			data-slot="table-head"
 			class={cn(
-				"h-10 whitespace-nowrap px-2 text-left align-middle font-medium text-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+				TABLE_HEAD_CELL_CLASS,
+				"h-10 whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
 				local.class,
 			)}
 			{...rest}
@@ -67,7 +74,8 @@ const TableCell: Component<ComponentProps<"td">> = (props) => {
 		<td
 			data-slot="table-cell"
 			class={cn(
-				"whitespace-nowrap p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+				TABLE_CELL_INSET,
+				"whitespace-nowrap align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
 				local.class,
 			)}
 			{...rest}
