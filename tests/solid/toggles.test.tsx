@@ -172,3 +172,24 @@ describe("checkbox and radio wear one material", () => {
 		expect(classOf(radio.container, '[data-slot="radio-group-item-label"]')).toContain("gap-2.5");
 	});
 });
+
+/* An affordance parked on top of a field reserves exactly its own width, so
+ * the text never runs under it and the two fields line up. */
+describe("field affordances reserve one column", () => {
+	it("pads the number field for its spinner column", () => {
+		const { container } = render(() => <NumberField value={3} />);
+		expect(classOf(container, '[data-slot="number-field"]')).toContain("pr-10");
+		expect(classOf(container, '[data-slot="number-field-spinner"]')).toContain("w-10");
+	});
+
+	it("pads the password field for its reveal button and leading well", () => {
+		const { container } = render(() => (
+			<PasswordInput aria-label="Password" leading={<span data-testid="lock" />} />
+		));
+		const input = classOf(container, "input");
+		expect(input).toContain("pr-10");
+		expect(input).toContain("pl-10");
+		expect(classOf(container, '[data-slot="password-input-toggle"]')).toContain("w-10");
+		expect(classOf(container, '[data-slot="password-input-leading"]')).toContain("w-10");
+	});
+});

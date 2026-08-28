@@ -10,6 +10,7 @@ vi.mock("@iconify-icon/solid", () => ({
 	),
 }));
 
+import { CARD_SURFACE } from "../../src/lib/card-classes.js";
 import { OptionCard, OptionCardGroup } from "../../src/solid/option-card.js";
 
 afterEach(cleanup);
@@ -128,6 +129,40 @@ describe("OptionCard", () => {
 		expect(item?.querySelector('[data-slot="option-card-description"]')?.textContent).toBe(
 			"They pick a password.",
 		);
-		expect(item?.className).toContain("data-[checked]:border-primary");
+		expect(item?.className).toContain("data-[checked]:[--glass-tone:var(--primary)]");
+	});
+
+	it("wears the card surface and tints it when picked, never a flat fill", () => {
+		const { container } = render(() => (
+			<OptionCardGroup value="invite" onChange={() => {}}>
+				<OptionCard value="invite" title="Send an invite" description="They pick a password." />
+			</OptionCardGroup>
+		));
+
+		const item = container.querySelector('[data-slot="radio-group-item"]');
+		const className = item?.className ?? "";
+		for (const token of CARD_SURFACE.split(" ")) expect(className, token).toContain(token);
+		expect(className).toContain("glass-tint");
+		expect(className, "bg-* is a no-op on glass").not.toContain("bg-primary/5");
+		expect(className).not.toContain("border-border");
+	});
+
+	it("gives the row one padding and the text one size", () => {
+		const { container } = render(() => (
+			<OptionCardGroup value={null} onChange={() => {}}>
+				<OptionCard value="invite" title="Send an invite" description="They pick a password." />
+			</OptionCardGroup>
+		));
+
+		expect(container.querySelector('[data-slot="option-card-row"]')?.className).toContain("p-3");
+		expect(container.querySelector('[data-slot="option-card-title"]')?.className).toContain(
+			"font-medium",
+		);
+		expect(container.querySelector('[data-slot="option-card-title"]')?.className).toContain(
+			"text-sm",
+		);
+		const description = container.querySelector('[data-slot="option-card-description"]')?.className;
+		expect(description).toContain("text-sm");
+		expect(description).toContain("text-muted-foreground");
 	});
 });

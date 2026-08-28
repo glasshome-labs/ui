@@ -1,13 +1,15 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show } from "solid-js";
+import { CARD_SURFACE } from "../lib/card-classes.js";
 import { cn } from "../lib/utils.js";
 import { RadioGroup, RadioGroupItem } from "./radio-group.js";
 
 /* The card is the affordance, so the radio's own control is suppressed and the
- * tinted border plus the check carry the picked state. Padding lives inside the
- * label, not on the item, so the whole card is a click target. */
-const OPTION_CARD_CHROME =
-	"group/option-card cursor-pointer rounded-md border border-border transition-colors duration-200 hover:bg-foreground/[0.03] has-[:focus-visible]:border-ring has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50 data-[checked]:border-primary data-[checked]:bg-primary/5 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 data-[disabled]:hover:bg-transparent";
+ * tinted surface plus the check carry the picked state. The tone is transparent
+ * until then, which makes every tint term in the glass formula inert. Padding
+ * lives inside the label, not on the item, so the whole card is a click
+ * target. */
+const OPTION_CARD_CHROME = `${CARD_SURFACE} glass-tint group/option-card cursor-pointer rounded-md transition-all duration-200 [--glass-tone:transparent] hover:[--glass-base:color-mix(in_srgb,var(--card)_80%,transparent)] has-[:focus-visible]:[--glass-edge:var(--ring)] has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50 data-[checked]:[--glass-tone:var(--primary)] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50`;
 
 export function OptionCardGroup(props: {
 	value: string | null;
@@ -45,7 +47,7 @@ export function OptionCard(props: {
 				showControl={false}
 				class={OPTION_CARD_CHROME}
 			>
-				<div class="flex w-full items-center gap-3 p-3">
+				<div data-slot="option-card-row" class="flex w-full items-center gap-3 p-3">
 					<Show when={props.icon}>
 						{(icon) => (
 							<Icon
@@ -58,14 +60,14 @@ export function OptionCard(props: {
 						)}
 					</Show>
 					<div class="flex min-w-0 flex-1 flex-col gap-0.5">
-						<span data-slot="option-card-title" class="font-medium leading-snug">
+						<span data-slot="option-card-title" class="font-medium text-sm leading-snug">
 							{props.title}
 						</span>
 						<Show when={props.description}>
 							{(description) => (
 								<span
 									data-slot="option-card-description"
-									class="text-muted-foreground text-xs leading-normal"
+									class="text-muted-foreground text-sm leading-normal"
 								>
 									{description()}
 								</span>

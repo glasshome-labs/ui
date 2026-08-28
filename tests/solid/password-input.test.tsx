@@ -34,19 +34,19 @@ describe("PasswordInput", () => {
 	it("reserves right padding for the toggle regardless of visibility state", () => {
 		const { container } = render(() => <PasswordInput aria-label="Password" />);
 		const { input, toggle } = parts(container);
-		expect(input.className).toContain("pr-12");
+		expect(input.className).toContain("pr-10");
 		fireEvent.click(toggle);
-		expect(input.className).toContain("pr-12");
+		expect(input.className).toContain("pr-10");
 	});
 
 	it("only pads for a leading icon when one is given", () => {
 		const bare = render(() => <PasswordInput aria-label="Password" />);
-		expect(parts(bare.container).input.className).not.toContain("pl-14");
+		expect(parts(bare.container).input.className).not.toContain("pl-10");
 
 		const withLeading = render(() => (
 			<PasswordInput aria-label="Password" leading={<span data-testid="lock" />} />
 		));
-		expect(parts(withLeading.container).input.className).toContain("pl-14");
+		expect(parts(withLeading.container).input.className).toContain("pl-10");
 		expect(withLeading.getByTestId("lock")).toBeTruthy();
 	});
 
