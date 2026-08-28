@@ -39,17 +39,17 @@ export const MODAL_PANEL = `${OVERLAY_SURFACE} data-[closed]:fade-out-0 data-[ex
 
 export const MODAL_SCRIM = `data-[closed]:fade-out-0 data-[expanded]:fade-in-0 fixed inset-0 ${Z_CLASS.overlay} ${SCRIM_CLASS} data-[closed]:animate-out data-[expanded]:animate-in`;
 
-export const MODAL_HEADER = "flex shrink-0 items-start justify-between gap-4 px-6 pt-6 pb-3";
-export const MODAL_HEADER_TEXT = "flex min-w-0 flex-col gap-1.5 text-left";
-export const MODAL_HEADER_ACTION = "flex shrink-0 items-center gap-2";
+const MODAL_HEADER = "flex shrink-0 items-start justify-between gap-4 px-6 pt-6 pb-3";
+const MODAL_HEADER_TEXT = "flex min-w-0 flex-col gap-1.5 text-left";
+const MODAL_HEADER_ACTION = "flex shrink-0 items-center gap-2";
 
 /* The only scroll container. The `of-type` variants restore the full inset when
  * the Header or the Footer is absent; plain `first:`/`last:` cannot, because
  * kobalte parks a focus-trap <span> at each end of the panel. */
-export const MODAL_BODY =
+const MODAL_BODY =
 	"gh-scroll flex min-h-0 flex-1 touch-pan-y flex-col gap-4 overflow-y-auto overscroll-contain px-6 py-3 first-of-type:pt-6 last-of-type:pb-6 [scrollbar-gutter:stable]";
 
-export const MODAL_FOOTER =
+const MODAL_FOOTER =
 	"flex shrink-0 flex-col-reverse gap-2 px-6 pt-3 pb-6 sm:flex-row sm:justify-end";
 
 export const MODAL_TITLE = "font-semibold text-foreground text-lg leading-none tracking-tight";
