@@ -1,3 +1,4 @@
+import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 import {
 	Accordion,
@@ -34,9 +35,16 @@ export function NavCatalog() {
 			<CatalogItem name="Tabs" hint={`value: ${tab()}`} span={2}>
 				<Tabs value={tab()} onChange={setTab} class="w-full">
 					<TabsList>
-						<TabsTrigger value="overview">Overview</TabsTrigger>
-						<TabsTrigger value="activity">Activity</TabsTrigger>
+						<TabsTrigger value="overview">
+							<Icon icon="lucide:layout-dashboard" width={16} height={16} />
+							Overview
+						</TabsTrigger>
+						<TabsTrigger value="activity">
+							<Icon icon="lucide:activity" width={16} height={16} />
+							Activity
+						</TabsTrigger>
 						<TabsTrigger value="settings" disabled>
+							<Icon icon="lucide:settings" width={16} height={16} />
 							Settings
 						</TabsTrigger>
 					</TabsList>
