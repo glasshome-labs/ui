@@ -1,4 +1,5 @@
 import { For } from "solid-js";
+import { DOT, DOT_ACTIVE } from "../lib/dot-classes.js";
 import { cn } from "../lib/utils.js";
 
 /**
@@ -20,11 +21,7 @@ export function StepIndicator(props: { count: number; index: number; class?: str
 					<span
 						data-slot="step-indicator-dot"
 						aria-current={step === props.index ? "step" : undefined}
-						class="h-1.5 rounded-full transition-[width,background-color]"
-						classList={{
-							"w-5 bg-primary": step === props.index,
-							"w-1.5 bg-muted-foreground/35": step !== props.index,
-						}}
+						class={cn(DOT, step === props.index && DOT_ACTIVE)}
 					/>
 				)}
 			</For>
