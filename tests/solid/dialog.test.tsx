@@ -7,6 +7,7 @@ import {
 	AlertDialogContent,
 	AlertDialogTitle,
 } from "../../src/solid/alert-dialog.js";
+import { BottomSheet, BottomSheetContent } from "../../src/solid/bottom-sheet/index.js";
 import { Button } from "../../src/solid/button.js";
 import {
 	Dialog,
@@ -202,6 +203,37 @@ describe("Dialog labelling", () => {
 	});
 });
 
+describe("modal role", () => {
+	it("states the role per family, never inheriting the primitive's default", () => {
+		render(() => (
+			<Dialog open>
+				<DialogContent ariaLabel="a">a</DialogContent>
+			</Dialog>
+		));
+		expect(panel().getAttribute("role")).toBe("dialog");
+		cleanup();
+
+		render(() => (
+			<Sheet open>
+				<SheetContent ariaLabel="b">b</SheetContent>
+			</Sheet>
+		));
+		expect(document.querySelector('[data-slot="sheet-content"]')?.getAttribute("role")).toBe(
+			"dialog",
+		);
+		cleanup();
+
+		render(() => (
+			<AlertDialog open>
+				<AlertDialogContent ariaLabel="c">c</AlertDialogContent>
+			</AlertDialog>
+		));
+		expect(document.querySelector('[data-slot="alert-dialog-content"]')?.getAttribute("role")).toBe(
+			"alertdialog",
+		);
+	});
+});
+
 describe("Dialog trigger", () => {
 	it("renders one button for Trigger as={Button} and opens on click", () => {
 		render(() => (
@@ -250,6 +282,18 @@ describe("one page-scroll lock", () => {
 		expect(document.querySelector('[data-slot="alert-dialog-content"]')).toBeNull();
 		expect(pageLocked()).toBe(true);
 
+		unmount();
+		expect(pageLocked()).toBe(false);
+	});
+
+	it("does not lock the page for a bottom sheet that is mounted but closed", () => {
+		const { unmount } = render(() => (
+			<BottomSheet>
+				<BottomSheetContent ariaLabel="Filters">rows</BottomSheetContent>
+			</BottomSheet>
+		));
+
+		expect(pageLocked()).toBe(false);
 		unmount();
 		expect(pageLocked()).toBe(false);
 	});

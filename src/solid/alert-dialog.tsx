@@ -49,6 +49,7 @@ const AlertDialogContent: ParentComponent<AlertDialogContentProps> = (props) => 
 			<AlertDialogOverlay />
 			<AlertDialogPrimitive.Content
 				data-slot="alert-dialog-content"
+				role="alertdialog"
 				aria-label={local.ariaLabel}
 				class={cn(MODAL_PANEL, MODAL_WIDTH[local.size ?? "md"], local.class)}
 				{...rest}

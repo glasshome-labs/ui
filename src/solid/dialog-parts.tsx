@@ -17,6 +17,11 @@ import { OVERLAY_SURFACE, SCRIM_CLASS } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 import { acquireScrollLock, releaseScrollLock } from "./bottom-sheet/scroll-lock.js";
 
+/* kobalte 0.13.11 builds AlertDialog with Object.assign(DialogRoot, ...), the
+ * same object Dialog is built from, so whichever of the two modules a bundle
+ * evaluates last owns .Content for both. Every family therefore states its own
+ * role instead of trusting the primitive's default. */
+
 export type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
 
 export const MODAL_WIDTH: Record<ModalSize, string> = {

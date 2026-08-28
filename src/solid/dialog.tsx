@@ -61,6 +61,7 @@ const DialogContent: ParentComponent<DialogContentProps> = (props) => {
 			<DialogPrimitive.Overlay data-slot="dialog-overlay" class={MODAL_SCRIM} />
 			<DialogPrimitive.Content
 				data-slot="dialog-content"
+				role="dialog"
 				aria-label={local.ariaLabel}
 				class={cn(MODAL_PANEL, MODAL_WIDTH[local.size ?? "lg"], local.class)}
 				{...others}

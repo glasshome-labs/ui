@@ -3,10 +3,10 @@ import {
 	type ComponentProps,
 	createContext,
 	createEffect,
+	createMemo,
 	createSignal,
 	type JSX,
 	onCleanup,
-	onMount,
 	type ParentComponent,
 	Show,
 	splitProps,
@@ -192,10 +192,15 @@ const BottomSheetContent: ParentComponent<BottomSheetContentProps> = (props) => 
 	const labels = createModalLabels();
 	let el: HTMLDivElement | undefined;
 
-	/* The portal above mounts this only while the sheet is not closed, so the
-	 * refcounted page lock follows the sheet's real lifetime, animation or not. */
-	onMount(acquireScrollLock);
-	onCleanup(releaseScrollLock);
+	/* Keyed on presence, not on mount: a sheet rendered without
+	 * BottomSheetPortal stays in the tree while closed and must not hold the
+	 * page lock. Release also runs on unmount, so no animation can strand it. */
+	const present = createMemo(() => ctx.state() !== "closed");
+	createEffect(() => {
+		if (!present()) return;
+		acquireScrollLock();
+		onCleanup(releaseScrollLock);
+	});
 
 	const clearAnimInline = () => {
 		if (!el) return;

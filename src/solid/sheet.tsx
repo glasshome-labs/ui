@@ -83,7 +83,7 @@ const SheetOverlay: Component<ComponentProps<typeof DialogPrimitive.Overlay>> = 
 		<DialogPrimitive.Overlay
 			data-slot="sheet-overlay"
 			class={cn(
-				`data-[closed]:fade-out-0 data-[expanded]:fade-in-0 pointer-events-auto fixed inset-0 select-none ${Z_CLASS.sheet} ${SCRIM_CLASS} data-[closed]:animate-out data-[expanded]:animate-in`,
+				`data-[closed]:fade-out-0 data-[expanded]:fade-in-0 pointer-events-auto fixed inset-0 select-none ${Z_CLASS.overlay} ${SCRIM_CLASS} data-[closed]:animate-out data-[expanded]:animate-in`,
 				local.class,
 			)}
 			{...rest}
@@ -95,7 +95,7 @@ const SheetOverlay: Component<ComponentProps<typeof DialogPrimitive.Overlay>> = 
  * blob over a flat field; pinned lengths match the ellipse a dialog gets. */
 const SHEET_SURFACE = `${OVERLAY_SURFACE} [--glass-sheen:600px_300px]`;
 
-const SHEET_PANEL = `fixed ${Z_CLASS.sheet} flex flex-col overflow-hidden rounded-lg ${SHEET_SURFACE} transition ease-in-out focus:outline-none focus-visible:outline-none data-[closed]:animate-out data-[expanded]:animate-in data-[closed]:duration-300 data-[expanded]:duration-500`;
+const SHEET_PANEL = `fixed ${Z_CLASS.overlay} flex flex-col overflow-hidden rounded-lg ${SHEET_SURFACE} transition ease-in-out focus:outline-none focus-visible:outline-none data-[closed]:animate-out data-[expanded]:animate-in data-[closed]:duration-300 data-[expanded]:duration-500`;
 
 const SHEET_SIDE = {
 	right:
@@ -142,6 +142,7 @@ const SheetContent: ParentComponent<SheetContentProps> = (props) => {
 				<SheetOverlay />
 				<DialogPrimitive.Content
 					data-slot="sheet-content"
+					role="dialog"
 					aria-label={local.ariaLabel}
 					class={cn(SHEET_PANEL, SHEET_SIDE[side() as keyof typeof SHEET_SIDE], local.class)}
 					onOpenAutoFocus={(e: Event) => e.preventDefault()}
