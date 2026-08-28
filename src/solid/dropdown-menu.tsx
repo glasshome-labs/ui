@@ -48,31 +48,31 @@ const DropdownMenuItem: Component<
 		/** @deprecated pass `tone="var(--destructive)"` instead */
 		variant?: "default" | "destructive";
 	}
-> = (props) => <MenuItemPart slot="dropdown-menu-item" {...props} />;
+> = (props) => <MenuItemPart slotName="dropdown-menu-item" {...props} />;
 
 const DropdownMenuSubTrigger: ParentComponent<
 	ComponentProps<typeof DropdownMenuPrimitive.SubTrigger> & { inset?: boolean }
-> = (props) => <MenuSubTriggerPart slot="dropdown-menu-sub-trigger" {...props} />;
+> = (props) => <MenuSubTriggerPart slotName="dropdown-menu-sub-trigger" {...props} />;
 
 const DropdownMenuSubContent: ParentComponent<
 	ComponentProps<typeof DropdownMenuPrimitive.SubContent>
-> = (props) => <MenuSubContentPart slot="dropdown-menu-sub-content" {...props} />;
+> = (props) => <MenuSubContentPart slotName="dropdown-menu-sub-content" {...props} />;
 
 const DropdownMenuCheckboxItem: ParentComponent<
 	ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>
-> = (props) => <MenuCheckboxItemPart slot="dropdown-menu-checkbox-item" {...props} />;
+> = (props) => <MenuCheckboxItemPart slotName="dropdown-menu-checkbox-item" {...props} />;
 
 const DropdownMenuRadioItem: ParentComponent<
 	ComponentProps<typeof DropdownMenuPrimitive.RadioItem>
-> = (props) => <MenuRadioItemPart slot="dropdown-menu-radio-item" {...props} />;
+> = (props) => <MenuRadioItemPart slotName="dropdown-menu-radio-item" {...props} />;
 
 const DropdownMenuSeparator: Component<ComponentProps<typeof DropdownMenuPrimitive.Separator>> = (
 	props,
-) => <MenuSeparatorPart slot="dropdown-menu-separator" {...props} />;
+) => <MenuSeparatorPart slotName="dropdown-menu-separator" {...props} />;
 
 const DropdownMenuLabel: Component<
 	ComponentProps<typeof DropdownMenuPrimitive.GroupLabel> & { inset?: boolean }
-> = (props) => <MenuLabelPart slot="dropdown-menu-label" {...props} />;
+> = (props) => <MenuLabelPart slotName="dropdown-menu-label" {...props} />;
 
 const DropdownMenuShortcut: Component<ComponentProps<"span">> = (props) => {
 	const [local, others] = splitProps(props, ["class"]);

@@ -50,6 +50,53 @@ function slidingIndicatorOf(el: Element | null) {
 	return el?.querySelector(".relative.isolate") ?? null;
 }
 
+// SlidingIndicator only paints once it can measure real geometry
+// (getBoundingClientRect + clientWidth/clientHeight); happy-dom reports all
+// zeros by default, so tests that need the indicator itself (not just its
+// always-rendered container) fake a non-zero layout for the duration.
+async function withMeasurableLayout<T>(fn: () => T | Promise<T>): Promise<T> {
+	const rectDescriptor = Object.getOwnPropertyDescriptor(
+		HTMLElement.prototype,
+		"getBoundingClientRect",
+	);
+	const widthDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth");
+	const heightDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientHeight");
+	HTMLElement.prototype.getBoundingClientRect = () =>
+		({
+			x: 0,
+			y: 0,
+			top: 0,
+			left: 0,
+			right: 100,
+			bottom: 20,
+			width: 100,
+			height: 20,
+			toJSON() {},
+		}) as DOMRect;
+	Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+		configurable: true,
+		get: () => 100,
+	});
+	Object.defineProperty(HTMLElement.prototype, "clientHeight", {
+		configurable: true,
+		get: () => 20,
+	});
+	try {
+		// Awaited here (not just returned): the caller's callback is often async
+		// itself (fires an event, then awaits a microtask for a MutationObserver
+		// to run), and the patch must still be in place when that later code runs,
+		// not just for the synchronous prefix before its first await.
+		return await fn();
+	} finally {
+		if (rectDescriptor)
+			Object.defineProperty(HTMLElement.prototype, "getBoundingClientRect", rectDescriptor);
+		if (widthDescriptor)
+			Object.defineProperty(HTMLElement.prototype, "clientWidth", widthDescriptor);
+		if (heightDescriptor)
+			Object.defineProperty(HTMLElement.prototype, "clientHeight", heightDescriptor);
+	}
+}
+
 describe("DropdownMenuContent", () => {
 	it("wears FLOATING_PANEL and wraps its items in one SlidingIndicator", () => {
 		const { container } = render(() => (
@@ -167,5 +214,39 @@ describe("ContextMenuContent", () => {
 		if (!item) throw new Error("no item rendered");
 		expect(item.style.getPropertyValue("--glass-tone")).toBe("var(--destructive)");
 		expect(item.className).not.toContain("!");
+	});
+
+	it("mirrors the highlighted item's own tone onto the sliding indicator", async () => {
+		await withMeasurableLayout(async () => {
+			const { container } = render(() => (
+				<ContextMenu>
+					<ContextMenuTrigger class="block h-8 w-8">Right-click</ContextMenuTrigger>
+					<ContextMenuContent>
+						<ContextMenuItem>One</ContextMenuItem>
+						<ContextMenuItem tone="var(--destructive)">Delete</ContextMenuItem>
+					</ContextMenuContent>
+				</ContextMenu>
+			));
+
+			fireEvent.contextMenu(
+				container.querySelector('[data-slot="context-menu-trigger"]') as Element,
+			);
+			const items = document.querySelectorAll<HTMLElement>('[data-slot="context-menu-item"]');
+			const destructiveItem = items[1];
+			if (!destructiveItem) throw new Error("no destructive item rendered");
+
+			// Drives MenuContentIndicator's own [data-highlighted] MutationObserver
+			// directly rather than Kobalte's hover/keyboard focus machinery (its
+			// own concern, not this batch's, and not reliably driveable through
+			// synthetic pointer/keyboard events in happy-dom).
+			destructiveItem.setAttribute("data-highlighted", "");
+			// The tone sync runs off a MutationObserver callback (microtask).
+			await Promise.resolve();
+			await Promise.resolve();
+
+			const indicator = document.querySelector<HTMLElement>("[data-sliding-indicator]");
+			expect(indicator).not.toBeNull();
+			expect(indicator?.style.getPropertyValue("--glass-tone")).toBe("var(--destructive)");
+		});
 	});
 });

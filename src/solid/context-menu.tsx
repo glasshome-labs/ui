@@ -26,11 +26,11 @@ const ContextMenuTrigger: Component<ComponentProps<typeof ContextMenuPrimitive.T
 
 const ContextMenuSubTrigger: ParentComponent<
 	ComponentProps<typeof ContextMenuPrimitive.SubTrigger> & { inset?: boolean }
-> = (props) => <MenuSubTriggerPart slot="context-menu-sub-trigger" {...props} />;
+> = (props) => <MenuSubTriggerPart slotName="context-menu-sub-trigger" {...props} />;
 
 const ContextMenuSubContent: Component<ComponentProps<typeof ContextMenuPrimitive.SubContent>> = (
 	props,
-) => <MenuSubContentPart slot="context-menu-sub-content" {...props} />;
+) => <MenuSubContentPart slotName="context-menu-sub-content" {...props} />;
 
 const ContextMenuContent: Component<ComponentProps<typeof ContextMenuPrimitive.Content>> = (
 	props,
@@ -40,7 +40,7 @@ const ContextMenuContent: Component<ComponentProps<typeof ContextMenuPrimitive.C
 		<ContextMenuPrimitive.Portal>
 			<ContextMenuPrimitive.Content
 				data-slot="context-menu-content"
-				class={cn(MENU_CONTENT_CLASS, local.class)}
+				class={cn(MENU_CONTENT_CLASS, "overflow-y-auto overflow-x-hidden", local.class)}
 				{...rest}
 			>
 				<MenuContentIndicator>{local.children}</MenuContentIndicator>
@@ -56,23 +56,23 @@ const ContextMenuItem: Component<
 		/** @deprecated pass `tone="var(--destructive)"` instead */
 		variant?: "default" | "destructive";
 	}
-> = (props) => <MenuItemPart slot="context-menu-item" {...props} />;
+> = (props) => <MenuItemPart slotName="context-menu-item" {...props} />;
 
 const ContextMenuCheckboxItem: ParentComponent<
 	ComponentProps<typeof ContextMenuPrimitive.CheckboxItem>
-> = (props) => <MenuCheckboxItemPart slot="context-menu-checkbox-item" {...props} />;
+> = (props) => <MenuCheckboxItemPart slotName="context-menu-checkbox-item" {...props} />;
 
 const ContextMenuRadioItem: ParentComponent<
 	ComponentProps<typeof ContextMenuPrimitive.RadioItem>
-> = (props) => <MenuRadioItemPart slot="context-menu-radio-item" {...props} />;
+> = (props) => <MenuRadioItemPart slotName="context-menu-radio-item" {...props} />;
 
 const ContextMenuLabel: Component<
 	ComponentProps<typeof ContextMenuPrimitive.GroupLabel> & { inset?: boolean }
-> = (props) => <MenuLabelPart slot="context-menu-label" {...props} />;
+> = (props) => <MenuLabelPart slotName="context-menu-label" {...props} />;
 
 const ContextMenuSeparator: Component<ComponentProps<typeof ContextMenuPrimitive.Separator>> = (
 	props,
-) => <MenuSeparatorPart slot="context-menu-separator" {...props} />;
+) => <MenuSeparatorPart slotName="context-menu-separator" {...props} />;
 
 const ContextMenuShortcut: Component<ComponentProps<"span">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);

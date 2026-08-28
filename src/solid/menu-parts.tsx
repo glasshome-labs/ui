@@ -1,6 +1,14 @@
 import { Icon } from "@iconify-icon/solid";
 import { DropdownMenu as MenuPrimitive } from "@kobalte/core/dropdown-menu";
-import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
+import {
+	type Component,
+	type ComponentProps,
+	createSignal,
+	onCleanup,
+	onMount,
+	type ParentComponent,
+	splitProps,
+} from "solid-js";
 import { glassToneText } from "../lib/glass-tone.js";
 import { MENU_ITEM, MENU_LABEL, MENU_SEPARATOR } from "../lib/menu-classes.js";
 import { FLOATING_PANEL, OVERLAY_MOTION } from "../lib/overlay-classes.js";
@@ -16,19 +24,61 @@ import { SlidingIndicator } from "./sliding-indicator.js";
  * here under whichever Root happens to be an ancestor.
  */
 
-export const MENU_CONTENT_CLASS = cn(FLOATING_PANEL, OVERLAY_MOTION, "min-w-[8rem] p-1");
+export const MENU_CONTENT_CLASS = cn(
+	FLOATING_PANEL,
+	OVERLAY_MOTION,
+	"min-w-[8rem] overflow-hidden p-1",
+);
+
+// Indented rows (checkbox/radio) need pl-8 pr-2, not px-2; tailwind-merge
+// does not cancel px-2 for a more specific pl-8/pr-2 pair (both stay in the
+// class list, leaving the visible result to CSS emit order), so the shared
+// row base is built once here with px-2 actually removed.
+const MENU_ITEM_NO_X_PADDING = MENU_ITEM.replace(/\bpx-2\b/, "").trim();
 
 /** Every menu content and sub content wraps its rows in one sliding highlight,
- *  keyed off Kobalte's roving-focus attribute. */
-export const MenuContentIndicator: ParentComponent = (props) => (
-	<SlidingIndicator
-		activeSelector="[data-highlighted]"
-		orientation="vertical"
-		indicatorClass="rounded-sm"
-	>
-		{props.children}
-	</SlidingIndicator>
-);
+ *  keyed off Kobalte's roving-focus attribute. The highlighted row's own
+ *  --glass-tone (set inline by MenuItemPart) is mirrored onto the indicator,
+ *  since --glass-tone does not inherit and the indicator is a sibling, not
+ *  an ancestor, of the rows it highlights. */
+export const MenuContentIndicator: ParentComponent = (props) => {
+	let containerRef: HTMLDivElement | undefined;
+	const [tone, setTone] = createSignal<string | undefined>(undefined);
+
+	const syncTone = () => {
+		const highlighted = containerRef?.querySelector<HTMLElement>("[data-highlighted]");
+		setTone(highlighted?.style.getPropertyValue("--glass-tone") || undefined);
+	};
+
+	onMount(() => {
+		if (!containerRef) return;
+		const mo = new MutationObserver(syncTone);
+		mo.observe(containerRef, {
+			subtree: true,
+			attributes: true,
+			attributeFilter: ["data-highlighted"],
+		});
+		containerRef.addEventListener("focusin", syncTone);
+		syncTone();
+		onCleanup(() => {
+			mo.disconnect();
+			containerRef?.removeEventListener("focusin", syncTone);
+		});
+	});
+
+	return (
+		<div ref={containerRef}>
+			<SlidingIndicator
+				activeSelector="[data-highlighted]"
+				orientation="vertical"
+				indicatorClass="rounded-sm"
+				indicatorTone={tone()}
+			>
+				{props.children}
+			</SlidingIndicator>
+		</div>
+	);
+};
 
 type ToneProps = {
 	tone?: string;
@@ -45,17 +95,29 @@ function toneStyle(tone: string | undefined) {
 }
 
 type MenuItemProps = ComponentProps<typeof MenuPrimitive.Item> &
-	ToneProps & { inset?: boolean; slot: string };
+	ToneProps & { inset?: boolean; slotName: string; style?: Record<string, string> };
 
 export const MenuItemPart: Component<MenuItemProps> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "inset", "tone", "variant", "slot"]);
+	const [local, rest] = splitProps(props, [
+		"class",
+		"inset",
+		"tone",
+		"variant",
+		"slotName",
+		"style",
+	]);
 	const tone = () => resolveTone(local);
 	return (
 		<MenuPrimitive.Item
-			data-slot={local.slot}
+			data-slot={local.slotName}
 			data-inset={local.inset}
-			class={cn(MENU_ITEM, local.inset && "pl-8", local.class)}
-			style={toneStyle(tone())}
+			// Icons default to muted-foreground unless the item already carries a
+			// "text-*" class (MENU_ITEM's [&_svg:not([class*='text-'])] guard); a
+			// tone sets color via inline style, invisible to that class-string
+			// check, so a static text-[currentColor] class opts the icon back
+			// into following the item's own (inline, higher-specificity) color.
+			class={cn(MENU_ITEM, local.inset && "pl-8", tone() && "text-[currentColor]", local.class)}
+			style={{ ...toneStyle(tone()), ...local.style }}
 			{...rest}
 		/>
 	);
@@ -63,14 +125,14 @@ export const MenuItemPart: Component<MenuItemProps> = (props) => {
 
 type MenuLabelProps = ComponentProps<typeof MenuPrimitive.GroupLabel> & {
 	inset?: boolean;
-	slot: string;
+	slotName: string;
 };
 
 export const MenuLabelPart: Component<MenuLabelProps> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "inset", "slot"]);
+	const [local, rest] = splitProps(props, ["class", "inset", "slotName"]);
 	return (
 		<MenuPrimitive.GroupLabel
-			data-slot={local.slot}
+			data-slot={local.slotName}
 			data-inset={local.inset}
 			class={cn(MENU_LABEL, local.inset && "pl-8", local.class)}
 			{...rest}
@@ -78,13 +140,13 @@ export const MenuLabelPart: Component<MenuLabelProps> = (props) => {
 	);
 };
 
-type MenuSeparatorProps = ComponentProps<typeof MenuPrimitive.Separator> & { slot: string };
+type MenuSeparatorProps = ComponentProps<typeof MenuPrimitive.Separator> & { slotName: string };
 
 export const MenuSeparatorPart: Component<MenuSeparatorProps> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "slot"]);
+	const [local, rest] = splitProps(props, ["class", "slotName"]);
 	return (
 		<MenuPrimitive.Separator
-			data-slot={local.slot}
+			data-slot={local.slotName}
 			class={cn(MENU_SEPARATOR, local.class)}
 			{...rest}
 		/>
@@ -93,14 +155,14 @@ export const MenuSeparatorPart: Component<MenuSeparatorProps> = (props) => {
 
 type MenuSubTriggerProps = ComponentProps<typeof MenuPrimitive.SubTrigger> & {
 	inset?: boolean;
-	slot: string;
+	slotName: string;
 };
 
 export const MenuSubTriggerPart: ParentComponent<MenuSubTriggerProps> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "children", "inset", "slot"]);
+	const [local, rest] = splitProps(props, ["class", "children", "inset", "slotName"]);
 	return (
 		<MenuPrimitive.SubTrigger
-			data-slot={local.slot}
+			data-slot={local.slotName}
 			data-inset={local.inset}
 			class={cn(MENU_ITEM, local.inset && "pl-8", local.class)}
 			{...rest}
@@ -111,13 +173,13 @@ export const MenuSubTriggerPart: ParentComponent<MenuSubTriggerProps> = (props) 
 	);
 };
 
-type MenuSubContentProps = ComponentProps<typeof MenuPrimitive.SubContent> & { slot: string };
+type MenuSubContentProps = ComponentProps<typeof MenuPrimitive.SubContent> & { slotName: string };
 
 export const MenuSubContentPart: ParentComponent<MenuSubContentProps> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "children", "slot"]);
+	const [local, rest] = splitProps(props, ["class", "children", "slotName"]);
 	return (
 		<MenuPrimitive.SubContent
-			data-slot={local.slot}
+			data-slot={local.slotName}
 			class={cn(MENU_CONTENT_CLASS, local.class)}
 			{...rest}
 		>
@@ -126,14 +188,16 @@ export const MenuSubContentPart: ParentComponent<MenuSubContentProps> = (props) 
 	);
 };
 
-type MenuCheckboxItemProps = ComponentProps<typeof MenuPrimitive.CheckboxItem> & { slot: string };
+type MenuCheckboxItemProps = ComponentProps<typeof MenuPrimitive.CheckboxItem> & {
+	slotName: string;
+};
 
 export const MenuCheckboxItemPart: ParentComponent<MenuCheckboxItemProps> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "children", "slot"]);
+	const [local, rest] = splitProps(props, ["class", "children", "slotName"]);
 	return (
 		<MenuPrimitive.CheckboxItem
-			data-slot={local.slot}
-			class={cn(MENU_ITEM, "py-1.5 pr-2 pl-8", local.class)}
+			data-slot={local.slotName}
+			class={cn(MENU_ITEM_NO_X_PADDING, "py-1.5 pr-2 pl-8", local.class)}
 			{...rest}
 		>
 			<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
@@ -146,14 +210,14 @@ export const MenuCheckboxItemPart: ParentComponent<MenuCheckboxItemProps> = (pro
 	);
 };
 
-type MenuRadioItemProps = ComponentProps<typeof MenuPrimitive.RadioItem> & { slot: string };
+type MenuRadioItemProps = ComponentProps<typeof MenuPrimitive.RadioItem> & { slotName: string };
 
 export const MenuRadioItemPart: ParentComponent<MenuRadioItemProps> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "children", "slot"]);
+	const [local, rest] = splitProps(props, ["class", "children", "slotName"]);
 	return (
 		<MenuPrimitive.RadioItem
-			data-slot={local.slot}
-			class={cn(MENU_ITEM, "py-1.5 pr-2 pl-8", local.class)}
+			data-slot={local.slotName}
+			class={cn(MENU_ITEM_NO_X_PADDING, "py-1.5 pr-2 pl-8", local.class)}
 			{...rest}
 		>
 			<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
