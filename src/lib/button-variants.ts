@@ -1,5 +1,10 @@
 import { cva } from "cva";
 
+/* One outline material, worn by the pill and by Toggle: `glass` owns the
+ * element's background and border, so a real border-input box is a no-op. */
+export const OUTLINE_SURFACE =
+	"glass [--glass-edge:var(--border)] hover:[--glass-base:var(--muted)] dark:[--glass-base:var(--input)] dark:hover:[--glass-base:var(--muted)]";
+
 /* Buttons are glass pills on an OPAQUE --card base: a translucent fill goes
  * muddy over dark heroes/sections. Every class is literal for Tailwind's
  * scanner. `size: none` is sizeless for callers that own height/padding. */
@@ -16,8 +21,7 @@ export const buttonVariants = cva({
 				"glass glass-tint [--glass-text:61%] [--glass-tone:var(--destructive)] [--glass-wash:30%] focus-visible:ring-destructive/30 hover:[--glass-edge:color-mix(in_srgb,var(--destructive)_60%,transparent)] hover:[--glass-wash:40%]",
 			secondary:
 				"glass glass-tint [--glass-tone:var(--accent)] [--glass-wash:30%] hover:[--glass-edge:color-mix(in_srgb,var(--accent)_60%,transparent)] hover:[--glass-wash:40%]",
-			outline:
-				"glass [--glass-edge:var(--border)] hover:[--glass-base:var(--muted)] dark:[--glass-base:var(--input)] dark:hover:[--glass-base:var(--muted)]",
+			outline: OUTLINE_SURFACE,
 			ghost: "hover:bg-muted hover:text-foreground dark:hover:bg-muted/50",
 			link: "text-primary underline-offset-4 hover:underline",
 		},

@@ -1,8 +1,6 @@
-/* toggle-group.tsx:89 used `!important` to beat toggleVariants' own
- * `hover:bg-muted`; both classes go through the same cn()/tailwind-merge
- * call, so the later class already wins without the escape hatch. */
 import { cleanup, render } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it } from "vitest";
+import { Toggle } from "../../src/solid/toggle.js";
 import { ToggleGroup, ToggleGroupItem } from "../../src/solid/toggle-group.js";
 
 afterEach(cleanup);
@@ -27,15 +25,26 @@ async function flush() {
 }
 
 describe("ToggleGroup", () => {
-	it("carries no !important escape hatch on its items", () => {
+	it("leaves the hover fill to the standalone Toggle, so no square paints behind the indicator", () => {
+		const standalone = render(() => <Toggle>Notify</Toggle>);
+		expect(
+			standalone.container.querySelector<HTMLElement>('[data-slot="toggle"]')?.className,
+		).toContain("not-data-[pressed]:hover:bg-muted");
+		cleanup();
+
 		const { container } = render(() => (
 			<ToggleGroup value="left">
 				<ToggleGroupItem value="left">Left</ToggleGroupItem>
 				<ToggleGroupItem value="right">Right</ToggleGroupItem>
 			</ToggleGroup>
 		));
-		for (const item of container.querySelectorAll<HTMLElement>('[data-slot="toggle-group-item"]')) {
-			expect(item.className).not.toContain("!");
+		const items = container.querySelectorAll<HTMLElement>('[data-slot="toggle-group-item"]');
+		expect(items).toHaveLength(2);
+		for (const item of items) {
+			// `:not([data-pressed]):hover` (0,3,0) outranks the group's own
+			// `hover:bg-transparent` (0,2,0), so the fill must never reach an item.
+			expect(item.className).not.toContain("hover:bg-muted");
+			expect(item.className).toContain("hover:text-primary");
 		}
 	});
 

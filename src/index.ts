@@ -22,6 +22,7 @@ export {
 	BUTTON_OUTLINE_CLASS,
 	buttonVariants,
 	ICON_BUTTON_CLASS,
+	OUTLINE_SURFACE,
 } from "./lib/button-variants.js";
 export {
 	CARD_BLUR,

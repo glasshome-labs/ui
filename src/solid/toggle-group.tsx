@@ -85,12 +85,11 @@ const ToggleGroupItem: Component<
 				// segments' rounded corners. Items are <button>, so `-of-type` skips the indicator.
 				"min-w-0 flex-1 shrink-0 rounded-none px-4 shadow-none first-of-type:rounded-l-md last-of-type:rounded-r-md focus:z-10 focus-visible:z-10 data-[variant=outline]:border-l-0 data-[variant=outline]:first-of-type:border-l",
 				// Single-select: the sliding indicator paints the active segment, so the
-				// item needs no pressed fill of its own, and hover only tints the text
-				// (a square bg-muted hover would clash with the rounded glass indicator).
+				// item needs no pressed fill of its own and hover only tints the text.
 				// Multi-select has no single indicator, so each pressed segment carries
 				// its own neutral fill.
 				context.sliding
-					? "hover:bg-transparent hover:text-primary"
+					? "hover:text-primary"
 					: "data-[pressed]:bg-muted data-[pressed]:text-foreground",
 				local.class,
 			)}
