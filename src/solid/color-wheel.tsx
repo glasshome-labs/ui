@@ -33,6 +33,9 @@ const ColorWheel: Component<ColorWheelProps> = (props) => {
 		"aria-label",
 	]);
 	const size = () => local.size ?? 200;
+	// Kobalte reads `thickness` as a percentage of the radius, so a px thumb
+	// only fits if the ring is sized from the same number the class resolves to.
+	const thickness = () => local.thickness ?? Math.ceil((THUMB_SIZE / (size() / 2)) * 100);
 
 	return (
 		<KColorWheel
@@ -40,7 +43,7 @@ const ColorWheel: Component<ColorWheelProps> = (props) => {
 			defaultValue={local.defaultValue}
 			onChange={local.onChange}
 			onChangeEnd={local.onChangeEnd}
-			thickness={local.thickness ?? THUMB_SIZE}
+			thickness={thickness()}
 			disabled={local.disabled}
 			data-slot="color-wheel"
 			class={cn(
