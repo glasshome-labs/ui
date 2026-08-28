@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type ComponentProps, type JSX, Show, splitProps } from "solid-js";
+import { type ComponentProps, children, type JSX, Show, splitProps } from "solid-js";
 import { CARD_BLUR, CARD_SURFACE_BASE, SECTION_ROW_SURFACE } from "../lib/card-classes.js";
 import { ICON_PILL, ICON_PILL_TINT } from "../lib/pill-classes.js";
 import {
@@ -35,7 +35,7 @@ type SectionCardProps = {
 	subtitleClass?: string;
 	class?: string;
 	glass?: GlassSurface;
-	children: JSX.Element;
+	children?: JSX.Element;
 };
 
 export function SectionCard(props: SectionCardProps) {
@@ -43,6 +43,10 @@ export function SectionCard(props: SectionCardProps) {
 	const active = () => glass().active?.() ?? false;
 	const hasHeader = () =>
 		props.icon != null || props.title != null || props.action != null || props.count != null;
+	// Resolved once: a header-only card must not pay the section gap for an
+	// empty body slot, and reading props.children twice would build it twice.
+	const body = children(() => props.children);
+	const hasBody = () => body.toArray().some((child) => child != null && child !== false);
 
 	return (
 		<section
@@ -92,7 +96,9 @@ export function SectionCard(props: SectionCardProps) {
 					{props.toolbar}
 				</div>
 			</Show>
-			<div data-slot="section-card-body">{props.children}</div>
+			<Show when={hasBody()}>
+				<div data-slot="section-card-body">{body()}</div>
+			</Show>
 		</section>
 	);
 }

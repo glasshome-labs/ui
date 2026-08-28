@@ -62,6 +62,15 @@ describe("SectionCard spacing owner", () => {
 		}
 	});
 
+	it("renders no body slot when the card has only a header", () => {
+		const withBody = render(() => <SectionCard title="t">rows</SectionCard>);
+		expect(slot(withBody.container, "section-card-body").textContent).toBe("rows");
+		cleanup();
+
+		const headerOnly = render(() => <SectionCard title="t" />);
+		expect(headerOnly.container.querySelector('[data-slot="section-card-body"]')).toBeNull();
+	});
+
 	it("keeps the toolbar rule only when a header sits above it", () => {
 		const withHeader = render(() => (
 			<SectionCard title="t" toolbar={<span>bar</span>}>
@@ -174,6 +183,17 @@ describe("Empty", () => {
 		const media = slot(container, "empty-media");
 		expect(media.className).not.toMatch(/(^|\s)mb-/);
 		expect(media.className).toContain("glass");
+	});
+
+	it("names the media kind on both attributes, like ItemMedia", () => {
+		const iconed = render(() => <EmptyMedia media="icon" />);
+		const media = slot(iconed.container, "empty-media");
+		expect(media.dataset.media).toBe("icon");
+		expect(media.dataset.variant).toBe("icon");
+		cleanup();
+
+		const plain = render(() => <EmptyMedia />);
+		expect(slot(plain.container, "empty-media").dataset.variant).toBe("default");
 	});
 });
 

@@ -166,7 +166,7 @@ export function TableEmpty(props: {
 		<Empty class="gap-3 rounded-none border-none py-12">
 			<EmptyHeader>
 				<Show when={props.icon}>
-					<EmptyMedia variant="icon">
+					<EmptyMedia media="icon">
 						{typeof props.icon === "string" ? (
 							<Icon icon={props.icon} width={24} height={24} />
 						) : (

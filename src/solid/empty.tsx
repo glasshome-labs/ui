@@ -46,6 +46,7 @@ const EmptyMedia: Component<
 		<div
 			data-slot="empty-media"
 			data-media={media()}
+			data-variant={local.variant ?? media() ?? "default"}
 			class={cn(
 				"flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
 				media() && EMPTY_MEDIA[media() as EmptyMediaKind],

@@ -25,6 +25,12 @@ describe("TableEmpty", () => {
 		const { container } = render(() => <TableEmpty message="No rows" />);
 		expect(container.querySelector('[data-slot="empty"]')).not.toBeNull();
 	});
+
+	it("asks for the icon pill through the current prop", () => {
+		const { container } = render(() => <TableEmpty icon="lucide:inbox" message="No rows" />);
+		const media = container.querySelector<HTMLElement>('[data-slot="empty-media"]');
+		expect(media?.dataset.media).toBe("icon");
+	});
 });
 
 describe("TABLE_SCROLL_CLASS", () => {
