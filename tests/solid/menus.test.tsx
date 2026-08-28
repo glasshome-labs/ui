@@ -216,6 +216,34 @@ describe("ContextMenuContent", () => {
 		expect(item.className).not.toContain("!");
 	});
 
+	it("lets a toned item's real svg child inherit the tone instead of muted-foreground", () => {
+		// No Icon mock here: MENU_ITEM's guard targets a real <svg>, and a
+		// stubbed <span> would pass by construction without proving anything.
+		const { container } = render(() => (
+			<ContextMenu>
+				<ContextMenuTrigger class="block h-8 w-8">Right-click</ContextMenuTrigger>
+				<ContextMenuContent>
+					<ContextMenuItem tone="var(--destructive)">
+						<svg data-testid="trash-icon" />
+						Delete
+					</ContextMenuItem>
+				</ContextMenuContent>
+			</ContextMenu>
+		));
+
+		fireEvent.contextMenu(container.querySelector('[data-slot="context-menu-trigger"]') as Element);
+
+		const item = document.querySelector<HTMLElement>('[data-slot="context-menu-item"]');
+		if (!item) throw new Error("no item rendered");
+		expect(item.dataset.tone).toBe("");
+
+		const tokens = item.className.split(/\s+/);
+		expect(tokens).toContain(
+			"[&:not([data-tone])_svg:not([class*='text-'])]:text-muted-foreground",
+		);
+		expect(tokens).not.toContain("[&_svg:not([class*='text-'])]:text-muted-foreground");
+	});
+
 	it("mirrors the highlighted item's own tone onto the sliding indicator", async () => {
 		await withMeasurableLayout(async () => {
 			const { container } = render(() => (

@@ -34,7 +34,7 @@ export const MENU_CONTENT_CLASS = cn(
 // does not cancel px-2 for a more specific pl-8/pr-2 pair (both stay in the
 // class list, leaving the visible result to CSS emit order), so the shared
 // row base is built once here with px-2 actually removed.
-const MENU_ITEM_NO_X_PADDING = MENU_ITEM.replace(/\bpx-2\b/, "").trim();
+const MENU_ITEM_NO_X_PADDING = MENU_ITEM.replace(/\s*\bpx-2\b\s*/, " ").trim();
 
 /** Every menu content and sub content wraps its rows in one sliding highlight,
  *  keyed off Kobalte's roving-focus attribute. The highlighted row's own
@@ -111,12 +111,8 @@ export const MenuItemPart: Component<MenuItemProps> = (props) => {
 		<MenuPrimitive.Item
 			data-slot={local.slotName}
 			data-inset={local.inset}
-			// Icons default to muted-foreground unless the item already carries a
-			// "text-*" class (MENU_ITEM's [&_svg:not([class*='text-'])] guard); a
-			// tone sets color via inline style, invisible to that class-string
-			// check, so a static text-[currentColor] class opts the icon back
-			// into following the item's own (inline, higher-specificity) color.
-			class={cn(MENU_ITEM, local.inset && "pl-8", tone() && "text-[currentColor]", local.class)}
+			data-tone={tone() ? "" : undefined}
+			class={cn(MENU_ITEM, local.inset && "pl-8", local.class)}
 			style={{ ...toneStyle(tone()), ...local.style }}
 			{...rest}
 		/>
