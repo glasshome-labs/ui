@@ -354,7 +354,9 @@ export function IconPicker(props: IconPickerProps) {
 			<PopoverContent
 				onOpenAutoFocus={(e) => {
 					e.preventDefault();
-					searchRef?.focus();
+					// preventScroll: the panel is portalled at (0,0) until the popper places it,
+					// so a plain focus() scrolls the page to the top.
+					searchRef?.focus({ preventScroll: true });
 				}}
 				onInteractOutside={() => setOpen(false)}
 			>
@@ -383,7 +385,7 @@ export function IconPicker(props: IconPickerProps) {
 										"cursor-pointer transition-colors",
 										activeLib() === lib.prefix
 											? "[--glass-tone:var(--primary)]"
-											: "text-muted-foreground [--glass-base:transparent] [--glass-edge:transparent] [--glass-light:0] hover:text-foreground",
+											: "text-muted-foreground [--glass-base:transparent] [--glass-edge:transparent] [--glass-light:0] [--glass-rim:0] hover:text-foreground",
 									)}
 									onClick={() => handleLibChange(lib.prefix)}
 								>

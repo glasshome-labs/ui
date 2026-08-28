@@ -662,7 +662,9 @@ export function EntitySelector(props: EntitySelectorProps) {
 					class="flex min-w-72 flex-col"
 					onOpenAutoFocus={(e) => {
 						e.preventDefault();
-						inputRef?.focus();
+						// preventScroll: the panel is portalled at (0,0) until the popper places it,
+						// so a plain focus() scrolls the page to the top.
+						inputRef?.focus({ preventScroll: true });
 					}}
 					onInteractOutside={() => closePicker()}
 				>
