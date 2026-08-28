@@ -15,16 +15,16 @@ import {
 	AvatarFallback,
 	BottomSheet,
 	BottomSheetBody,
+	BottomSheetClose,
 	BottomSheetContent,
 	BottomSheetDescription,
-	BottomSheetFooter,
 	BottomSheetHandle,
-	BottomSheetHeader,
 	BottomSheetOverlay,
 	BottomSheetPortal,
 	BottomSheetTitle,
 	BottomSheetTrigger,
 	Button,
+	buttonVariants,
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
@@ -198,6 +198,8 @@ export function OverlaysCatalog() {
 				</Sheet>
 			</CatalogItem>
 
+			{/* The raw surface: handle plus one scrolling Body, the shape the mobile
+			    pickers wear. A titled, footed sheet is a ResponsiveDialog. */}
 			<CatalogItem name="BottomSheet" hint="drag-to-dismiss · click to open">
 				<BottomSheet>
 					<BottomSheetTrigger as={Button} variant="outline">
@@ -207,19 +209,16 @@ export function OverlaysCatalog() {
 						<BottomSheetOverlay />
 						<BottomSheetContent>
 							<BottomSheetHandle />
-							<BottomSheetHeader action={<HeaderAction />}>
+							<BottomSheetBody>
 								<BottomSheetTitle>Bottom sheet</BottomSheetTitle>
 								<BottomSheetDescription>
 									Drag-to-dismiss panel with snap points, the mobile-native surface.
 								</BottomSheetDescription>
-							</BottomSheetHeader>
-							<BottomSheetBody>
 								<DemoRows />
+								<BottomSheetClose class={buttonVariants({ variant: "outline" })}>
+									Close
+								</BottomSheetClose>
 							</BottomSheetBody>
-							<BottomSheetFooter>
-								<Button variant="outline">Cancel</Button>
-								<Button>Save</Button>
-							</BottomSheetFooter>
 						</BottomSheetContent>
 					</BottomSheetPortal>
 				</BottomSheet>

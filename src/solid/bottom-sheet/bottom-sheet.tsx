@@ -389,16 +389,9 @@ const BottomSheetHandle: Component<ComponentProps<"div">> = (props) => {
 	);
 };
 
-const {
-	Header: SharedHeader,
-	Body: BottomSheetBody,
-	Footer: SharedFooter,
-} = createModalParts("bottom-sheet");
-
-/** @deprecated Use the shared modal `Header` of the family you render in. */
-const BottomSheetHeader = SharedHeader;
-/** @deprecated Use the shared modal `Footer` of the family you render in. */
-const BottomSheetFooter = SharedFooter;
+/* Only the Body: a titled, footed sheet is a ResponsiveDialog, which renders
+ * its own Header and Footer around this same surface. */
+const { Body: BottomSheetBody } = createModalParts("bottom-sheet");
 
 const BottomSheetTitle: Component<ComponentProps<"h2">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
@@ -451,9 +444,7 @@ export {
 	BottomSheetClose,
 	BottomSheetContent,
 	BottomSheetDescription,
-	BottomSheetFooter,
 	BottomSheetHandle,
-	BottomSheetHeader,
 	BottomSheetOverlay,
 	BottomSheetPortal,
 	BottomSheetTitle,
