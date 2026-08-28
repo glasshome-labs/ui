@@ -7,7 +7,7 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia } from "
 import { Input } from "./input.js";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select.js";
 import { Skeleton } from "./skeleton.js";
-import { TABLE_CELL_INSET, TABLE_HEAD_CELL_CLASS } from "./table.js";
+import { TABLE_HEAD_CELL_CLASS } from "./table.js";
 
 /**
  * Generic data-table vocabulary: sticky-less header, row height/padding, border
@@ -21,21 +21,18 @@ import { TABLE_CELL_INSET, TABLE_HEAD_CELL_CLASS } from "./table.js";
 
 export { TABLE_HEAD_CELL_CLASS };
 
-// Literal counterparts of SECTION_PADDING's spacing number, kept for
-// Tailwind's static scanner (same split as lib/layers.ts's Z/Z_CLASS); this
-// throws if SECTION_PADDING ever moves off p-3 without this map moving too.
-const BLEED_BY_SECTION_PADDING: Record<string, string> = { "p-3": "-mx-3" };
-const bleedX = BLEED_BY_SECTION_PADDING[SECTION_PADDING];
-if (!bleedX) {
-	throw new Error(`TABLE_BLEED: no -mx- literal mapped for SECTION_PADDING ${SECTION_PADDING}`);
-}
-export const TABLE_BLEED = `${bleedX} border-border/50 border-t`;
+// Literal counterpart of SECTION_PADDING's spacing number, kept for
+// Tailwind's static scanner (same split as lib/layers.ts's Z/Z_CLASS). Keying
+// on the literal type of SECTION_PADDING makes a drift a compile error here
+// instead of a runtime throw.
+const BLEED_BY_SECTION_PADDING: Record<typeof SECTION_PADDING, string> = { "p-3": "-mx-3" };
+export const TABLE_BLEED = `${BLEED_BY_SECTION_PADDING[SECTION_PADDING]} border-border/50 border-t`;
 
 export const TABLE_CELL_X = "px-4";
 export const TABLE_ROW_CLASS =
 	"flex items-center gap-4 border-border/50 border-b px-4 py-2.5 transition-colors last:border-b-0 hover:bg-foreground/[0.03]";
 export const TABLE_HEAD_CLASS = "flex items-center gap-4 border-border/50 border-b px-4 py-2";
-export const TABLE_SCROLL_CLASS = "overflow-auto gh-scroll";
+export const TABLE_SCROLL_CLASS = "max-h-[600px] overflow-auto gh-scroll";
 export const TABLE_NUM_CELL_CLASS = "text-right text-muted-foreground text-xs tabular-nums";
 
 export type SortDirection = "asc" | "desc";
@@ -166,7 +163,7 @@ export function TableEmpty(props: {
 	action?: JSX.Element;
 }) {
 	return (
-		<Empty class={cn(TABLE_CELL_INSET, "gap-3 rounded-none border-none py-12")}>
+		<Empty class="gap-3 rounded-none border-none py-12">
 			<EmptyHeader>
 				<Show when={props.icon}>
 					<EmptyMedia variant="icon">

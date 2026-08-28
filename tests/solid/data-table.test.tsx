@@ -1,7 +1,8 @@
 /* data-table.tsx's empty/loading states used to hand-roll their own markup
  * (a second Empty, a third Skeleton family with inline widths); these pin
  * that they now compose the package's own Empty/Skeleton, and that the
- * scroll recipe carries the shared scrollbar with no baked-in max height. */
+ * scroll recipe keeps its default bound (real hub call sites pass it bare,
+ * with no height of their own) while gaining the shared scrollbar. */
 import { cleanup, render } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it } from "vitest";
 import { TABLE_SCROLL_CLASS, TableEmpty, TableSkeleton } from "../../src/solid/data-table.js";
@@ -27,8 +28,8 @@ describe("TableEmpty", () => {
 });
 
 describe("TABLE_SCROLL_CLASS", () => {
-	it("carries the shared scrollbar and no baked-in max height", () => {
+	it("carries the shared scrollbar and keeps its default max height", () => {
 		expect(TABLE_SCROLL_CLASS).toContain("gh-scroll");
-		expect(TABLE_SCROLL_CLASS).not.toContain("max-h-[600px]");
+		expect(TABLE_SCROLL_CLASS).toContain("max-h-[600px]");
 	});
 });
