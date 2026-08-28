@@ -261,6 +261,8 @@ export interface IconPickerProps {
 	 * picker still works, showing the curated set only.
 	 */
 	searchIcons?: (query: string, prefix: string) => Promise<string[]>;
+	/** Id of the element naming the trigger, for forms that label it outside. */
+	"aria-labelledby"?: string;
 }
 
 export function IconPicker(props: IconPickerProps) {
@@ -329,6 +331,7 @@ export function IconPicker(props: IconPickerProps) {
 					type="button"
 					data-slot="icon-picker-trigger"
 					data-expanded={open() || undefined}
+					aria-labelledby={props["aria-labelledby"]}
 					class={PICKER_TRIGGER}
 					onClick={() => setOpen(!open())}
 				>

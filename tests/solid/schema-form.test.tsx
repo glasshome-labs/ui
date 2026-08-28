@@ -609,3 +609,101 @@ describe("field stack", () => {
 		}
 	});
 });
+
+/* One row per control kind the dispatch can reach: `for` only where the control
+ * renders an element carrying the field id, aria-labelledby everywhere else.
+ * "Label" and the second "Entities" come from the variants branch fields. */
+const WIRING: Record<string, string> = {
+	Name: "for",
+	Count: "for",
+	Picture: "for",
+	Label: "for",
+	Enabled: "labelledby",
+	Mode: "labelledby",
+	Room: "labelledby",
+	Glyph: "labelledby",
+	Entities: "labelledby",
+	Tags: "labelledby",
+	"Flow nodes": "labelledby",
+	Type: "labelledby",
+};
+
+describe("SchemaForm labelling", () => {
+	const labelStore: MediaStore = {
+		index: async () => ({
+			media: [],
+			usage: { bytes: 0, limitBytes: 1024, files: 0, limitFiles: 10 },
+		}),
+		upload: async () => {
+			throw new Error("unused");
+		},
+		remove: async () => {},
+		url: (id) => `/api/images/${id}`,
+	};
+
+	const everyKind: ExtendedJSONSchema = {
+		type: "object",
+		properties: {
+			name: { type: "string", title: "Name" },
+			count: { type: "integer", title: "Count" },
+			picture: { type: "string", formType: "image-picker", title: "Picture" },
+			enabled: { type: "boolean", title: "Enabled" },
+			mode: { type: "string", enum: ["auto", "manual"], title: "Mode" },
+			room: { type: "string", formType: "area-picker", title: "Room" },
+			glyph: { type: "string", formType: "icon-picker", title: "Glyph" },
+			sensors: powerEntities,
+			tags: { type: "array", items: { type: "string" }, title: "Tags" },
+			nodes: nodesList,
+			shape: nodeItemSchema,
+		},
+	};
+
+	const renderEveryKind = () =>
+		render(() => (
+			<EntityDataContext.Provider value={stubEntityData}>
+				<MediaStoreContext.Provider value={labelStore}>
+					<SchemaForm schema={everyKind} data={{}} onChange={() => {}} />
+				</MediaStoreContext.Provider>
+			</EntityDataContext.Provider>
+		));
+
+	it("never points a label's `for` at an element that does not exist", () => {
+		const { container } = renderEveryKind();
+		const labels = container.querySelectorAll<HTMLLabelElement>('[data-slot="field-label"][for]');
+		expect(labels.length).toBeGreaterThan(0);
+		for (const label of labels) {
+			const target = label.getAttribute("for") ?? "";
+			expect(container.querySelector(`[id="${target}"]`), `label for="${target}"`).not.toBeNull();
+		}
+	});
+
+	it("wires each control kind to its label the one way that works", () => {
+		const { container } = renderEveryKind();
+		const wiring: Record<string, string> = {};
+		for (const label of container.querySelectorAll<HTMLLabelElement>('[data-slot="field-label"]')) {
+			const text = label.textContent ?? "";
+			if (label.hasAttribute("for")) wiring[text] = "for";
+			else if (container.querySelector(`[aria-labelledby~="${label.id}"]`))
+				wiring[text] = "labelledby";
+			else wiring[text] = "none";
+		}
+		expect(wiring).toEqual(WIRING);
+	});
+
+	it("labels every control that renders no element with the field id", () => {
+		const { container } = renderEveryKind();
+		const labels = Array.from(
+			container.querySelectorAll<HTMLLabelElement>('[data-slot="field-label"]'),
+		);
+		const idless = labels.filter((label) => !label.hasAttribute("for"));
+		expect(idless.length).toBeGreaterThan(0);
+		for (const label of idless) {
+			expect(label.id, "an aria-labelledby target needs an id").not.toBe("");
+			expect(
+				// `~=`: Kobalte appends its own value id to the trigger's list.
+				container.querySelector(`[aria-labelledby~="${label.id}"]`),
+				`${label.textContent} has no labelled control`,
+			).not.toBeNull();
+		}
+	});
+});

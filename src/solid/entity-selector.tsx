@@ -36,6 +36,8 @@ interface EntitySelectorProps {
 	 *  unit-of-measurement fallback for power/energy sensors that lack one). */
 	deviceClass?: string;
 	multiple?: boolean;
+	/** Id of the element naming the trigger, for forms that label it outside. */
+	"aria-labelledby"?: string;
 }
 
 // Many real-world power/energy sensors carry a unit but no device_class.
@@ -387,6 +389,7 @@ export function EntitySelector(props: EntitySelectorProps) {
 				role="combobox"
 				data-slot="entity-selector-trigger"
 				data-expanded={open() || undefined}
+				aria-labelledby={props["aria-labelledby"]}
 				aria-expanded={open()}
 				aria-controls={listboxId}
 				aria-haspopup="listbox"

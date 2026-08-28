@@ -13,6 +13,8 @@ interface AreaPickerBaseProps {
 	class?: string;
 	allowClear?: boolean;
 	disabled?: boolean;
+	/** Id of the element naming the trigger, for forms that label it outside. */
+	"aria-labelledby"?: string;
 }
 
 interface AreaPickerSingleProps extends AreaPickerBaseProps {
@@ -134,6 +136,7 @@ export function AreaPicker(props: AreaPickerProps) {
 					type="button"
 					data-slot="area-picker-trigger"
 					data-expanded={open() || undefined}
+					aria-labelledby={props["aria-labelledby"]}
 					class={PICKER_TRIGGER}
 					disabled={props.disabled}
 					onClick={() => setOpen(!open())}

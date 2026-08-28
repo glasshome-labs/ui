@@ -221,6 +221,9 @@ interface FieldProps {
 	value: unknown;
 	onChange: (value: unknown) => void;
 	searchIcons?: IconPickerProps["searchIcons"];
+	/** Id of the FieldLabel naming this control, for the kinds that render no
+	 *  element carrying `id`. */
+	labelledBy?: string;
 	/**
 	 * This field is the root of a list item: the item Card is already its
 	 * container and its header row already captions it, so a group renders its
@@ -230,14 +233,77 @@ interface FieldProps {
 	bare?: boolean;
 }
 
+/* The dispatch, as data: first match wins, and the same answer decides how the
+ * label reaches the control. Order is the contract (a legacy areaId key is a
+ * string like any other, so it has to be asked about before `enum`/`type`). */
+type ControlKind =
+	| "unknown"
+	| "list"
+	| "variants"
+	| "entities"
+	| "icon"
+	| "image"
+	| "area"
+	| "enum"
+	| "boolean"
+	| "number"
+	| "strings"
+	| "group"
+	| "text";
+
+const CONTROL_KINDS: ReadonlyArray<
+	readonly [ControlKind, (prop: ExtendedJSONSchema, name: string) => boolean]
+> = [
+	["unknown", (prop) => !isKnownFormType(prop)],
+	["list", (prop) => prop.formType === "list"],
+	["variants", (prop) => prop.formType === "variants"],
+	["entities", (prop) => isEntityArray(prop)],
+	["icon", (prop) => prop.formType === "icon-picker"],
+	["image", (prop) => prop.formType === "image-picker"],
+	["area", (prop, name) => prop.formType === "area-picker" || isLegacyAreaKey(name, prop)],
+	["enum", (prop) => prop.enum !== undefined],
+	["boolean", (prop) => prop.type === "boolean"],
+	["number", (prop) => prop.type === "number" || prop.type === "integer"],
+	["strings", (prop) => isStringArray(prop)],
+	["group", (prop) => isObjectGroup(prop)],
+];
+
+function controlKind(prop: ExtendedJSONSchema, name: string): ControlKind {
+	return CONTROL_KINDS.find(([, matches]) => matches(prop, name))?.[0] ?? "text";
+}
+
+/* `for` only where the control really renders an element carrying the field id;
+ * a picker trigger or a composite group is named by aria-labelledby instead, so
+ * no label points at nothing. `none`: nothing focusable to name. */
+const LABEL_TARGET: Record<ControlKind, "for" | "labelledby" | "none"> = {
+	text: "for",
+	image: "for",
+	number: "for",
+	entities: "labelledby",
+	icon: "labelledby",
+	area: "labelledby",
+	enum: "labelledby",
+	boolean: "labelledby",
+	list: "labelledby",
+	variants: "labelledby",
+	strings: "labelledby",
+	unknown: "none",
+	group: "none",
+};
+
 /* A control's own hint sits below the control; a group carries its legend and
  * explanation above its rows, so the group branch renders its own caption. */
 function LabeledField(props: FieldProps) {
+	const kind = () => controlKind(props.prop, props.name);
+	const labelId = () => `${props.id}-label`;
+	const target = () => LABEL_TARGET[kind()];
 	return (
-		<Show when={!isObjectGroup(props.prop)} fallback={<FieldControl {...props} />}>
+		<Show when={kind() !== "group"} fallback={<FieldControl {...props} />}>
 			<Field>
-				<FieldLabel for={props.id}>{props.prop.title || props.name}</FieldLabel>
-				<FieldControl {...props} />
+				<FieldLabel id={labelId()} for={target() === "for" ? props.id : undefined}>
+					{props.prop.title || props.name}
+				</FieldLabel>
+				<FieldControl {...props} labelledBy={target() === "labelledby" ? labelId() : undefined} />
 				<Show when={props.prop.description}>
 					{(description) => <FieldDescription>{description()}</FieldDescription>}
 				</Show>
@@ -249,6 +315,7 @@ function LabeledField(props: FieldProps) {
 /** The one recursive dispatch: every nesting level renders through here. */
 function FieldControl(props: FieldProps) {
 	const current = () => props.value ?? props.prop.default;
+	const kind = () => controlKind(props.prop, props.name);
 	return (
 		<SwitchFlow
 			fallback={
@@ -260,19 +327,20 @@ function FieldControl(props: FieldProps) {
 				/>
 			}
 		>
-			<Match when={!isKnownFormType(props.prop)}>
+			<Match when={kind() === "unknown"}>
 				<Alert tone="info" data-slot="schema-form-unknown">
 					This setting needs a newer dashboard version to be edited here.
 				</Alert>
 			</Match>
-			<Match when={props.prop.formType === "list"}>
+			<Match when={kind() === "list"}>
 				<ListControl {...props} />
 			</Match>
-			<Match when={props.prop.formType === "variants"}>
+			<Match when={kind() === "variants"}>
 				<VariantsControl {...props} />
 			</Match>
-			<Match when={isEntityArray(props.prop)}>
+			<Match when={kind() === "entities"}>
 				<EntitySelector
+					aria-labelledby={props.labelledBy}
 					entityIds={(current() as string[]) ?? []}
 					onEntityIdsChange={(ids) => props.onChange(ids)}
 					domain={props.prop.domain ?? ""}
@@ -280,26 +348,29 @@ function FieldControl(props: FieldProps) {
 					multiple={props.prop.singleSelect !== true}
 				/>
 			</Match>
-			<Match when={props.prop.formType === "icon-picker"}>
+			<Match when={kind() === "icon"}>
 				<IconPicker
+					aria-labelledby={props.labelledBy}
 					value={String(current() ?? "")}
 					onChange={(val) => props.onChange(val)}
 					searchIcons={props.searchIcons}
 				/>
 			</Match>
-			<Match when={props.prop.formType === "image-picker"}>
+			<Match when={kind() === "image"}>
 				<ImagePicker
 					id={props.id}
 					value={String(current() ?? "")}
 					onChange={(val) => props.onChange(val)}
 				/>
 			</Match>
-			<Match
-				when={props.prop.formType === "area-picker" || isLegacyAreaKey(props.name, props.prop)}
-			>
-				<AreaPicker value={String(current() ?? "")} onChange={(val) => props.onChange(val)} />
+			<Match when={kind() === "area"}>
+				<AreaPicker
+					aria-labelledby={props.labelledBy}
+					value={String(current() ?? "")}
+					onChange={(val) => props.onChange(val)}
+				/>
 			</Match>
-			<Match when={props.prop.enum}>
+			<Match when={kind() === "enum"}>
 				<Select
 					value={String(current() ?? "")}
 					onChange={(val) => {
@@ -310,22 +381,23 @@ function FieldControl(props: FieldProps) {
 						<SelectItem item={itemProps.item}>{String(itemProps.item.rawValue)}</SelectItem>
 					)}
 				>
-					<SelectTrigger class="w-full">
+					<SelectTrigger class="w-full" aria-labelledby={props.labelledBy}>
 						<SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
 					</SelectTrigger>
 					<SelectContent />
 				</Select>
 			</Match>
-			<Match when={props.prop.type === "boolean"}>
+			<Match when={kind() === "boolean"}>
 				<div class="flex items-center gap-3">
 					<Switch
+						aria-labelledby={props.labelledBy}
 						checked={Boolean(current() ?? false)}
 						onChange={(checked) => props.onChange(checked)}
 					/>
 					<span class="text-sm">{current() ? "Enabled" : "Disabled"}</span>
 				</div>
 			</Match>
-			<Match when={props.prop.type === "number" || props.prop.type === "integer"}>
+			<Match when={kind() === "number"}>
 				<NumberField
 					id={props.id}
 					value={Number(current() ?? 0)}
@@ -335,13 +407,14 @@ function FieldControl(props: FieldProps) {
 					onInput={(e) => props.onChange(Number(e.currentTarget.value))}
 				/>
 			</Match>
-			<Match when={isStringArray(props.prop)}>
+			<Match when={kind() === "strings"}>
 				<StringListField
+					labelledBy={props.labelledBy}
 					value={(current() as string[]) ?? []}
 					onChange={(val) => props.onChange(val)}
 				/>
 			</Match>
-			<Match when={isObjectGroup(props.prop)}>
+			<Match when={kind() === "group"}>
 				<FieldSet
 					class={cn(props.bare !== true && "rounded-lg border border-border p-3")}
 					data-slot="schema-form-object"
@@ -466,7 +539,11 @@ function ListControl(props: FieldProps) {
 	};
 
 	return (
-		<div class={cn("flex w-full min-w-0 flex-col", LIST_GAP.class)} data-slot="schema-form-list">
+		<fieldset
+			aria-labelledby={props.labelledBy}
+			class={cn("flex w-full min-w-0 flex-col", LIST_GAP.class)}
+			data-slot="schema-form-list"
+		>
 			<Index each={items()}>
 				{(item, index) => (
 					<Card
@@ -615,7 +692,7 @@ function ListControl(props: FieldProps) {
 				<Icon icon="lucide:plus" width={16} height={16} aria-hidden="true" />
 				{props.prop.addLabel ?? "Add item"}
 			</Button>
-		</div>
+		</fieldset>
 	);
 }
 
@@ -651,7 +728,11 @@ function VariantsControl(props: FieldProps) {
 	});
 
 	return (
-		<div class="flex w-full min-w-0 flex-col gap-3" data-slot="schema-form-variants">
+		<fieldset
+			aria-labelledby={props.labelledBy}
+			class="flex w-full min-w-0 flex-col gap-3"
+			data-slot="schema-form-variants"
+		>
 			<Select
 				value={currentKind()}
 				onChange={(val) => {
@@ -685,11 +766,15 @@ function VariantsControl(props: FieldProps) {
 					</div>
 				)}
 			</Show>
-		</div>
+		</fieldset>
 	);
 }
 
-function StringListField(props: { value: string[]; onChange: (value: string[]) => void }) {
+function StringListField(props: {
+	value: string[];
+	onChange: (value: string[]) => void;
+	labelledBy?: string;
+}) {
 	const [input, setInput] = createSignal("");
 
 	const addItem = (item: string) => {
@@ -700,7 +785,11 @@ function StringListField(props: { value: string[]; onChange: (value: string[]) =
 	};
 
 	return (
-		<div class="flex flex-col gap-2">
+		<fieldset
+			aria-labelledby={props.labelledBy}
+			class="flex min-w-0 flex-col gap-2"
+			data-slot="schema-form-string-list"
+		>
 			<Show when={props.value.length > 0}>
 				<div class="flex flex-wrap gap-1.5">
 					<For each={props.value}>
@@ -732,6 +821,6 @@ function StringListField(props: { value: string[]; onChange: (value: string[]) =
 					}
 				}}
 			/>
-		</div>
+		</fieldset>
 	);
 }
