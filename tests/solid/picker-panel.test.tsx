@@ -137,22 +137,20 @@ describe("PickerSearch", () => {
 });
 
 describe("picker triggers", () => {
-	const cases: Array<[string, () => never]> = [
-		["AreaPicker", () => (<AreaPicker value="" onChange={() => {}} />) as never],
-		["IconPicker", () => (<IconPicker value="" onChange={() => {}} />) as never],
+	const cases: Array<[string, () => JSX.Element]> = [
+		["AreaPicker", () => <AreaPicker value="" onChange={() => {}} />],
+		["IconPicker", () => <IconPicker value="" onChange={() => {}} />],
 		[
 			"EntitySelector",
-			() =>
-				(<EntitySelector domain="light" entityIds={[]} onEntityIdsChange={() => {}} />) as never,
+			() => <EntitySelector domain="light" entityIds={[]} onEntityIdsChange={() => {}} />,
 		],
 		[
 			"ImagePicker",
-			() =>
-				(
-					<MediaStoreContext.Provider value={mediaStore}>
-						<ImagePicker value="" onChange={() => {}} />
-					</MediaStoreContext.Provider>
-				) as never,
+			() => (
+				<MediaStoreContext.Provider value={mediaStore}>
+					<ImagePicker value="" onChange={() => {}} />
+				</MediaStoreContext.Provider>
+			),
 		],
 	];
 
@@ -181,10 +179,9 @@ describe("picker triggers", () => {
 
 describe("EntitySelector rows", () => {
 	it("uses the package Checkbox in multiple mode", async () => {
-		const { container } = withData(
-			() =>
-				(<EntitySelector domain="light" entityIds={[]} onEntityIdsChange={() => {}} />) as never,
-		);
+		const { container } = withData(() => (
+			<EntitySelector domain="light" entityIds={[]} onEntityIdsChange={() => {}} />
+		));
 		fireEvent.click(firstButton(container));
 		await waitFor(() => expect(document.querySelector('[data-slot="checkbox"]')).not.toBeNull());
 	});
