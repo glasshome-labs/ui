@@ -5,6 +5,7 @@
 //   bun run gallery:shots                      every cell
 //   bun run gallery:shots ResponsiveDialog Select
 //   bun run gallery:shots ResponsiveDialog --click "Open responsive"   (viewport shot after the click)
+//   bun run gallery:shots ToggleGroup --hover "Center"                 (cell shot with the pointer on it)
 //   flags: --width 1280 --height 900 --light --scale 2 --out ~/.cache/glasshome-gallery-shots --no-build
 //
 // CHROMIUM_PATH points at a system Chromium when Playwright's bundled one
@@ -31,6 +32,7 @@ const scale = Number(flag("scale", 1));
 const light = flag("light", false) === true;
 const noBuild = flag("no-build", false) === true;
 const click = flag("click", null);
+const hover = flag("hover", null);
 // Per-checkout cache dirs, so parallel worktrees never overwrite each other.
 const checkout = pkg
 	.replace(/[^a-z0-9]+/gi, "-")
@@ -110,7 +112,11 @@ for (const name of wanted) {
 		await page.keyboard.press("Escape");
 		await page.waitForTimeout(500);
 	} else {
-		const out = join(outDir, `${slug(name)}.png`);
+		if (hover) {
+			await cell.getByText(String(hover), { exact: true }).first().hover();
+			await page.waitForTimeout(400);
+		}
+		const out = join(outDir, `${slug(name)}${hover ? `--hover-${slug(String(hover))}` : ""}.png`);
 		await cell.screenshot({ path: out });
 		console.log(out);
 	}
