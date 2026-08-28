@@ -136,7 +136,7 @@ describe("checkbox and radio wear one material", () => {
 		const { container } = render(() => <Checkbox>Accept</Checkbox>);
 		const box = classOf(container, '[data-slot="checkbox-box"]');
 		expectTokens(box, FIELD_CHROME, "checkbox box");
-		expect(box).toContain("rounded-[5px]");
+		expect(box).toContain("rounded-xs");
 		expect(box).not.toContain("shadow-xs");
 		expect(box, "border utilities are no-ops on glass").not.toContain(
 			"peer-focus-visible:border-ring",

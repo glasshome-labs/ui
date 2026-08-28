@@ -4,9 +4,21 @@ import { type Component, type ComponentProps, type JSX, splitProps } from "solid
 import { FIELD_CHROME } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
 
-const Checkbox: Component<ComponentProps<typeof CheckboxPrimitive>> = (props) => {
-	const [local, others] = splitProps(props, ["class", "children"]);
+/* Two box sizes and the glyph that fits each: `sm` is the row-embedded control
+ * (picker rows, dense lists), `default` the touch target of a standalone one. */
+const CHECKBOX_SIZE = {
+	sm: { box: "size-5", glyph: "size-3.5", px: 14 },
+	default: { box: "size-7", glyph: "size-5", px: 20 },
+} as const;
+
+type CheckboxSize = keyof typeof CHECKBOX_SIZE;
+
+const Checkbox: Component<ComponentProps<typeof CheckboxPrimitive> & { size?: CheckboxSize }> = (
+	props,
+) => {
+	const [local, others] = splitProps(props, ["class", "children", "size"]);
 	const label = () => local.children as JSX.Element;
+	const size = () => CHECKBOX_SIZE[local.size ?? "default"];
 	return (
 		<CheckboxPrimitive data-slot="checkbox" {...others}>
 			{/* One <label> row: the box is a plain span, not a Kobalte Control, so a
@@ -20,10 +32,10 @@ const Checkbox: Component<ComponentProps<typeof CheckboxPrimitive>> = (props) =>
 					<span
 						aria-hidden="true"
 						data-slot="checkbox-box"
+						data-size={local.size ?? "default"}
 						class={cn(
-							// The theme's smallest radius token fully rounds a box this size, which
-							// would make the checkbox read as a radio.
-							"box-border inline-flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-[5px] transition-all duration-200 ease-out group-active:scale-90",
+							"box-border inline-flex shrink-0 items-center justify-center overflow-hidden rounded-xs transition-all duration-200 ease-out group-active:scale-90",
+							size().box,
 							"peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50 peer-focus-visible:[--glass-edge:var(--ring)]",
 							state.checked()
 								? "glass glass-tint text-foreground [--glass-tone:var(--primary)]"
@@ -35,10 +47,11 @@ const Checkbox: Component<ComponentProps<typeof CheckboxPrimitive>> = (props) =>
 						{/* Always mounted so the box keeps constant height. */}
 						<Icon
 							icon="lucide:check"
-							width={20}
-							height={20}
+							width={size().px}
+							height={size().px}
 							class={cn(
-								"size-5 transition-all duration-200 ease-out",
+								size().glyph,
+								"transition-all duration-200 ease-out",
 								state.checked() ? "scale-100 opacity-100" : "scale-0 opacity-0",
 							)}
 						/>

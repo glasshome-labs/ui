@@ -483,7 +483,12 @@ export function EntitySelector(props: EntitySelectorProps) {
 					fallback={
 						// The row owns the click, so the control is presentation only.
 						<div aria-hidden="true" class="pointer-events-none shrink-0">
-							<Checkbox checked={selected()} disabled class="cursor-pointer opacity-100" />
+							<Checkbox
+								checked={selected()}
+								disabled
+								size="sm"
+								class="cursor-pointer opacity-100"
+							/>
 						</div>
 					}
 				>

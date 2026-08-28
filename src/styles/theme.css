@@ -31,6 +31,10 @@
 	--font-mono: var(--font-mono);
 	--font-serif: var(--font-serif);
 
+	/* Below --radius-sm: a box small enough that the theme's smallest token would
+	   round it into a circle (checkbox, OTP slot). Clamped, so a tiny --radius
+	   theme never grows it. */
+	--radius-xs: min(5px, var(--radius-sm));
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
