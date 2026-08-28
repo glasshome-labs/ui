@@ -60,14 +60,14 @@ type WidgetIdentityProps = {
 export function WidgetIdentity(_props: WidgetIdentityProps) {
 	const props = mergeProps({ iconSize: "sm" as const, showVersionInline: true }, _props);
 	return (
-		<div class={cn("flex min-w-0 items-center gap-3", props.class)}>
+		<div data-slot="widget-identity" class={cn("flex min-w-0 items-center gap-3", props.class)}>
 			<SectionIcon size={props.iconSize}>
 				<Show when={props.widget.icon} fallback={<Icon icon="lucide:package" />}>
 					{(icon) => <Icon icon={icon()} />}
 				</Show>
 			</SectionIcon>
-			<div class="min-w-0 flex-1">
-				<div class="flex items-center gap-2">
+			<div data-slot="widget-identity-headings" class="flex min-w-0 flex-1 flex-col gap-0.5">
+				<div data-slot="widget-identity-headline" class="flex items-center gap-2">
 					<SectionSubtitle class="truncate">
 						{props.widget.displayName || props.widget.name}
 					</SectionSubtitle>
@@ -85,7 +85,7 @@ export function WidgetIdentity(_props: WidgetIdentityProps) {
 						<Badge tone="var(--destructive)">Not published</Badge>
 					</Show>
 				</div>
-				<div class="mt-0.5 flex min-w-0 flex-wrap items-center gap-1.5">
+				<div data-slot="widget-identity-scope" class="flex min-w-0 flex-wrap items-center gap-1.5">
 					<span class="truncate font-mono text-muted-foreground text-xs">
 						@{props.widget.scope}/{props.widget.name}
 					</span>
@@ -101,14 +101,20 @@ export function WidgetIdentity(_props: WidgetIdentityProps) {
 	);
 }
 
-/** Downloads (+ optional version count) meta cluster. */
+/** Downloads (+ optional version counts) meta cluster. */
 export function WidgetMeta(props: {
 	widget: WidgetSummary;
+	/** Append `N versions`. */
 	showVersions?: boolean;
+	/** Append `v{latestVersion}` (the tile footer's shape). */
+	showLatestVersion?: boolean;
 	class?: string;
 }): JSX.Element {
 	return (
-		<div class={cn("flex items-center gap-4 text-muted-foreground text-xs", props.class)}>
+		<div
+			data-slot="widget-meta"
+			class={cn("flex items-center gap-4 text-muted-foreground text-xs", props.class)}
+		>
 			<Show when={props.widget.downloadCount != null}>
 				<span class="flex items-center gap-1 tabular-nums">
 					<Icon icon="lucide:arrow-down-to-line" width={12} height={12} class="size-3" />
@@ -120,6 +126,9 @@ export function WidgetMeta(props: {
 					<Icon icon="lucide:layers" width={12} height={12} class="size-3" />
 					{props.widget.versionCount} versions
 				</span>
+			</Show>
+			<Show when={props.showLatestVersion && props.widget.latestVersion}>
+				<span class="tabular-nums">v{props.widget.latestVersion}</span>
 			</Show>
 		</div>
 	);

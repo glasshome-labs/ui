@@ -1,5 +1,5 @@
-import { cva, type VariantProps } from "cva";
 import { type Component, type ComponentProps, splitProps } from "solid-js";
+import { ICON_PILL } from "../lib/pill-classes.js";
 import { cn } from "../lib/utils.js";
 
 const Empty: Component<ComponentProps<"div">> = (props) => {
@@ -8,7 +8,7 @@ const Empty: Component<ComponentProps<"div">> = (props) => {
 		<div
 			data-slot="empty"
 			class={cn(
-				"flex min-w-0 flex-1 flex-col items-center justify-center gap-6 text-balance rounded-lg border-dashed p-6 text-center md:p-12",
+				"flex min-w-0 flex-1 flex-col items-center justify-center gap-6 text-balance rounded-lg border border-border/60 border-dashed p-6 text-center md:p-12",
 				local.class,
 			)}
 			{...rest}
@@ -27,29 +27,30 @@ const EmptyHeader: Component<ComponentProps<"div">> = (props) => {
 	);
 };
 
-const emptyMediaVariants = cva({
-	base: "mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
-	variants: {
-		variant: {
-			default: "bg-transparent",
-			icon: "flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground [&_svg:not([class*='size-'])]:size-6",
-		},
-	},
-	defaultVariants: {
-		variant: "default",
-	},
-});
+type EmptyMediaKind = "icon";
 
-const EmptyMedia: Component<ComponentProps<"div"> & VariantProps<typeof emptyMediaVariants>> = (
-	props,
-) => {
-	const [local, rest] = splitProps(props, ["class", "variant"] as const);
-	const variant = () => local.variant ?? "default";
+const EMPTY_MEDIA: Record<EmptyMediaKind, string> = {
+	icon: `${ICON_PILL} size-10 rounded-lg [&_svg:not([class*='size-'])]:size-6`,
+};
+
+const EmptyMedia: Component<
+	ComponentProps<"div"> & {
+		media?: EmptyMediaKind;
+		/** @deprecated `media` */
+		variant?: EmptyMediaKind | "default";
+	}
+> = (props) => {
+	const [local, rest] = splitProps(props, ["class", "media", "variant"] as const);
+	const media = () => local.media ?? (local.variant === "default" ? undefined : local.variant);
 	return (
 		<div
-			data-slot="empty-icon"
-			data-variant={variant()}
-			class={cn(emptyMediaVariants({ variant: variant() }), local.class)}
+			data-slot="empty-media"
+			data-media={media()}
+			class={cn(
+				"flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
+				media() && EMPTY_MEDIA[media() as EmptyMediaKind],
+				local.class,
+			)}
 			{...rest}
 		/>
 	);
@@ -60,7 +61,7 @@ const EmptyTitle: Component<ComponentProps<"div">> = (props) => {
 	return (
 		<div
 			data-slot="empty-title"
-			class={cn("font-medium text-lg tracking-tight", local.class)}
+			class={cn("font-semibold text-lg tracking-tight", local.class)}
 			{...rest}
 		/>
 	);

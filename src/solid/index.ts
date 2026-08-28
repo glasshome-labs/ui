@@ -10,6 +10,7 @@
 // don't need a direct @kobalte/core dependency.
 export { type Color, parseColor } from "@kobalte/core/colors";
 // Floating glass panel + its shared surface token.
+export { SECTION_ROW_SURFACE } from "../lib/card-classes.js";
 export { OVERLAY_SURFACE } from "../lib/overlay-classes.js";
 // Section tokens re-exported from the Solid entry for convenience.
 export {
@@ -325,6 +326,7 @@ export { ScopeIndicator } from "./scope-indicator.js";
 export { ScrollArea, ScrollBar } from "./scroll-area.js";
 export {
 	type GlassSurface,
+	NOOP_GLASS,
 	SectionCard,
 	SectionIcon,
 	SectionLabel,

@@ -1,7 +1,12 @@
 import { Icon } from "@iconify-icon/solid";
 import { type ComponentProps, type JSX, Show, splitProps } from "solid-js";
-import { CARD_BLUR, CARD_SURFACE_BASE } from "../lib/card-classes.js";
-import { SECTION_INNER_RADIUS, SECTION_PADDING, SECTION_ROW_CLASS } from "../lib/section-tokens.js";
+import { CARD_BLUR, CARD_SURFACE_BASE, SECTION_ROW_SURFACE } from "../lib/card-classes.js";
+import { ICON_PILL, ICON_PILL_TINT } from "../lib/pill-classes.js";
+import {
+	SECTION_INNER_RADIUS,
+	SECTION_OUTER_RADIUS,
+	SECTION_PADDING,
+} from "../lib/section-tokens.js";
 import { cn } from "../lib/utils.js";
 import { CountPill } from "./count-pill.js";
 
@@ -13,7 +18,7 @@ export type GlassSurface = {
 	active?: () => boolean;
 };
 
-const NOOP_GLASS: Required<GlassSurface> = {
+export const NOOP_GLASS: Required<GlassSurface> = {
 	ref: () => {},
 	style: () => ({}),
 	active: () => false,
@@ -41,10 +46,13 @@ export function SectionCard(props: SectionCardProps) {
 
 	return (
 		<section
+			data-slot="section-card"
 			ref={glass().ref}
 			class={cn(
 				CARD_SURFACE_BASE,
-				"relative overflow-hidden rounded-[var(--radius)] transition-colors [contain:layout_style_paint] hover:border-border",
+				SECTION_OUTER_RADIUS,
+				SECTION_PADDING,
+				"relative flex flex-col gap-3 overflow-hidden transition-colors [contain:layout_style_paint] md:gap-4 hover:[--glass-light:0.09]",
 				props.class,
 			)}
 			classList={{ [CARD_BLUR]: !active() }}
@@ -52,70 +60,91 @@ export function SectionCard(props: SectionCardProps) {
 		>
 			<Show when={hasHeader()}>
 				<header
-					class={`${SECTION_PADDING} flex items-center justify-between gap-2 pb-3 md:pb-4 ${props.headerClass ?? ""}`}
+					data-slot="section-card-header"
+					class={cn("flex items-center gap-2 sm:gap-3", props.headerClass)}
 				>
-					<div class="flex min-w-0 items-center gap-3">
-						<Show when={props.icon}>{(icon) => <SectionIcon icon={icon()} />}</Show>
-						<div class="min-w-0">
-							<div class="flex min-w-0 items-center gap-3">
-								<Show when={props.title}>
-									<SectionTitle>{props.title}</SectionTitle>
-								</Show>
-								<Show when={props.count != null}>
-									<CountPill>{props.count}</CountPill>
-								</Show>
-							</div>
-							<Show when={props.subtitle}>
-								<SectionMeta class={cn("mt-0.5", props.subtitleClass)}>
-									{props.subtitle}
-								</SectionMeta>
+					<Show when={props.icon}>{(icon) => <SectionIcon icon={icon()} />}</Show>
+					<div data-slot="section-card-headings" class="flex min-w-0 flex-1 flex-col gap-0.5">
+						<div data-slot="section-card-headline" class="flex min-w-0 items-center gap-2 sm:gap-3">
+							<Show when={props.title}>
+								<SectionTitle>{props.title}</SectionTitle>
+							</Show>
+							<Show when={props.count != null}>
+								<CountPill>{props.count}</CountPill>
 							</Show>
 						</div>
+						<Show when={props.subtitle}>
+							<SectionMeta class={props.subtitleClass}>{props.subtitle}</SectionMeta>
+						</Show>
 					</div>
-					{props.action}
+					<Show when={props.action}>
+						<div data-slot="section-card-actions" class="flex shrink-0 items-center gap-2">
+							{props.action}
+						</div>
+					</Show>
 				</header>
 			</Show>
 			<Show when={props.toolbar}>
-				<div class={`${SECTION_PADDING} ${hasHeader() ? "border-border/50 border-t pt-3" : ""}`}>
+				<div
+					data-slot="section-card-toolbar"
+					class={cn(hasHeader() && "border-border/50 border-t pt-3")}
+				>
 					{props.toolbar}
 				</div>
 			</Show>
-			<div class={`${SECTION_PADDING} ${hasHeader() || props.toolbar != null ? "pt-0" : ""}`}>
-				{props.children}
-			</div>
+			<div data-slot="section-card-body">{props.children}</div>
 		</section>
 	);
 }
 
 export function SectionRow(props: ComponentProps<"div">) {
 	const [local, rest] = splitProps(props, ["class"]);
-	return <div class={cn(SECTION_ROW_CLASS, local.class)} {...rest} />;
+	return (
+		<div
+			data-slot="section-row"
+			class={cn(SECTION_ROW_SURFACE, SECTION_INNER_RADIUS, SECTION_PADDING, local.class)}
+			{...rest}
+		/>
+	);
 }
 
 type SectionIconSize = "sm" | "md" | "lg";
 
 const ICON_DIMENSIONS: Record<SectionIconSize, string> = {
 	sm: "size-7 [&>iconify-icon]:text-[16px]",
-	md: "size-10 sm:size-11 md:size-12 [&>iconify-icon]:text-[20px] sm:[&>iconify-icon]:text-[22px] md:[&>iconify-icon]:text-[24px]",
+	md: "size-10 sm:size-11 [&>iconify-icon]:text-[20px] sm:[&>iconify-icon]:text-[22px]",
 	lg: "size-12 sm:size-14 [&>iconify-icon]:text-[24px] sm:[&>iconify-icon]:text-[28px]",
 };
 
-const ICON_TONES = {
-	neutral: "bg-foreground/10 text-foreground/80",
-	primary: "bg-primary/10 text-primary",
-} as const;
+/** @deprecated pass a CSS color to `tone` instead. */
+const LEGACY_TONES: Record<string, string | undefined> = {
+	neutral: undefined,
+	primary: "var(--primary)",
+};
 
 export function SectionIcon(props: {
 	icon?: string;
 	children?: JSX.Element;
 	size?: SectionIconSize;
-	tone?: keyof typeof ICON_TONES;
+	/** Any CSS color. `"neutral"` and `"primary"` are the deprecated old enum. */
+	tone?: string;
 	class?: string;
 }) {
+	const tone = () => {
+		const t = props.tone;
+		if (t == null) return undefined;
+		return t in LEGACY_TONES ? LEGACY_TONES[t] : t;
+	};
 	return (
 		<span
-			class={`${SECTION_INNER_RADIUS} ${ICON_DIMENSIONS[props.size ?? "md"]} ${ICON_TONES[props.tone ?? "neutral"]} flex shrink-0 items-center justify-center ${props.class ?? ""}`}
-			style={{ "box-shadow": "inset 0 1px 0 oklch(1 0 0 / 0.08)" }}
+			data-slot="section-icon"
+			class={cn(
+				tone() ? ICON_PILL_TINT : `${ICON_PILL} text-foreground/80`,
+				SECTION_INNER_RADIUS,
+				ICON_DIMENSIONS[props.size ?? "md"],
+				props.class,
+			)}
+			style={tone() ? { "--glass-tone": tone() } : undefined}
 		>
 			<Show when={props.children} fallback={props.icon ? <Icon icon={props.icon} /> : null}>
 				{props.children}
@@ -127,8 +156,9 @@ export function SectionIcon(props: {
 export function SectionTitle(props: { children: JSX.Element; class?: string }) {
 	return (
 		<h2
+			data-slot="section-title"
 			class={cn(
-				"truncate font-bold text-foreground text-lg tracking-tight sm:text-xl md:text-2xl",
+				"truncate font-bold text-foreground text-lg tracking-tight sm:text-xl",
 				props.class,
 			)}
 		>
@@ -138,31 +168,40 @@ export function SectionTitle(props: { children: JSX.Element; class?: string }) {
 }
 
 export function SectionSubtitle(props: { children: JSX.Element; class?: string }) {
-	return <h3 class={cn("font-semibold text-base leading-tight", props.class)}>{props.children}</h3>;
+	return (
+		<h3
+			data-slot="section-subtitle"
+			class={cn("font-semibold text-base leading-tight", props.class)}
+		>
+			{props.children}
+		</h3>
+	);
 }
 
+/** @deprecated SectionMeta, or FieldLegend for a titled group of rows. */
 export function SectionLabel(props: { children: JSX.Element; class?: string }) {
+	return <SectionMeta class={cn("font-medium", props.class)}>{props.children}</SectionMeta>;
+}
+
+export function SectionMeta(props: { children: JSX.Element; class?: string }) {
 	return (
-		<p
-			class={cn(
-				"px-1 font-medium text-[10px] text-muted-foreground uppercase tracking-wider",
-				props.class,
-			)}
-		>
+		<p data-slot="section-meta" class={cn("text-muted-foreground text-xs", props.class)}>
 			{props.children}
 		</p>
 	);
 }
 
-export function SectionMeta(props: { children: JSX.Element; class?: string }) {
-	return <p class={cn("text-muted-foreground text-xs", props.class)}>{props.children}</p>;
-}
-
 export function SectionRowSkeleton(props: { class?: string }) {
 	return (
 		<div
+			data-slot="section-row-skeleton"
 			aria-hidden="true"
-			class={`${SECTION_ROW_CLASS} h-14 animate-pulse border-border/40 bg-foreground/[0.03] ${props.class ?? ""}`}
+			class={cn(
+				SECTION_ROW_SURFACE,
+				SECTION_INNER_RADIUS,
+				"h-14 animate-pulse [--glass-rim:0.15]",
+				props.class,
+			)}
 		/>
 	);
 }
@@ -170,7 +209,7 @@ export function SectionRowSkeleton(props: { class?: string }) {
 export function SectionRowSkeletons(props: { count?: number }) {
 	const n = props.count ?? 3;
 	return (
-		<div class="space-y-2" aria-busy="true">
+		<div data-slot="section-row-skeletons" class="flex flex-col gap-2" aria-busy="true">
 			{Array.from({ length: n }, () => (
 				<SectionRowSkeleton />
 			))}
