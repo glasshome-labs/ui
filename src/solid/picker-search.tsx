@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show, splitProps } from "solid-js";
 import { CONTROL_H, FIELD_TEXT } from "../lib/input-classes.js";
+import { CONTROL_H_TOUCH } from "../lib/picker-classes.js";
 import { cn } from "../lib/utils.js";
 
 export interface PickerSearchProps
@@ -13,7 +14,12 @@ export interface PickerSearchProps
 	clearLabel?: string;
 	class?: string;
 	inputRef?: (el: HTMLInputElement) => void;
+	/** "touch" is the sheet row: a picker that opens as a bottom sheet makes this
+	 *  its primary control, so it takes the full touch target. */
+	size?: "default" | "touch";
 }
+
+const SEARCH_H = { default: CONTROL_H.default, touch: CONTROL_H_TOUCH } as const;
 
 /* The search row inside a picker panel. A bare input, not a nested Input: the
  * panel already wears the field surface, so a second one reads as a field in a
@@ -26,13 +32,14 @@ export function PickerSearch(props: PickerSearchProps) {
 		"clearLabel",
 		"class",
 		"inputRef",
+		"size",
 	]);
 	return (
 		<div
 			data-slot="picker-search"
 			class={cn(
 				"flex shrink-0 items-center gap-2 border-border/50 border-b px-3",
-				CONTROL_H.default,
+				SEARCH_H[local.size ?? "default"],
 				local.class,
 			)}
 		>

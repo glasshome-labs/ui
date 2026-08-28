@@ -11,3 +11,7 @@ export const PICKER_TRIGGER = `${FIELD_CONTROL} ${CONTROL_H.default} items-cente
 /* Every picker list scrolls at the same size, on the list itself, never on the
  * panel: a max-height on the panel clips the search row and the footer too. */
 export const PICKER_LIST = "max-h-[min(70vh,400px)] overflow-y-auto gh-scroll";
+
+/* 44 px: the minimum comfortable touch target, for the search row when a picker
+ * opens as a sheet. CONTROL_H has no touch step yet, so it is named here. */
+export const CONTROL_H_TOUCH = "h-11";

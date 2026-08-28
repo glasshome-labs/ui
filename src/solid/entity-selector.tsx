@@ -294,6 +294,14 @@ export function EntitySelector(props: EntitySelectorProps) {
 			scrollRef.scrollTo({ top: bottom - scrollRef.clientHeight });
 	};
 
+	const optionId = (entityIndex: number) => `${listboxId}-option-${entityIndex}`;
+	// Only names a row the list is actually rendering: the virtualiser unmounts
+	// the rest, and aria-activedescendant must point at a live element.
+	const activeOptionId = () =>
+		!isMobile() && visibleRows().some((r) => r.kind === "entity" && r.entityIndex === activeIndex())
+			? optionId(activeIndex())
+			: undefined;
+
 	const closePicker = () => {
 		setOpen(false);
 		setSearch("");
@@ -438,6 +446,7 @@ export function EntitySelector(props: EntitySelectorProps) {
 			// biome-ignore lint/a11y/useKeyWithClickEvents: same, Enter is handled on the search input.
 			<div
 				role="option"
+				id={optionId(p.entityIndex)}
 				data-slot="entity-selector-row"
 				aria-selected={selected()}
 				data-highlighted={(!isMobile() && activeIndex() === p.entityIndex) || undefined}
@@ -495,12 +504,17 @@ export function EntitySelector(props: EntitySelectorProps) {
 					inputRef = el;
 				}}
 				type="search"
+				role="combobox"
 				aria-label={`Search ${props.domain} entities`}
+				aria-controls={listboxId}
+				aria-expanded
+				aria-activedescendant={activeOptionId()}
 				placeholder="Search by name, room, or ID..."
 				value={search()}
 				onValueChange={setSearch}
 				onKeyDown={handleKeyDown}
 				clearLabel="Clear search"
+				size={isMobile() ? "touch" : "default"}
 				class="[&_input::-webkit-search-cancel-button]:hidden"
 			/>
 			<div
@@ -569,6 +583,7 @@ export function EntitySelector(props: EntitySelectorProps) {
 					<SlidingIndicator
 						activeSelector="[data-highlighted]"
 						orientation="vertical"
+						role="presentation"
 						style={{ height: `${totalHeight()}px` }}
 					>
 						<For each={visibleRows()}>

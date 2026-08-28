@@ -75,7 +75,7 @@ export {
 	OVERLAY_SURFACE_OPAQUE,
 	SCRIM_CLASS,
 } from "./lib/overlay-classes.js";
-export { PICKER_LIST, PICKER_TRIGGER } from "./lib/picker-classes.js";
+export { CONTROL_H_TOUCH, PICKER_LIST, PICKER_TRIGGER } from "./lib/picker-classes.js";
 export { CHIP, ICON_PILL, ICON_PILL_TINT } from "./lib/pill-classes.js";
 export {
 	SECTION_INNER_RADIUS,
