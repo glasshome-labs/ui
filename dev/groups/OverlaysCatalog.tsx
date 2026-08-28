@@ -1,8 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
-import { createSignal } from "solid-js";
+import { createSignal, For } from "solid-js";
 import {
 	AlertDialog,
 	AlertDialogAction,
+	AlertDialogBody,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
@@ -14,12 +15,14 @@ import {
 	BottomSheetBody,
 	BottomSheetContent,
 	BottomSheetDescription,
+	BottomSheetFooter,
 	BottomSheetHandle,
 	BottomSheetHeader,
+	BottomSheetOverlay,
+	BottomSheetPortal,
 	BottomSheetTitle,
 	BottomSheetTrigger,
 	Button,
-	buttonVariants,
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
@@ -31,6 +34,7 @@ import {
 	ContextMenuShortcut,
 	ContextMenuTrigger,
 	Dialog,
+	DialogBody,
 	DialogClose,
 	DialogContent,
 	DialogDescription,
@@ -49,6 +53,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 	ResponsiveDialog,
+	ResponsiveDialogBody,
 	ResponsiveDialogClose,
 	ResponsiveDialogContent,
 	ResponsiveDialogDescription,
@@ -57,8 +62,11 @@ import {
 	ResponsiveDialogTitle,
 	ResponsiveDialogTrigger,
 	Sheet,
+	SheetBody,
+	SheetClose,
 	SheetContent,
 	SheetDescription,
+	SheetFooter,
 	SheetHeader,
 	SheetTitle,
 	SheetTrigger,
@@ -78,6 +86,29 @@ function usePersistentOpen(key: string) {
 	return [open, setOpen] as const;
 }
 
+/* 30 rows: the specimen only proves the scroll contract (bar inside the panel
+ * edge, header and footer pinned) if the body actually overflows. */
+function DemoRows(props: { count?: number }) {
+	return (
+		<For each={Array.from({ length: props.count ?? 30 }, (_, i) => i + 1)}>
+			{(i) => (
+				<div class="flex items-center justify-between rounded-md border border-border/50 px-3 py-2">
+					<span class="text-foreground text-sm">Living room lamp {i}</span>
+					<span class="text-muted-foreground text-xs">on</span>
+				</div>
+			)}
+		</For>
+	);
+}
+
+function HeaderAction() {
+	return (
+		<Button variant="ghost" size="sm">
+			<Icon icon="lucide:rotate-ccw" width={16} height={16} /> Reset
+		</Button>
+	);
+}
+
 export function OverlaysCatalog() {
 	const [dialogOpen, setDialogOpen] = usePersistentOpen("dialog");
 	const [sheetOpen, setSheetOpen] = usePersistentOpen("sheet");
@@ -89,14 +120,15 @@ export function OverlaysCatalog() {
 						Open dialog
 					</DialogTrigger>
 					<DialogContent>
-						<DialogHeader>
+						<DialogHeader action={<HeaderAction />}>
 							<DialogTitle>Package dialog</DialogTitle>
 							<DialogDescription>Confirm actions, edit records, link devices.</DialogDescription>
 						</DialogHeader>
+						<DialogBody>
+							<DemoRows />
+						</DialogBody>
 						<DialogFooter>
-							<DialogClose as={Button} variant="outline">
-								Cancel
-							</DialogClose>
+							<DialogClose>Cancel</DialogClose>
 							<Button>Confirm</Button>
 						</DialogFooter>
 					</DialogContent>
@@ -115,6 +147,11 @@ export function OverlaysCatalog() {
 								This removes it from every dashboard. This action cannot be undone.
 							</AlertDialogDescription>
 						</AlertDialogHeader>
+						<AlertDialogBody>
+							<p class="text-muted-foreground text-sm">
+								Three dashboards still show it. They will fall back to an empty cell.
+							</p>
+						</AlertDialogBody>
 						<AlertDialogFooter>
 							<AlertDialogCancel>Cancel</AlertDialogCancel>
 							<AlertDialogAction>Delete</AlertDialogAction>
@@ -129,31 +166,45 @@ export function OverlaysCatalog() {
 						Open sheet
 					</SheetTrigger>
 					<SheetContent side="right">
-						<SheetHeader>
+						<SheetHeader action={<HeaderAction />}>
 							<SheetTitle>Widget settings</SheetTitle>
 							<SheetDescription>Edit-in-place panel that slides from the edge.</SheetDescription>
 						</SheetHeader>
+						<SheetBody>
+							<DemoRows />
+						</SheetBody>
+						<SheetFooter>
+							<SheetClose>Cancel</SheetClose>
+							<Button>Save</Button>
+						</SheetFooter>
 					</SheetContent>
 				</Sheet>
 			</CatalogItem>
 
 			<CatalogItem name="BottomSheet" hint="drag-to-dismiss · click to open">
 				<BottomSheet>
-					<BottomSheetTrigger class={buttonVariants({ variant: "outline" })}>
+					<BottomSheetTrigger as={Button} variant="outline">
 						Open bottom sheet
 					</BottomSheetTrigger>
-					<BottomSheetContent>
-						<BottomSheetHandle />
-						<BottomSheetHeader>
-							<BottomSheetTitle>Bottom sheet</BottomSheetTitle>
-							<BottomSheetDescription>
-								Drag-to-dismiss panel with snap points, the mobile-native surface.
-							</BottomSheetDescription>
-						</BottomSheetHeader>
-						<BottomSheetBody class="text-muted-foreground text-sm">
-							Content goes here.
-						</BottomSheetBody>
-					</BottomSheetContent>
+					<BottomSheetPortal>
+						<BottomSheetOverlay />
+						<BottomSheetContent>
+							<BottomSheetHandle />
+							<BottomSheetHeader action={<HeaderAction />}>
+								<BottomSheetTitle>Bottom sheet</BottomSheetTitle>
+								<BottomSheetDescription>
+									Drag-to-dismiss panel with snap points, the mobile-native surface.
+								</BottomSheetDescription>
+							</BottomSheetHeader>
+							<BottomSheetBody>
+								<DemoRows />
+							</BottomSheetBody>
+							<BottomSheetFooter>
+								<Button variant="outline">Cancel</Button>
+								<Button>Save</Button>
+							</BottomSheetFooter>
+						</BottomSheetContent>
+					</BottomSheetPortal>
 				</BottomSheet>
 			</CatalogItem>
 
@@ -238,18 +289,22 @@ export function OverlaysCatalog() {
 
 			<CatalogItem name="ResponsiveDialog" hint="adaptive · click to open">
 				<ResponsiveDialog>
-					<ResponsiveDialogTrigger class={buttonVariants({ variant: "outline" })}>
+					<ResponsiveDialogTrigger as={Button} variant="outline">
 						Open responsive
 					</ResponsiveDialogTrigger>
 					<ResponsiveDialogContent>
-						<ResponsiveDialogHeader>
+						<ResponsiveDialogHeader action={<HeaderAction />}>
 							<ResponsiveDialogTitle>Adaptive dialog</ResponsiveDialogTitle>
 							<ResponsiveDialogDescription>
 								Centered modal on desktop, drag-to-dismiss bottom sheet on mobile.
 							</ResponsiveDialogDescription>
 						</ResponsiveDialogHeader>
+						<ResponsiveDialogBody>
+							<DemoRows />
+						</ResponsiveDialogBody>
 						<ResponsiveDialogFooter>
 							<ResponsiveDialogClose>Close</ResponsiveDialogClose>
+							<Button>Save</Button>
 						</ResponsiveDialogFooter>
 					</ResponsiveDialogContent>
 				</ResponsiveDialog>
