@@ -7,11 +7,14 @@ import {
 	For,
 	on,
 	onCleanup,
-	onMount,
+	type ParentComponent,
 	Show,
 } from "solid-js";
-import { FIELD_CHROME, INPUT_SURFACE } from "../lib/input-classes.js";
-import { OVERLAY_SURFACE } from "../lib/overlay-classes.js";
+import { MENU_ITEM, MENU_LABEL } from "../lib/menu-classes.js";
+import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
+import { ICON_PILL, ICON_PILL_TINT } from "../lib/pill-classes.js";
+import { createIsMobile } from "../lib/use-is-mobile.js";
+import { cn } from "../lib/utils.js";
 import {
 	BottomSheet,
 	BottomSheetContent,
@@ -19,8 +22,11 @@ import {
 	BottomSheetOverlay,
 	BottomSheetPortal,
 } from "./bottom-sheet/index.js";
+import { Checkbox } from "./checkbox.js";
 import { type EntityViewLike, useEntityData } from "./entity-data.js";
-import { anchorToTriggerTop, Popover, PopoverAnchor } from "./popover.js";
+import { PickerSearch } from "./picker-search.js";
+import { Popover, PopoverAnchor, PopoverContent } from "./popover.js";
+import { SlidingIndicator } from "./sliding-indicator.js";
 
 interface EntitySelectorProps {
 	entityIds: string[];
@@ -38,7 +44,6 @@ const DEVICE_CLASS_UNIT_FALLBACK: Record<string, readonly string[]> = {
 	energy: ["Wh", "kWh"],
 };
 
-const MOBILE_BREAKPOINT = 640;
 const HEADER_HEIGHT = 30;
 const ROW_HEIGHT = 52;
 const OVERSCAN_PX = 200;
@@ -58,20 +63,6 @@ function sameRow(a: ListRow, b: ListRow): boolean {
 	if (a.kind === "entity" && b.kind === "entity")
 		return a.id === b.id && a.entityIndex === b.entityIndex;
 	return false;
-}
-
-function createIsMobile() {
-	const [isMobile, setIsMobile] = createSignal(
-		typeof window !== "undefined" && window.innerWidth < MOBILE_BREAKPOINT,
-	);
-	onMount(() => {
-		const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-		const update = () => setIsMobile(mq.matches);
-		update();
-		mq.addEventListener("change", update);
-		onCleanup(() => mq.removeEventListener("change", update));
-	});
-	return isMobile;
 }
 
 function isUnavailable(view: EntityViewLike) {
@@ -386,12 +377,12 @@ export function EntitySelector(props: EntitySelectorProps) {
 			<button
 				type="button"
 				role="combobox"
+				data-slot="entity-selector-trigger"
+				data-expanded={open() || undefined}
 				aria-expanded={open()}
 				aria-controls={listboxId}
 				aria-haspopup="listbox"
-				class={`flex h-9 w-full items-center gap-2 rounded-md ${INPUT_SURFACE} px-3 py-2 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 hover:[--glass-light:0.09] ${
-					showTriggerClear() ? "pr-14" : ""
-				}`}
+				class={cn(PICKER_TRIGGER, showTriggerClear() && "pr-14")}
 				onClick={p.onClick}
 			>
 				<Show when={triggerIcon()}>
@@ -429,7 +420,7 @@ export function EntitySelector(props: EntitySelectorProps) {
 		</div>
 	);
 
-	const EntityRowButton = (p: { id: string; entityIndex: number; top: number }) => {
+	const EntityRow = (p: { id: string; entityIndex: number; top: number }) => {
 		const view = createMemo(() => data.getEntityView(p.id));
 		const selected = () => selectedSet().has(p.id);
 		const unavailable = () => {
@@ -441,106 +432,77 @@ export function EntitySelector(props: EntitySelectorProps) {
 			return v ? stateLabel(v) : "";
 		};
 		return (
-			<button
-				type="button"
+			// A listbox option, not a button: the row carries a real Checkbox, and a
+			// form control inside a <button> is neither valid nor clickable once.
+			// biome-ignore lint/a11y/useFocusableInteractive: options stay unfocusable; the search input owns the roving highlight and the keys.
+			// biome-ignore lint/a11y/useKeyWithClickEvents: same, Enter is handled on the search input.
+			<div
 				role="option"
+				data-slot="entity-selector-row"
 				aria-selected={selected()}
-				data-active={(!isMobile() && activeIndex() === p.entityIndex) || undefined}
-				class="data-active:glass absolute inset-x-1 flex cursor-pointer items-center gap-3 rounded-lg px-2 text-left transition-colors data-active:[--glass-tone:var(--primary)]"
+				data-highlighted={(!isMobile() && activeIndex() === p.entityIndex) || undefined}
+				class={cn(MENU_ITEM, "absolute inset-x-0 cursor-pointer gap-3 py-0")}
 				style={{ top: `${p.top}px`, height: `${ROW_HEIGHT}px` }}
 				onMouseMove={() => setActiveIndex(p.entityIndex)}
 				onClick={() => toggleEntity(p.id)}
 			>
 				<div
-					class={`flex size-8 shrink-0 items-center justify-center rounded-lg ${
+					class={cn(
+						"size-8 rounded-lg",
 						selected()
-							? "glass text-foreground [--glass-tone:var(--primary)]"
-							: "bg-muted text-muted-foreground"
-					} ${unavailable() ? "opacity-50" : ""}`}
+							? `${ICON_PILL_TINT} text-foreground [--glass-tone:var(--primary)]`
+							: ICON_PILL,
+						unavailable() && "opacity-50",
+					)}
 				>
 					<Icon icon={view()?.icon ?? FALLBACK_ICON} width={18} height={18} />
 				</div>
-				<div class={`min-w-0 flex-1 ${unavailable() ? "opacity-60" : ""}`}>
-					<div class="truncate font-medium text-sm">{view()?.friendlyName ?? p.id}</div>
+				<div class={cn("min-w-0 flex-1", unavailable() && "opacity-60")}>
+					<div class="truncate font-medium">{view()?.friendlyName ?? p.id}</div>
 					<div class="truncate text-muted-foreground text-xs">{p.id}</div>
 				</div>
 				<span
-					class={`max-w-24 shrink-0 truncate text-xs ${
-						unavailable() ? "text-muted-foreground italic" : "text-muted-foreground"
-					}`}
+					class={cn(
+						"max-w-24 shrink-0 truncate text-muted-foreground text-xs",
+						unavailable() && "italic",
+					)}
 				>
 					{state()}
 				</span>
 				<Show
 					when={isSingle()}
 					fallback={
-						/* Multi-select: square checkbox, mirrors checkbox.tsx */
-						<div
-							class={`flex size-4 shrink-0 items-center justify-center overflow-hidden rounded-[5px] border shadow-xs transition-all duration-200 ease-out ${
-								selected()
-									? "glass border-transparent text-foreground [--glass-tone:var(--primary)]"
-									: FIELD_CHROME
-							}`}
-							aria-hidden="true"
-						>
-							<Icon
-								icon="lucide:check"
-								width={14}
-								height={14}
-								class={`size-3.5 transition-all duration-200 ease-out ${
-									selected() ? "scale-100 opacity-100" : "scale-0 opacity-0"
-								}`}
-							/>
+						// The row owns the click, so the control is presentation only.
+						<div aria-hidden="true" class="pointer-events-none shrink-0">
+							<Checkbox checked={selected()} disabled class="cursor-pointer opacity-100" />
 						</div>
 					}
 				>
-					{/* Single-select: round radio, mirrors radio-group.tsx */}
-					<div
-						class={`relative flex aspect-square size-4 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-input/30 shadow-xs transition-colors dark:bg-input/30 ${
-							selected() ? "border-transparent" : "border-input"
-						}`}
-						aria-hidden="true"
-					>
+					<div class="flex size-4 shrink-0 items-center justify-center">
 						<Show when={selected()}>
-							<div class="glass zoom-in-50 fade-in absolute inset-0 animate-in rounded-full duration-200 [--glass-tone:var(--primary)]" />
+							<Icon icon="lucide:check" width={16} height={16} class="text-primary" />
 						</Show>
 					</div>
 				</Show>
-			</button>
+			</div>
 		);
 	};
 
 	const PickerContent = () => (
 		<div class="flex min-h-0 flex-1 flex-col">
-			<div class="flex shrink-0 items-center gap-2 border-b px-3">
-				<Icon
-					icon="mdi:magnify"
-					width={16}
-					height={16}
-					class="shrink-0 text-muted-foreground"
-					aria-hidden="true"
-				/>
-				<input
-					ref={inputRef}
-					type="search"
-					aria-label={`Search ${props.domain} entities`}
-					placeholder="Search by name, room, or ID..."
-					value={search()}
-					onInput={(e) => setSearch(e.currentTarget.value)}
-					onKeyDown={handleKeyDown}
-					class="h-11 w-full appearance-none bg-transparent text-sm outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
-				/>
-				<Show when={search()}>
-					<button
-						type="button"
-						aria-label="Clear search"
-						class="shrink-0 rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground"
-						onClick={() => setSearch("")}
-					>
-						<Icon icon="mdi:close-circle" width={16} height={16} />
-					</button>
-				</Show>
-			</div>
+			<PickerSearch
+				inputRef={(el) => {
+					inputRef = el;
+				}}
+				type="search"
+				aria-label={`Search ${props.domain} entities`}
+				placeholder="Search by name, room, or ID..."
+				value={search()}
+				onValueChange={setSearch}
+				onKeyDown={handleKeyDown}
+				clearLabel="Clear search"
+				class="[&_input::-webkit-search-cancel-button]:hidden"
+			/>
 			<div
 				ref={attachScrollRef}
 				id={listboxId}
@@ -548,7 +510,11 @@ export function EntitySelector(props: EntitySelectorProps) {
 				aria-multiselectable={!isSingle()}
 				aria-label={`${props.domain} entities`}
 				data-sheet-scroll=""
-				class="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain py-1"
+				class={cn(
+					"min-h-0 flex-1 touch-pan-y overscroll-contain px-1 py-1",
+					PICKER_LIST,
+					isMobile() && "max-h-none",
+				)}
 				onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
 			>
 				<Show
@@ -600,12 +566,16 @@ export function EntitySelector(props: EntitySelectorProps) {
 						</div>
 					}
 				>
-					<div class="relative" style={{ height: `${totalHeight()}px` }}>
+					<SlidingIndicator
+						activeSelector="[data-highlighted]"
+						orientation="vertical"
+						style={{ height: `${totalHeight()}px` }}
+					>
 						<For each={visibleRows()}>
 							{(row) =>
 								row.kind === "header" ? (
 									<div
-										class="absolute inset-x-1 flex items-end px-2 pb-1 font-medium text-muted-foreground text-xs"
+										class={cn(MENU_LABEL, "absolute inset-x-0 flex items-end px-2 pb-1")}
 										style={{
 											top: `${rowTop(row)}px`,
 											height: `${HEADER_HEIGHT}px`,
@@ -615,15 +585,15 @@ export function EntitySelector(props: EntitySelectorProps) {
 										{row.label}
 									</div>
 								) : (
-									<EntityRowButton id={row.id} entityIndex={row.entityIndex} top={rowTop(row)} />
+									<EntityRow id={row.id} entityIndex={row.entityIndex} top={rowTop(row)} />
 								)
 							}
 						</For>
-					</div>
+					</SlidingIndicator>
 				</Show>
 			</div>
 			<Show when={diagnosticCount() > 0 || props.deviceClass}>
-				<div class="flex shrink-0 items-center justify-between gap-2 border-t px-3 py-2">
+				<div class="flex shrink-0 items-center justify-between gap-2 border-border/50 border-t px-3 py-2">
 					<span class="truncate text-muted-foreground text-xs">
 						{props.deviceClass ? `Showing ${props.deviceClass} entities only` : ""}
 					</span>
@@ -682,62 +652,61 @@ export function EntitySelector(props: EntitySelectorProps) {
 		</Show>
 	);
 
+	// One shell per viewport, one list: the sheet and the panel host the same
+	// PickerContent, so a fix to the list can never land in only one of them.
+	const ContentHost: ParentComponent = (p) => (
+		<Show
+			when={isMobile()}
+			fallback={
+				<PopoverContent
+					class="flex min-w-72 flex-col"
+					onOpenAutoFocus={(e) => {
+						e.preventDefault();
+						inputRef?.focus();
+					}}
+					onInteractOutside={() => closePicker()}
+				>
+					{p.children}
+				</PopoverContent>
+			}
+		>
+			<BottomSheet
+				open={open()}
+				onOpenChange={(isOpen) => {
+					if (!isOpen) closePicker();
+				}}
+			>
+				<BottomSheetPortal>
+					<BottomSheetOverlay />
+					<BottomSheetContent
+						class="h-[85dvh] pb-[env(safe-area-inset-bottom)]"
+						ariaLabel={`Select ${props.domain} entities`}
+					>
+						<BottomSheetHandle />
+						{p.children}
+					</BottomSheetContent>
+				</BottomSheetPortal>
+			</BottomSheet>
+		</Show>
+	);
+
 	return (
 		<div class="flex flex-col gap-2">
-			<Show
-				when={!isMobile()}
-				fallback={
-					<>
-						<TriggerButton onClick={() => setOpen(true)} />
-						<BottomSheet
-							open={open()}
-							onOpenChange={(isOpen) => {
-								if (!isOpen) closePicker();
-							}}
-						>
-							<BottomSheetPortal>
-								<BottomSheetOverlay />
-								<BottomSheetContent
-									class="h-[85dvh] pb-[env(safe-area-inset-bottom)]"
-									ariaLabel={`Select ${props.domain} entities`}
-								>
-									<BottomSheetHandle />
-									<PickerContent />
-								</BottomSheetContent>
-							</BottomSheetPortal>
-						</BottomSheet>
-					</>
-				}
+			<Popover
+				surface="field"
+				open={open() && !isMobile()}
+				onOpenChange={(isOpen) => {
+					if (!isOpen) closePicker();
+				}}
+				modal
 			>
-				<Popover
-					open={open()}
-					onOpenChange={(isOpen) => {
-						if (!isOpen) closePicker();
-					}}
-					modal
-					gutter={0}
-					getAnchorRect={anchorToTriggerTop}
-				>
-					<PopoverAnchor as="div">
-						<TriggerButton onClick={() => (open() ? closePicker() : setOpen(true))} />
-					</PopoverAnchor>
-					<Popover.Portal>
-						<Popover.Content
-							data-slot="popover-content"
-							class={`${OVERLAY_SURFACE} relative z-50 flex w-[var(--kb-popper-anchor-width)] min-w-72 flex-col overflow-hidden rounded-md text-popover-foreground outline-hidden data-[closed]:animate-select-out data-[expanded]:animate-select-in`}
-							onOpenAutoFocus={(e) => {
-								e.preventDefault();
-								inputRef?.focus();
-							}}
-							onInteractOutside={() => closePicker()}
-						>
-							<div class="flex max-h-[min(70vh,400px)] flex-col">
-								<PickerContent />
-							</div>
-						</Popover.Content>
-					</Popover.Portal>
-				</Popover>
-			</Show>
+				<PopoverAnchor as="div">
+					<TriggerButton onClick={() => (open() ? closePicker() : setOpen(true))} />
+				</PopoverAnchor>
+				<ContentHost>
+					<PickerContent />
+				</ContentHost>
+			</Popover>
 			<SelectedChips />
 		</div>
 	);
