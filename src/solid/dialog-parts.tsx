@@ -14,7 +14,9 @@ import {
 	Show,
 	splitProps,
 	useContext,
+	type ValidComponent,
 } from "solid-js";
+import { Dynamic } from "solid-js/web";
 import { Z_CLASS } from "../lib/layers.js";
 import { OVERLAY_SURFACE, SCRIM_CLASS } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
@@ -46,8 +48,9 @@ export const MODAL_PANEL = `${OVERLAY_SURFACE} data-[closed]:fade-out-0 data-[ex
 
 export const MODAL_SCRIM = `data-[closed]:fade-out-0 data-[expanded]:fade-in-0 fixed inset-0 ${Z_CLASS.overlay} ${SCRIM_CLASS} data-[closed]:animate-out data-[expanded]:animate-in`;
 
-const MODAL_HEADER = "flex shrink-0 items-start justify-between gap-4 px-6 pt-6 pb-3";
-const MODAL_HEADER_TEXT = "flex min-w-0 flex-col gap-1.5 text-left";
+const MODAL_HEADER = "flex shrink-0 items-start gap-4 px-6 pt-6 pb-3";
+const MODAL_HEADER_MEDIA = "flex shrink-0 items-center";
+const MODAL_HEADER_TEXT = "flex min-w-0 flex-1 flex-col gap-1.5 text-left";
 const MODAL_HEADER_ACTION = "flex shrink-0 items-center gap-2";
 
 /* The only scroll container.
@@ -68,19 +71,32 @@ const MODAL_FOOTER =
 export const MODAL_TITLE = "font-semibold text-foreground text-lg leading-none tracking-tight";
 export const MODAL_DESCRIPTION = "text-muted-foreground text-sm";
 
-export type ModalHeaderProps = ComponentProps<"div"> & { action?: JSX.Element };
+export type ModalHeaderProps = ComponentProps<"div"> & {
+	/** Avatar or icon, rendered ahead of the title column. */
+	media?: JSX.Element;
+	action?: JSX.Element;
+};
+
+/** `as="form"` makes the scroll container the form, so a footer submit button
+ *  reaches it through `form="<id>"` with no wrapper in between. */
+export type ModalBodyProps = ComponentProps<"div"> & { as?: ValidComponent };
 
 export interface ModalParts {
 	Header: Component<ModalHeaderProps>;
-	Body: Component<ComponentProps<"div">>;
+	Body: Component<ModalBodyProps>;
 	Footer: Component<ComponentProps<"div">>;
 }
 
 export function createModalParts(slot: string): ModalParts {
 	const Header: Component<ModalHeaderProps> = (props) => {
-		const [local, rest] = splitProps(props, ["class", "action", "children"]);
+		const [local, rest] = splitProps(props, ["class", "media", "action", "children"]);
 		return (
 			<div data-slot={`${slot}-header`} class={cn(MODAL_HEADER, local.class)} {...rest}>
+				<Show when={local.media}>
+					<div data-slot={`${slot}-header-media`} class={MODAL_HEADER_MEDIA}>
+						{local.media}
+					</div>
+				</Show>
 				<div data-slot={`${slot}-header-text`} class={MODAL_HEADER_TEXT}>
 					{local.children}
 				</div>
@@ -96,10 +112,11 @@ export function createModalParts(slot: string): ModalParts {
 	/* data-sheet-scroll is the bottom sheet's drag arbitration marker: a Body
 	 * inside a sheet must yield the gesture to its own scroll, whichever family
 	 * rendered it. */
-	const Body: Component<ComponentProps<"div">> = (props) => {
-		const [local, rest] = splitProps(props, ["class"]);
+	const Body: Component<ModalBodyProps> = (props) => {
+		const [local, rest] = splitProps(props, ["class", "as"]);
 		return (
-			<div
+			<Dynamic
+				component={local.as ?? "div"}
 				data-slot={`${slot}-body`}
 				data-sheet-scroll=""
 				class={cn(MODAL_BODY, local.class)}

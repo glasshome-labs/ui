@@ -173,7 +173,9 @@ describe("Dialog header action", () => {
 
 		const header = panel().querySelector<HTMLElement>('[data-slot="dialog-header"]');
 		if (!header) throw new Error("no header");
-		expect(header.className).toContain("justify-between");
+		// The text column takes the free width, so the action sits at the far edge
+		// whether or not the header also carries media.
+		expect(header.querySelector('[data-slot="dialog-header-text"]')?.className).toContain("flex-1");
 		const parts = Array.from(header.children).map((el) => el.getAttribute("data-slot"));
 		expect(parts).toEqual(["dialog-header-text", "dialog-header-action"]);
 		expect(header.querySelector('[data-slot="dialog-header-action"]')?.textContent).toBe("Reset");
@@ -595,5 +597,84 @@ describe("modal labelling precedence", () => {
 		expect(screen.getByRole("dialog", { name: "Quick actions" })).toBe(
 			document.querySelector("[data-sheet-content]"),
 		);
+	});
+});
+
+describe("modal header media", () => {
+	it("renders the media column before the text column, action last", () => {
+		render(() => (
+			<Dialog open>
+				<DialogContent>
+					<DialogHeader media={<span>avatar</span>} action={<Button>Reset</Button>}>
+						<DialogTitle>Ada Lovelace</DialogTitle>
+						<DialogDescription>Home Assistant account</DialogDescription>
+					</DialogHeader>
+				</DialogContent>
+			</Dialog>
+		));
+
+		const header = panel().querySelector<HTMLElement>('[data-slot="dialog-header"]');
+		if (!header) throw new Error("no header");
+		expect(Array.from(header.children).map((el) => el.getAttribute("data-slot"))).toEqual([
+			"dialog-header-media",
+			"dialog-header-text",
+			"dialog-header-action",
+		]);
+		expect(header.querySelector('[data-slot="dialog-header-media"]')?.textContent).toBe("avatar");
+	});
+
+	it("omits the media node when no media is passed", () => {
+		render(() => (
+			<Dialog open>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Title</DialogTitle>
+					</DialogHeader>
+				</DialogContent>
+			</Dialog>
+		));
+
+		expect(document.querySelector('[data-slot="dialog-header-media"]')).toBeNull();
+	});
+});
+
+describe("modal parts as", () => {
+	it("renders the Body as a form that keeps the scroll contract and submits", () => {
+		let submitted = false;
+		render(() => (
+			<Dialog open>
+				<DialogContent ariaLabel="d">
+					<DialogBody
+						as="form"
+						id="edit-widget"
+						onSubmit={(event) => {
+							event.preventDefault();
+							submitted = true;
+						}}
+					>
+						fields
+					</DialogBody>
+				</DialogContent>
+			</Dialog>
+		));
+
+		const body = panel().querySelector<HTMLElement>('[data-slot="dialog-body"]');
+		expect(body?.tagName).toBe("FORM");
+		expect(body?.getAttribute("id")).toBe("edit-widget");
+		expect(body?.className).toContain("overflow-y-auto");
+		fireEvent.submit(body as HTMLElement);
+		expect(submitted).toBe(true);
+	});
+
+	it("renders the Content as a form panel", () => {
+		render(() => (
+			<Dialog open>
+				<DialogContent as="form" ariaLabel="d">
+					<DialogBody>fields</DialogBody>
+				</DialogContent>
+			</Dialog>
+		));
+
+		expect(panel().tagName).toBe("FORM");
 	});
 });
