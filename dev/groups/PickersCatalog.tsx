@@ -134,7 +134,7 @@ export function PickersCatalog() {
 	const [area, setArea] = createSignal<string>("");
 	const [rooms, setRooms] = createSignal<string[]>([]);
 	const [lightIds, setLightIds] = createSignal<string[]>([]);
-	const [imageId, setImageId] = createSignal("demo-1");
+	const [imageId, setImageId] = createSignal("");
 
 	return (
 		<EntityDataContext.Provider value={demoAdapter}>
@@ -173,6 +173,8 @@ export function PickersCatalog() {
 						<IconPicker value={icon()} onChange={setIcon} placeholder="mdi:lightbulb" />
 					</div>
 					<CatalogNote>
+						Opens as the field expanding: the panel is anchored to the trigger's top edge at the
+						trigger's width and radius, so it covers the trigger instead of dropping in below it.
 						Browsing the curated libraries needs no host wiring. Pass searchIcons to add live
 						search: dash proxies Iconify same-origin so the design system carries no network or CSP
 						policy of its own.
@@ -183,7 +185,11 @@ export function PickersCatalog() {
 					<div class="w-full max-w-sm">
 						<AreaPicker value={area()} onChange={setArea} placeholder="Select area..." />
 					</div>
-					<CatalogNote>options come from EntityDataContext (static demo adapter here)</CatalogNote>
+					<CatalogNote>
+						options come from EntityDataContext (static demo adapter here). Open it: the panel
+						covers the trigger, and the trigger drops its own edge and focus ring underneath, so the
+						seam carries one border and no ring halo.
+					</CatalogNote>
 				</CatalogItem>
 
 				<CatalogItem name="AreaPicker (disabled)" hint="read-only, still shows the value" span={2}>
@@ -201,7 +207,8 @@ export function PickersCatalog() {
 					</div>
 					<CatalogNote>
 						rows toggle instead of closing; the trigger counts them ("2 rooms"). A selected id the
-						home no longer has stays listed, greyed, until the next change drops it.
+						home no longer has stays listed, greyed, until the next change drops it. The sliding
+						indicator rests on a selected row, not on the first one.
 					</CatalogNote>
 				</CatalogItem>
 
@@ -210,7 +217,8 @@ export function PickersCatalog() {
 						<EntitySelector domain="light" entityIds={lightIds()} onEntityIdsChange={setLightIds} />
 					</div>
 					<CatalogNote>
-						domain="light"; entities come from EntityDataContext (static demo adapter here)
+						domain="light"; entities come from EntityDataContext (static demo adapter here). Rows
+						are listbox options carrying the package Checkbox, never a copy of it.
 					</CatalogNote>
 				</CatalogItem>
 
@@ -222,7 +230,7 @@ export function PickersCatalog() {
 					</MediaStoreContext.Provider>
 					<CatalogNote>
 						options come from MediaStoreContext (in-memory demo store here); upload and delete are
-						both live against it
+						both live against it. The panel owns no padding; the gallery body inside it does.
 					</CatalogNote>
 				</CatalogItem>
 
