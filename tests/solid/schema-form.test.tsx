@@ -500,3 +500,112 @@ describe("list rows preview their picture", () => {
 		);
 	});
 });
+
+/* The generated form is the same field stack as a hand-written one: parent
+ * gap, the control's hint below the control, a group's explanation above the
+ * group, and every add button as wide as the fields it sits under. */
+describe("field stack", () => {
+	const scene: ExtendedJSONSchema = {
+		type: "object",
+		properties: {
+			name: { type: "string", title: "Name", description: "Display name for this scene." },
+			place: {
+				type: "object",
+				title: "Placement",
+				description: "Where the scene shows up.",
+				properties: { room: { type: "string", title: "Room" } },
+			},
+		},
+	};
+
+	function renderScene() {
+		return render(() => (
+			<SchemaForm schema={scene} data={{ name: "Evening" }} onChange={() => {}} />
+		));
+	}
+
+	it("stacks the field on the parent gap alone", () => {
+		const { container } = renderScene();
+		const root = container.querySelector<HTMLElement>('[data-slot="schema-form"]');
+		expect(root?.className).toContain("gap-6");
+		expect(root?.className).not.toContain("space-y");
+	});
+
+	it("puts a field's own hint below its control", () => {
+		const { container } = renderScene();
+		const field = container.querySelector<HTMLElement>('[data-slot="field"]');
+		const slots = Array.from(field?.children ?? []).map((child) => child.getAttribute("data-slot"));
+		expect(slots).toEqual(["field-label", "input", "field-description"]);
+	});
+
+	it("puts a group's explanation above the group", () => {
+		const { container } = renderScene();
+		const group = container.querySelector<HTMLElement>('[data-slot="schema-form-object"]');
+		expect(group?.tagName).toBe("FIELDSET");
+		const first = group?.children[0];
+		const second = group?.children[1];
+		expect(first?.getAttribute("data-slot")).toBe("field-legend");
+		expect(first?.textContent).toBe("Placement");
+		expect(second?.getAttribute("data-slot")).toBe("field-description");
+		expect(second?.textContent).toBe("Where the scene shows up.");
+	});
+
+	it("gives the list add button the width of the fields above it", () => {
+		const { container } = render(() => (
+			<SchemaForm
+				schema={{ type: "object", properties: { nodes: nodesList } }}
+				data={{ nodes: [] }}
+				onChange={() => {}}
+			/>
+		));
+		const add = container.querySelector<HTMLElement>('[data-slot="schema-form-list-add"]');
+		expect(add?.className).toContain("w-full");
+		expect(add?.className).not.toContain("self-start");
+	});
+
+	it("reports validation errors through the Alert door", () => {
+		const { container } = render(() => (
+			<SchemaForm
+				schema={{ type: "object", properties: {} }}
+				data={{}}
+				onChange={() => {}}
+				errors={["Name is required."]}
+			/>
+		));
+		const alert = container.querySelector<HTMLElement>('[data-slot="alert"]');
+		expect(alert?.getAttribute("role")).toBe("alert");
+		expect(alert?.textContent).toContain("Name is required.");
+	});
+
+	it("renders string-list chips as badges", () => {
+		const { container } = render(() => (
+			<SchemaForm
+				schema={{
+					type: "object",
+					properties: { tags: { type: "array", items: { type: "string" } } },
+				}}
+				data={{ tags: ["kitchen"] }}
+				onChange={() => {}}
+			/>
+		));
+		const badge = container.querySelector<HTMLElement>('[data-slot="badge"]');
+		expect(badge?.textContent).toContain("kitchen");
+	});
+
+	it("spaces the list row with a gap instead of per-child margins", () => {
+		const { container } = render(() => (
+			<SchemaForm
+				schema={{ type: "object", properties: { nodes: nodesList } }}
+				data={{ nodes: [{ kind: "input", label: "Solar", entities: [] }] }}
+				onChange={() => {}}
+			/>
+		));
+		const row = container.querySelector<HTMLElement>('[data-slot="schema-form-list-row"]');
+		expect(row?.className).toContain("gap-1.5");
+		for (const child of Array.from(row?.children ?? [])) {
+			expect(child.className, `${child.getAttribute("data-slot") ?? child.tagName}`).not.toMatch(
+				/(^|\s)-?m[trblxy]?-/,
+			);
+		}
+	});
+});
