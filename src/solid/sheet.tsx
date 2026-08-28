@@ -86,7 +86,7 @@ type SheetContentProps = ComponentProps<typeof DialogPrimitive.Content> & {
 	/** A modal belongs in `ResponsiveDialog`; this family slides from an edge. */
 	side?: SheetSide;
 	above?: JSX.Element;
-	/** Names a panel that has no `SheetTitle`. */
+	/** Names a panel that has no `SheetTitle`. A registered Title wins. */
 	ariaLabel?: string;
 };
 
