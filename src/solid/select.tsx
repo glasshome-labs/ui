@@ -1,21 +1,14 @@
 import { Icon } from "@iconify-icon/solid";
 import { Select as SelectPrimitive } from "@kobalte/core/select";
 import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
-import { INPUT_SURFACE } from "../lib/input-classes.js";
+import { CONTROL_H, INPUT_SURFACE } from "../lib/input-classes.js";
+import { Z_CLASS } from "../lib/layers.js";
+import { MENU_ITEM, MENU_LABEL, MENU_SEPARATOR } from "../lib/menu-classes.js";
+import { anchorToTriggerTop, FIELD_MOTION } from "../lib/overlay-classes.js";
+import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
 import { cn } from "../lib/utils.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
 
-// Open the listbox ON TOP of the trigger instead of below it. Anchoring to the
-// trigger's TOP edge (a zero-height rect) with gutter 0 puts the content's top at
-// the input's top, so it covers the input at the same width (sameWidth is
-// Kobalte's default) and the options grow downward: the input appears to expand
-// rather than a separate box dropping in. Consumers can override per instance.
-const anchorToTriggerTop = (anchor?: HTMLElement) => {
-	const r = anchor?.getBoundingClientRect();
-	return r
-		? { x: r.left, y: r.top, width: r.width, height: 0 }
-		: { x: 0, y: 0, width: 0, height: 0 };
-};
 const Select = ((props: ComponentProps<typeof SelectPrimitive>) => (
 	<SelectPrimitive gutter={0} getAnchorRect={anchorToTriggerTop} {...props} />
 )) as typeof SelectPrimitive;
@@ -31,7 +24,11 @@ const SelectTrigger: ParentComponent<
 			data-slot="select-trigger"
 			data-size={size()}
 			class={cn(
-				`flex w-fit items-center justify-between gap-2 whitespace-nowrap rounded-md ${INPUT_SURFACE} px-3 py-2 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[size=default]:h-9 data-[size=sm]:h-8 data-[placeholder]:text-muted-foreground *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 dark:aria-invalid:ring-destructive/40 hover:[--glass-light:0.09] [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0`,
+				PICKER_TRIGGER,
+				// The one deviation from the shared recipe: a Select sizes to its
+				// value, every other picker fills its field.
+				"w-fit whitespace-nowrap data-[placeholder]:text-muted-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+				size() === "sm" && CONTROL_H.sm,
 				local.class,
 			)}
 			{...rest}
@@ -61,8 +58,8 @@ const SelectContent: ParentComponent<
 					// Same concave surface as the trigger: opening reads as the input
 					// expanding, not a separate floating panel.
 					INPUT_SURFACE,
-					"relative z-50 overflow-y-auto overflow-x-hidden rounded-md p-1 text-popover-foreground",
-					"data-[closed]:animate-select-out data-[expanded]:animate-select-in",
+					FIELD_MOTION,
+					`relative ${Z_CLASS.overlay} overflow-hidden rounded-md p-1 text-popover-foreground`,
 					local.class,
 				)}
 				{...rest}
@@ -70,9 +67,7 @@ const SelectContent: ParentComponent<
 				<SlidingIndicator
 					activeSelector="[data-highlighted]"
 					orientation="vertical"
-					class="w-full"
-					indicatorClass="rounded-sm [--glass-base:var(--popover)]"
-					indicatorTone="var(--primary)"
+					class={cn("w-full", PICKER_LIST)}
 				>
 					<SelectPrimitive.Listbox class={cn(local.listboxClass)} />
 				</SlidingIndicator>
@@ -86,7 +81,7 @@ const SelectLabel: Component<ComponentProps<typeof SelectPrimitive.Label>> = (pr
 	return (
 		<SelectPrimitive.Label
 			data-slot="select-label"
-			class={cn("px-2 py-1.5 text-muted-foreground text-xs", local.class)}
+			class={cn(MENU_LABEL, "font-normal", local.class)}
 			{...rest}
 		/>
 	);
@@ -98,7 +93,8 @@ const SelectItem: ParentComponent<ComponentProps<typeof SelectPrimitive.Item>> =
 		<SelectPrimitive.Item
 			data-slot="select-item"
 			class={cn(
-				"relative flex w-full cursor-default select-none items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden transition-colors focus:text-foreground data-[disabled]:pointer-events-none data-[highlighted]:text-foreground data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+				MENU_ITEM,
+				"w-full pr-8 focus:text-foreground data-[highlighted]:text-foreground *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
 				local.class,
 			)}
 			{...rest}
@@ -123,7 +119,7 @@ const SelectSeparator: Component<ComponentProps<"div">> = (props) => {
 	return (
 		<div
 			data-slot="select-separator"
-			class={cn("pointer-events-none -mx-1 my-1 h-px bg-border", local.class)}
+			class={cn("pointer-events-none", MENU_SEPARATOR, local.class)}
 			{...rest}
 		/>
 	);
