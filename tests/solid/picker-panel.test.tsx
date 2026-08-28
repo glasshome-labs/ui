@@ -141,7 +141,8 @@ describe("picker triggers", () => {
 		["IconPicker", () => (<IconPicker value="" onChange={() => {}} />) as never],
 		[
 			"EntitySelector",
-			() => (<EntitySelector domain="light" entityIds={[]} onEntityIdsChange={() => {}} />) as never,
+			() =>
+				(<EntitySelector domain="light" entityIds={[]} onEntityIdsChange={() => {}} />) as never,
 		],
 		[
 			"ImagePicker",
@@ -180,12 +181,11 @@ describe("picker triggers", () => {
 describe("EntitySelector rows", () => {
 	it("uses the package Checkbox in multiple mode", async () => {
 		const { container } = withData(
-			() => (<EntitySelector domain="light" entityIds={[]} onEntityIdsChange={() => {}} />) as never,
+			() =>
+				(<EntitySelector domain="light" entityIds={[]} onEntityIdsChange={() => {}} />) as never,
 		);
 		fireEvent.click(firstButton(container));
-		await waitFor(() =>
-			expect(document.querySelector('[data-slot="checkbox"]')).not.toBeNull(),
-		);
+		await waitFor(() => expect(document.querySelector('[data-slot="checkbox"]')).not.toBeNull());
 	});
 
 	it("shows no checkbox in single mode", async () => {
