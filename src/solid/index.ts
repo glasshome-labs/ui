@@ -156,14 +156,18 @@ export type { DockIconButtonProps, DockItem, DockProps } from "./dock.js";
 export { Dock } from "./dock.js";
 export {
 	DropdownMenu,
+	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
 	DropdownMenuShortcut,
 	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "./dropdown-menu.js";
 export {
@@ -375,6 +379,7 @@ export { Spinner } from "./spinner.js";
 export { StepIndicator } from "./step-indicator.js";
 export { Switch } from "./switch.js";
 export {
+	TABLE_CELL_INSET,
 	Table,
 	TableBody,
 	TableCaption,
