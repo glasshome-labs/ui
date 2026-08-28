@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { CONTROL_H, FIELD_TEXT, FOCUS_RING, INPUT_CLASS } from "../../src/lib/input-classes.js";
 import { Z, Z_CLASS } from "../../src/lib/layers.js";
-import { MENU_ITEM, MENU_LABEL, MENU_SEPARATOR } from "../../src/lib/menu-classes.js";
+import {
+	MENU_ITEM,
+	MENU_ITEM_BASE,
+	MENU_ITEM_X,
+	MENU_LABEL,
+	MENU_SEPARATOR,
+} from "../../src/lib/menu-classes.js";
 import {
 	anchorToTriggerTop,
 	FIELD_MOTION,
@@ -69,9 +75,17 @@ describe("pill recipes are glass, not flat fills", () => {
 
 describe("menu recipes", () => {
 	it("one item, one label, one separator", () => {
-		expect(MENU_ITEM).toContain("rounded-sm px-2 py-1.5 text-sm");
+		expect(MENU_ITEM).toContain("rounded-sm");
+		expect(MENU_ITEM).toContain("py-1.5");
+		expect(MENU_ITEM).toContain("text-sm");
 		expect(MENU_LABEL).toContain("px-2 py-1.5");
 		expect(MENU_SEPARATOR).toBe("-mx-1 my-1 h-px bg-border");
+	});
+
+	it("the row's horizontal padding is its own term, so an indented row can drop it", () => {
+		expect(MENU_ITEM_X).toBe("px-2");
+		expect(MENU_ITEM).toBe(`${MENU_ITEM_BASE} ${MENU_ITEM_X}`);
+		expect(MENU_ITEM_BASE).not.toMatch(/(^|\s)p[xlr]-/);
 	});
 });
 

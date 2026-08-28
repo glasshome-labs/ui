@@ -176,21 +176,6 @@
 	pointer-events: none;
 }
 
-/* PageHeader banner surface: bespoke three-stop card gradient (its material
- * predates the one-glass formula) over the same frost slot .glass uses, so
- * hosts wire the performant-blur engine identically on both. Frost defaults
- * to none → plain gradient banner. */
-:where(.glass-banner) {
-	background:
-		linear-gradient(
-			to bottom right,
-			color-mix(in srgb, var(--card) 55%, transparent),
-			color-mix(in srgb, var(--card) 25%, transparent),
-			color-mix(in srgb, var(--card) 10%, transparent)
-		),
-		var(--glass-frost, none);
-}
-
 /**
  * Consistent, theme-aware overlay scrollbar across browsers. Firefox uses
  * scrollbar-width/color; Chromium/WebKit use the ::-webkit-scrollbar pseudos

@@ -1,6 +1,7 @@
-/* Ring thickness for the colour wheel, whose Kobalte prop takes a number
- * rather than a class; every other thumb dimension is the size-7 below. */
-export const THUMB_SIZE = 28;
+/* The size-7 below in px (7 x --spacing, 0.27rem at a 16px root), rounded up:
+ * the colour wheel takes its ring thickness as a number, and a ring thinner
+ * than the thumb riding it lets the thumb overhang. */
+export const THUMB_SIZE = 31;
 
 /* The one draggable knob: switch, slider, colour slider, colour wheel. Colour
  * is the caller's (state, per-thumb tint, live channel value), everything else

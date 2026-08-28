@@ -66,7 +66,13 @@ export {
 	LOGO_SUB_CLASS,
 	type LogoSize,
 } from "./lib/logo-lockup.js";
-export { MENU_ITEM, MENU_LABEL, MENU_SEPARATOR } from "./lib/menu-classes.js";
+export {
+	MENU_ITEM,
+	MENU_ITEM_BASE,
+	MENU_ITEM_X,
+	MENU_LABEL,
+	MENU_SEPARATOR,
+} from "./lib/menu-classes.js";
 export {
 	anchorToTriggerTop,
 	FIELD_MOTION,

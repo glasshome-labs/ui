@@ -207,7 +207,7 @@ export function BarList(props: {
 				</div>
 			}
 		>
-			<div data-slot="bar-list" class="space-y-1.5">
+			<div data-slot="bar-list" class="flex flex-col gap-1.5">
 				<For each={props.items}>
 					{(item) => {
 						const pct = () => `${Math.max(2, (item.value / max()) * 100).toFixed(1)}%`;
@@ -297,7 +297,7 @@ function segmentStyle(s: StackedBarSegment) {
 export function StackedBar(props: { segments: StackedBarSegment[] }) {
 	const total = createMemo(() => props.segments.reduce((a, s) => a + s.value, 0) || 1);
 	return (
-		<div data-slot="stacked-bar" class="space-y-2">
+		<div data-slot="stacked-bar" class="flex flex-col gap-2">
 			<div class={cn("relative flex h-2.5 overflow-hidden", SLIDER_WELL_RADIUS, SLIDER_WELL)}>
 				<For each={props.segments}>
 					{(s) => (

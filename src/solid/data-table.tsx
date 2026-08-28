@@ -209,7 +209,7 @@ export function TableSkeleton(props: { count?: number; class?: string }) {
 						<Skeleton class="h-4 w-4 shrink-0" />
 						<div class="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
 							<Skeleton class="size-9 shrink-0 rounded-full sm:size-7" />
-							<div class="min-w-0 flex-1 space-y-1.5">
+							<div class="flex min-w-0 flex-1 flex-col gap-1.5">
 								<Skeleton
 									class={cn("h-3", SKELETON_TITLE_WIDTHS[i() % SKELETON_TITLE_WIDTHS.length])}
 								/>

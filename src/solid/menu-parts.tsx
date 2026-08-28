@@ -10,7 +10,7 @@ import {
 	splitProps,
 } from "solid-js";
 import { glassToneText } from "../lib/glass-tone.js";
-import { MENU_ITEM, MENU_LABEL, MENU_SEPARATOR } from "../lib/menu-classes.js";
+import { MENU_ITEM, MENU_ITEM_BASE, MENU_LABEL, MENU_SEPARATOR } from "../lib/menu-classes.js";
 import { FLOATING_PANEL, OVERLAY_MOTION } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
@@ -29,12 +29,6 @@ export const MENU_CONTENT_CLASS = cn(
 	OVERLAY_MOTION,
 	"min-w-[8rem] overflow-hidden p-1",
 );
-
-// Indented rows (checkbox/radio) need pl-8 pr-2, not px-2; tailwind-merge
-// does not cancel px-2 for a more specific pl-8/pr-2 pair (both stay in the
-// class list, leaving the visible result to CSS emit order), so the shared
-// row base is built once here with px-2 actually removed.
-const MENU_ITEM_NO_X_PADDING = MENU_ITEM.replace(/\s*\bpx-2\b\s*/, " ").trim();
 
 /** Every menu content and sub content wraps its rows in one sliding highlight,
  *  keyed off Kobalte's roving-focus attribute. The highlighted row's own
@@ -195,7 +189,7 @@ export const MenuCheckboxItemPart: ParentComponent<MenuCheckboxItemProps> = (pro
 	return (
 		<MenuPrimitive.CheckboxItem
 			data-slot={local.slotName}
-			class={cn(MENU_ITEM_NO_X_PADDING, "py-1.5 pr-2 pl-8", local.class)}
+			class={cn(MENU_ITEM_BASE, "py-1.5 pr-2 pl-8", local.class)}
 			{...rest}
 		>
 			<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
@@ -215,7 +209,7 @@ export const MenuRadioItemPart: ParentComponent<MenuRadioItemProps> = (props) =>
 	return (
 		<MenuPrimitive.RadioItem
 			data-slot={local.slotName}
-			class={cn(MENU_ITEM_NO_X_PADDING, "py-1.5 pr-2 pl-8", local.class)}
+			class={cn(MENU_ITEM_BASE, "py-1.5 pr-2 pl-8", local.class)}
 			{...rest}
 		>
 			<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
