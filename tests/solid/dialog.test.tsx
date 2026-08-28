@@ -529,6 +529,29 @@ describe("modal close buttons", () => {
 		);
 	});
 
+	it("runs the bound `[handler, data]` form, then closes", () => {
+		const calls: Array<[string, string]> = [];
+		render(() => (
+			<Dialog defaultOpen>
+				<DialogContent ariaLabel="d">
+					<DialogClose
+						onClick={[
+							(data: string, event: MouseEvent) => calls.push([data, event.type]),
+							"widget-7",
+						]}
+					>
+						Not now
+					</DialogClose>
+				</DialogContent>
+			</Dialog>
+		));
+
+		fireEvent.click(screen.getByRole("button", { name: "Not now" }));
+		expect(calls).toEqual([["widget-7", "click"]]);
+		endExitAnimations();
+		expect(document.querySelector('[data-slot="dialog-content"]')).toBeNull();
+	});
+
 	it("still closes the modal it belongs to", () => {
 		render(() => (
 			<Dialog defaultOpen>
@@ -570,6 +593,33 @@ describe("modal labelling precedence", () => {
 		const content = document.querySelector<HTMLElement>('[data-slot="sheet-content"]');
 		expect(content?.getAttribute("aria-label")).toBeNull();
 		expect(screen.getByRole("dialog", { name: "Widget settings" })).toBe(content);
+	});
+
+	it("names a titled AlertDialog by its Title even when ariaLabel is passed", () => {
+		render(() => (
+			<AlertDialog open>
+				<AlertDialogContent ariaLabel="Quick actions">
+					<AlertDialogTitle>Delete this widget?</AlertDialogTitle>
+				</AlertDialogContent>
+			</AlertDialog>
+		));
+
+		const content = document.querySelector<HTMLElement>('[data-slot="alert-dialog-content"]');
+		expect(content?.getAttribute("aria-label")).toBeNull();
+		expect(content?.getAttribute("aria-labelledby")).toBeTruthy();
+		expect(screen.getByRole("alertdialog", { name: "Delete this widget?" })).toBe(content);
+	});
+
+	it("falls back to ariaLabel on an untitled AlertDialog", () => {
+		render(() => (
+			<AlertDialog open>
+				<AlertDialogContent ariaLabel="Quick actions">body</AlertDialogContent>
+			</AlertDialog>
+		));
+
+		const content = document.querySelector<HTMLElement>('[data-slot="alert-dialog-content"]');
+		expect(content?.getAttribute("aria-labelledby")).toBeNull();
+		expect(screen.getByRole("alertdialog", { name: "Quick actions" })).toBe(content);
 	});
 
 	it("names a titled bottom sheet by its Title even when ariaLabel is passed", () => {

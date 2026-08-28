@@ -19,6 +19,7 @@ import { Z } from "../../lib/layers.js";
 import { OVERLAY_SURFACE_OPAQUE } from "../../lib/overlay-classes.js";
 import { cn } from "../../lib/utils.js";
 import {
+	callEventHandler,
 	createModalLabels,
 	createModalParts,
 	MODAL_DESCRIPTION,
@@ -113,11 +114,6 @@ const BottomSheet: ParentComponent<BottomSheetRootProps> = (props) => {
 
 type SheetButtonProps = ComponentProps<"button"> & { as?: ValidComponent };
 
-function callClickHandler(handler: ComponentProps<"button">["onClick"], event: MouseEvent) {
-	if (typeof handler === "function")
-		handler(event as MouseEvent & { currentTarget: HTMLButtonElement; target: Element });
-}
-
 const BottomSheetTrigger: ParentComponent<SheetButtonProps> = (props) => {
 	const [local, rest] = splitProps(props, ["children", "onClick", "as"]);
 	const ctx = useBottomSheetContext();
@@ -129,8 +125,8 @@ const BottomSheetTrigger: ParentComponent<SheetButtonProps> = (props) => {
 			data-slot="bottom-sheet-trigger"
 			aria-haspopup="dialog"
 			aria-expanded={ctx.open()}
-			onClick={(event: MouseEvent) => {
-				callClickHandler(local.onClick, event);
+			onClick={(event: MouseEvent & { currentTarget: HTMLButtonElement; target: Element }) => {
+				callEventHandler(event, local.onClick);
 				ctx.setOpen(true);
 			}}
 			{...rest}
@@ -427,8 +423,8 @@ const BottomSheetClose: ParentComponent<SheetButtonProps> = (props) => {
 			component={component()}
 			type={component() === "button" ? "button" : undefined}
 			data-slot="bottom-sheet-close"
-			onClick={(event: MouseEvent) => {
-				callClickHandler(local.onClick, event);
+			onClick={(event: MouseEvent & { currentTarget: HTMLButtonElement; target: Element }) => {
+				callEventHandler(event, local.onClick);
 				ctx.setOpen(false);
 			}}
 			{...rest}

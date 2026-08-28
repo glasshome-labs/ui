@@ -143,6 +143,18 @@ export function createModalParts(slot: string): ModalParts {
 	return { Header, Body, Footer };
 }
 
+/** Solid's handler prop is a union: a plain function, or the bound
+ *  `[handler, data]` form that calls `handler(data, event)`. A wrapper that
+ *  only checks for a function silently drops the bound one. */
+export function callEventHandler<T, E extends Event>(
+	event: E & { currentTarget: T; target: Element },
+	handler: JSX.EventHandlerUnion<T, E> | undefined,
+): void {
+	if (!handler) return;
+	if (typeof handler === "function") handler(event);
+	else handler[0](handler[1], event);
+}
+
 export type ModalDismissProps = ComponentProps<typeof KobalteButton>;
 
 /* Not kobalte's own CloseButton: that one hard-defaults aria-label to its
@@ -157,12 +169,8 @@ export function createModalDismiss(slot: string): ParentComponent<ModalDismissPr
 		return (
 			<KobalteButton
 				data-slot={slot}
-				onClick={(event: MouseEvent) => {
-					if (typeof local.onClick === "function") {
-						local.onClick(
-							event as MouseEvent & { currentTarget: HTMLButtonElement; target: Element },
-						);
-					}
+				onClick={(event: MouseEvent & { currentTarget: HTMLButtonElement; target: Element }) => {
+					callEventHandler(event, local.onClick);
 					context.close();
 				}}
 				{...rest}
