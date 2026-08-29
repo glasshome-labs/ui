@@ -53,12 +53,17 @@ export const ALERT_ICON_CLASS =
 	"gh-alert-icon flex size-8 shrink-0 items-center justify-center rounded-md";
 export const ALERT_ICON_BG_CLASS =
 	"gh-alert-icon-bg pointer-events-none absolute -right-3 -bottom-4";
-export function alertIconBgStyle(color: string): Record<string, string> {
+export function iconBgMaskStyle(color: string): Record<string, string> {
 	return {
 		color,
-		opacity: "0.32",
 		"-webkit-mask-image": "radial-gradient(140% 140% at 100% 100%, #000 45%, transparent 95%)",
 		"mask-image": "radial-gradient(140% 140% at 100% 100%, #000 45%, transparent 95%)",
+	};
+}
+export function alertIconBgStyle(color: string): Record<string, string> {
+	return {
+		...iconBgMaskStyle(color),
+		opacity: "0.32",
 	};
 }
 export const ALERT_CONTENT_CLASS = "relative z-10 min-w-0 flex-1";

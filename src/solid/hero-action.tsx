@@ -1,10 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show } from "solid-js";
-import { ALERT_ICON_BG_CLASS, alertIconBgStyle } from "../lib/alert-tones.js";
 import { glassToneText, isNeutralTone, NEUTRAL_KNOBS, NEUTRAL_TONE } from "../lib/glass-tone.js";
 import { SECTION_OUTER_RADIUS } from "../lib/section-tokens.js";
 import { cn } from "../lib/utils.js";
 import { Badge } from "./badge.js";
+import { Ornament } from "./ornament.js";
 import { RadioGroupItem } from "./radio-group.js";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip.js";
 
@@ -40,27 +40,7 @@ interface HeroActionContentProps {
 function HeroActionContent(props: HeroActionContentProps) {
 	return (
 		<>
-			{/* Absolutely positioned (ALERT_ICON_BG_CLASS): a sibling of the flex
-			 *  row below, not a flex child, so it never competes for row gap. */}
-			<Show when={props.ornament === "arrow"}>
-				<span
-					class={`${ALERT_ICON_BG_CLASS} transition-transform duration-200 group-hover:translate-x-1`}
-					style={alertIconBgStyle("var(--surface-tone)")}
-					aria-hidden="true"
-				>
-					<svg
-						aria-hidden="true"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<path d="M5 12h14" />
-						<path d="m12 5 7 7-7 7" />
-					</svg>
-				</span>
-			</Show>
+			<Ornament kind={props.ornament} />
 
 			<div class="flex w-full items-center gap-4">
 				<span
@@ -95,17 +75,6 @@ function HeroActionContent(props: HeroActionContentProps) {
 					</div>
 					<p class="truncate text-foreground/80 text-sm">{props.description}</p>
 				</div>
-
-				<Show when={props.ornament === "check"}>
-					<Icon
-						icon="lucide:check"
-						width={20}
-						height={20}
-						aria-hidden="true"
-						data-slot="hero-action-check"
-						class="shrink-0 text-primary opacity-0 transition-opacity duration-200 group-data-[checked]:opacity-100"
-					/>
-				</Show>
 			</div>
 		</>
 	);

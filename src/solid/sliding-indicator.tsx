@@ -11,6 +11,13 @@ import {
 } from "solid-js";
 import { cn } from "../lib/utils.js";
 
+function readTranslate(el: HTMLElement): [number, number] {
+	const t = getComputedStyle(el).translate;
+	if (!t || t === "none") return [0, 0];
+	const [x = "0", y = "0"] = t.split(" ");
+	return [Number.parseFloat(x) || 0, Number.parseFloat(y) || 0];
+}
+
 /**
  * The sliding "moving background": a tinted indicator that measures the active item
  * among its children and animates its position/size behind it. Reusable across
@@ -142,15 +149,18 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 		// which scrolls with the content, lands at the content offset; subtract the
 		// border so it aligns to the padding box (where the absolute indicator anchors).
 		const cr = containerRef.getBoundingClientRect();
+		// A row arriving through gh-stagger is still translated: bounding rects
+		// include that travel, its resting place does not.
+		const [tx, ty] = readTranslate(el);
 		setPos(
 			horizontal()
 				? {
-						offset: er.left - cr.left - containerRef.clientLeft + containerRef.scrollLeft,
+						offset: er.left - tx - cr.left - containerRef.clientLeft + containerRef.scrollLeft,
 						size: er.width,
 						cross: er.height,
 					}
 				: {
-						offset: er.top - cr.top - containerRef.clientTop + containerRef.scrollTop,
+						offset: er.top - ty - cr.top - containerRef.clientTop + containerRef.scrollTop,
 						size: er.height,
 						cross: er.width,
 					},
@@ -201,6 +211,7 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 	onMount(() => {
 		if (!containerRef) return;
 		ro = new ResizeObserver(() => measure());
+		containerRef?.addEventListener("animationend", measure);
 		ro.observe(containerRef);
 		// Attribute-based selection (e.g. Kobalte's [data-selected]/[data-highlighted]):
 		// re-slide when the active child's marker attribute moves, or when items are
@@ -233,6 +244,7 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 			ro?.disconnect();
 			mo.disconnect();
 			containerRef?.removeEventListener("focusin", onFocusIn);
+			containerRef?.removeEventListener("animationend", measure);
 		});
 	});
 

@@ -88,11 +88,12 @@
  * and inline style knobs still win. Rim shadows are declared on .glass (not
  * :root) so calc(var(--glass-rim)) resolves per element, not frozen at :root. */
 :root {
-	/* biome-ignore lint/correctness/noMissingVarFunction: transition-property takes property names, and these are the registered knobs */
+	/* biome-ignore-start lint/correctness/noMissingVarFunction: transition-property takes property names, and these are the registered knobs */
 	--glass-transition:
 		--glass-tone, --glass-wash, --glass-light, --glass-shade, --glass-rim, --glass-lift,
 		--glass-glow, --glass-drop, --glass-text, color, background-color, border-color, box-shadow,
 		opacity, transform, translate, scale, width, height;
+	/* biome-ignore-end lint/correctness/noMissingVarFunction: see above */
 }
 
 @layer utilities {

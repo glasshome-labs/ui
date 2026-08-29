@@ -176,7 +176,7 @@ describe("AreaPicker single mode", () => {
 		expect(triggerOf(container).textContent).toContain("Kitchen");
 	});
 
-	it("keeps the clear row, which multi mode never shows", () => {
+	it("clears on a re-tap of the picked area, unless the caller forbids clearing", () => {
 		const [value, setValue] = createSignal("kitchen");
 		const single = render(() => (
 			<EntityDataContext.Provider value={adapter}>
@@ -185,22 +185,21 @@ describe("AreaPicker single mode", () => {
 		));
 
 		fireEvent.click(triggerOf(single.container));
-		const clear = Array.from(document.querySelectorAll("button")).find((el) =>
-			el.textContent?.includes("Clear selection"),
-		);
-		expect(clear).toBeTruthy();
-		fireEvent.click(clear as HTMLElement);
+		expect(document.body.textContent).not.toContain("Clear selection");
+		fireEvent.click(row("Kitchen"));
 		expect(value()).toBe("");
 
 		cleanup();
 		document.body.innerHTML = "";
 
-		const multi = render(() => (
+		const [kept, setKept] = createSignal("kitchen");
+		const pinned = render(() => (
 			<EntityDataContext.Provider value={adapter}>
-				<AreaPicker values={["kitchen"]} onValuesChange={() => {}} />
+				<AreaPicker value={kept()} onChange={setKept} allowClear={false} />
 			</EntityDataContext.Provider>
 		));
-		fireEvent.click(triggerOf(multi.container));
-		expect(document.body.textContent).not.toContain("Clear selection");
+		fireEvent.click(triggerOf(pinned.container));
+		fireEvent.click(row("Kitchen"));
+		expect(kept()).toBe("kitchen");
 	});
 });

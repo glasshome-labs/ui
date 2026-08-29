@@ -13,6 +13,7 @@ import { SlidingIndicator } from "./sliding-indicator.js";
 interface AreaPickerBaseProps {
 	placeholder?: string;
 	class?: string;
+	/** false: a re-tap on the picked area keeps it instead of clearing. */
 	allowClear?: boolean;
 	disabled?: boolean;
 	/** Id of the element naming the trigger, for forms that label it outside. */
@@ -34,8 +35,6 @@ interface AreaPickerMultiProps extends AreaPickerBaseProps {
 }
 
 type AreaPickerProps = AreaPickerSingleProps | AreaPickerMultiProps;
-
-const CLEAR_ROW = "__clear__";
 
 export function AreaPicker(props: AreaPickerProps) {
 	const data = useEntityData();
@@ -90,7 +89,6 @@ export function AreaPicker(props: AreaPickerProps) {
 	// between rows, exactly like the Select. Hover wins; otherwise the pill rests
 	// on a selected row, which in multi mode is the first one still listed.
 	const [hovered, setHovered] = createSignal<string | null>(null);
-	const showClear = () => props.allowClear !== false && !!props.value;
 	const restingId = createMemo(() => {
 		const list = filtered();
 		if (!multi()) return list.some((a) => a.id === props.value) ? (props.value ?? null) : null;
@@ -99,9 +97,10 @@ export function AreaPicker(props: AreaPickerProps) {
 	});
 	const highlightedId = () => hovered() ?? restingId();
 
+	// A re-tap on the picked area clears it, the way every other picker toggles.
 	const selectArea = (areaId: string) => {
 		if (props.disabled) return;
-		props.onChange?.(areaId);
+		props.onChange?.(areaId === props.value && props.allowClear !== false ? "" : areaId);
 		setOpen(false);
 		setSearch("");
 	};
@@ -112,13 +111,6 @@ export function AreaPicker(props: AreaPickerProps) {
 		props.onValuesChange?.(
 			current.includes(areaId) ? current.filter((id) => id !== areaId) : [...current, areaId],
 		);
-	};
-
-	const clear = () => {
-		if (props.disabled) return;
-		props.onChange?.("");
-		setOpen(false);
-		setSearch("");
 	};
 
 	return (
@@ -207,26 +199,6 @@ export function AreaPicker(props: AreaPickerProps) {
 								</div>
 							)}
 						</For>
-						<Show when={showClear()}>
-							<button
-								type="button"
-								data-slot="area-picker-clear"
-								data-highlighted={highlightedId() === CLEAR_ROW || undefined}
-								class={cn(MENU_ITEM, "w-full cursor-pointer text-left")}
-								onMouseEnter={() => setHovered(CLEAR_ROW)}
-								onClick={clear}
-							>
-								<div class="flex size-[18px] shrink-0 items-center justify-center">
-									<Icon
-										icon="mdi:close-circle-outline"
-										width={18}
-										height={18}
-										class="text-muted-foreground"
-									/>
-								</div>
-								<span class="text-muted-foreground">Clear selection</span>
-							</button>
-						</Show>
 						<For each={filtered()}>
 							{(area) => (
 								<PickerRow
