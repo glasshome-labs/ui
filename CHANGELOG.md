@@ -18,6 +18,88 @@ Hand-written; drop this section once release-please cuts the version from the co
 
 * **input-classes:** add `FIELD_CHROME`, the recipe SPEC.md already documented. Toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) wear it and stay keyed to `--input` in both themes, so they keep reading as empty wells now that fields do not.
 
+## [2.0.0](https://github.com/glasshome/ui/compare/v1.6.0...v2.0.0) (2026-08-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ui:** HeroOption is gone (OptionCard carries accentVar, iconImage, ornament, onPick and OptionChoice rows). Sheet side="bottom" is gone (BottomSheet / ResponsiveDialog). BottomSheet's Header and Footer aliases are gone (the shared modal parts). DOT and DOT_ACTIVE are gone (POSITION_BAR, POSITION_BAR_LIT). OVERLAY_MOTION and FIELD_MOTION now come from motion-classes under the same names. The dark --popover token is near-black; overlay surfaces carry no corner sheen.
+
+### Features
+
+* **charts:** tooltip wears Overlay, tone-driven segments, one well radius ([c4f22bb](https://github.com/glasshome/ui/commit/c4f22bba7e61a3c9a07cd7ba2d64aea7bf06b095))
+* **dialog:** Header wrap, and one shot for the media and tab-row slots ([1d3fc58](https://github.com/glasshome/ui/commit/1d3fc588f354eacdec25fe7699778ad709f5f2e3))
+* **dialog:** one modal part set for every family, one scroll owner, one page lock ([b0600c1](https://github.com/glasshome/ui/commit/b0600c1c11558fe5550f92180b4b5816d3f0a8bf))
+* **dialog:** the shared Header takes media, the shared Body takes as ([2557e0f](https://github.com/glasshome/ui/commit/2557e0ff4fe67cffb480300da6792fb95d4e2d07))
+* **field:** one stack, parent-owned gap, and Form* renders the Field parts ([ccc478b](https://github.com/glasshome/ui/commit/ccc478b282f96e5d638093754be6d62150e44fc7))
+* **gallery:** DropdownMenu sub+checkbox, ContextMenu tone, HoverCard, data-table kit, charts ([6242849](https://github.com/glasshome/ui/commit/62428492805f969e5a620b59a6ee7962b826b867))
+* **gallery:** forms catalogue shows every case this batch fixes ([aa09109](https://github.com/glasshome/ui/commit/aa09109162d995e1a8884c555a3c642a4e835c24))
+* **gallery:** specimens for stat tiles, a padded card, the dock badge and a pinned tooltip ([5721860](https://github.com/glasshome/ui/commit/57218603fa9072267a888e9358e55859e976ae6f))
+* **input-group:** shell owns focus and invalid through the glass knobs ([5f4c226](https://github.com/glasshome/ui/commit/5f4c22668e864593864de2fc79198f9143c4b17e))
+* **lib:** named recipes for focus, control height, floating panel, pills and menus; gallery shot harness ([eed6425](https://github.com/glasshome/ui/commit/eed6425eee608cc63e0bda15f9fbf3f46bf16e3d))
+* **lib:** shared segmented-item recipe for Tabs and ToggleGroup ([e46b0c0](https://github.com/glasshome/ui/commit/e46b0c07856f7153c0a04f19593cfce60ed1150c))
+* **menu:** share Item/Sub/Checkbox/Radio parts between dropdown and context menus ([3108de6](https://github.com/glasshome/ui/commit/3108de6873b22711460b2e893e07280f1b17d92b))
+* **motion:** morph, stagger and colour transitions; gallery walkthrough fixes ([29c6943](https://github.com/glasshome/ui/commit/29c694320ff190d8b12885682320c24763202680))
+* **option-card:** sub-options are rows of the card (OptionChoice) ([fc88090](https://github.com/glasshome/ui/commit/fc880909842cf73da06e4a029e3541b76867ca9d))
+* **option-card:** sub-options morph the card open; the motion pillar in SPEC ([2143ac5](https://github.com/glasshome/ui/commit/2143ac5e1697cf5aba9d3e3f75091e1c9978348f))
+* **overlay:** HoverCardContent and Overlay wear FLOATING_PANEL ([85c18df](https://github.com/glasshome/ui/commit/85c18df71da3ee514a464f16110a99b9c1c944a2))
+* **picker:** one field-trigger recipe, one list size and one search row in lib ([f892f2c](https://github.com/glasshome/ui/commit/f892f2cae39f09fafaaa58920f8ce5f57a0ac968))
+* **pickers:** one PickerRow for area and entity rows ([c87afe7](https://github.com/glasshome/ui/commit/c87afe780572dc1df29aa9f48ab9328ccb6e19ba))
+* **schema-form:** the generated form is the field stack ([9232f7b](https://github.com/glasshome/ui/commit/9232f7b7bc08c30b9ee75b0d2fe497feb06a0b59))
+* **solid:** export the new DropdownMenu parts and TABLE_CELL_INSET ([3afa712](https://github.com/glasshome/ui/commit/3afa712142d6e754e343c631381f16b86b74e702))
+* **table:** one head-cell recipe, gh-scroll, Button/Empty/Skeleton composed ([ac8f275](https://github.com/glasshome/ui/commit/ac8f275491f0ae57c0393162bc14889d43ac3a68))
+* **table:** the flex family's head label is a token, not a p-0 override ([562c768](https://github.com/glasshome/ui/commit/562c76858c17ff6535ad73ca06d549d17925f8cf))
+* **tabs:** layout=split, so a host lays the list and the panels out ([f9cc2ab](https://github.com/glasshome/ui/commit/f9cc2abe1e7fa513ac782547ad842928278b5355))
+* **theme:** --radius-xs, and a size prop on Checkbox ([c987c7f](https://github.com/glasshome/ui/commit/c987c7f90dcde1d74c874a0a52b8edc8316adb5a))
+* **ui:** export the thumb recipe from the package root ([3309fa2](https://github.com/glasshome/ui/commit/3309fa2c11b4d68207955b69263a25b2f74b76fc))
+* **ui:** one thumb recipe and one focus ring across the toggle family ([b4bd11a](https://github.com/glasshome/ui/commit/b4bd11a3622e8f6da0c308eb4f186b53dc40ccee))
+* **ui:** the structure audit lands ([8ab8701](https://github.com/glasshome/ui/commit/8ab870106ba4983623f50a5687467d8d54f7e798))
+
+
+### Bug Fixes
+
+* **bottom-sheet, field:** type only real buttons, tint only card labels ([a12a9a3](https://github.com/glasshome/ui/commit/a12a9a3ff2c64f6c6ee8990af91271fb80b5c66c))
+* **charts:** restore RangeToggle's width, drop the no-op glass-rim knobs ([315b98e](https://github.com/glasshome/ui/commit/315b98e2ef131e7237e39faa90c42a49a3ac79ef))
+* **ci:** kobalte 0.13.13 for the menu entry, typed tests ([6a420ce](https://github.com/glasshome/ui/commit/6a420ce94930696bd250c0dbf42ccb5bf21a9980))
+* **color-slider:** clear Kobalte's track gradient inline, so one band runs edge to edge ([c6a828f](https://github.com/glasshome/ui/commit/c6a828f6f8aba16b3f31c03062feadb891c5a4f6))
+* **color-wheel:** clamp the derived ring thickness to the range it lives in ([debe0ae](https://github.com/glasshome/ui/commit/debe0aeb68ea1f255500ca4c803df829816db8a2))
+* **color-wheel:** size the ring from the thumb it carries ([21b1646](https://github.com/glasshome/ui/commit/21b164692d9f80fdf4eed86ac777cc658073e47d))
+* **dialog:** a close button runs the bound onClick form too ([fc60eda](https://github.com/glasshome/ui/commit/fc60eda59349aa39a1af6743f26672a11844db94))
+* **dialog:** a close button with text is named by its text, not by "Dismiss" ([1119df7](https://github.com/glasshome/ui/commit/1119df783d3703108d520cb2fbeee7f6e77a58f3))
+* **dialog:** a registered Title names the panel, ariaLabel is only the fallback ([7d4db1b](https://github.com/glasshome/ui/commit/7d4db1b5f9c075830c65e603e640681076eb5811))
+* **dialog:** align the Body content column with Header and Footer, keep pinch-zoom ([fb93b1f](https://github.com/glasshome/ui/commit/fb93b1f332e5734c082a931ff4b4b0b7e566a409))
+* **dialog:** every modal family states its own role, and the sheet lock follows presence ([189adcb](https://github.com/glasshome/ui/commit/189adcb6cdec0084947dab3c73c617d8efdb7c48))
+* **entity-selector:** the search input names the highlighted option; sheet search takes the touch height ([2b9be46](https://github.com/glasshome/ui/commit/2b9be4668326814c5ffe6e447d8ae4f662ca12f3))
+* **form:** FormControl keeps the wrapper shape working ([055af99](https://github.com/glasshome/ui/commit/055af99581e452fc97b27a64a06fc2c60daf50f5))
+* **form:** resolve a wrapped FormControl child once ([f9ac1b6](https://github.com/glasshome/ui/commit/f9ac1b685b3d473f4a752d6794c392c69ecf9e9a))
+* **gallery:** a shot names its width, so a mobile run keeps the desktop one ([a4ee151](https://github.com/glasshome/ui/commit/a4ee15183dba509e8e7679ebe4c2332bcde1b11f))
+* **gallery:** menu specimens wrap their items in the family's Group ([09a190b](https://github.com/glasshome/ui/commit/09a190bdd07cc52fd7ea668521dda440baa086de))
+* **menu:** clip overflow, follow the highlighted item's tone, fix class merges ([250b3bf](https://github.com/glasshome/ui/commit/250b3bf58abb2d15676853c9711f29b08b5dacf6))
+* **menu:** guard the muted svg color on data-tone, not an inert item class ([49ac5ab](https://github.com/glasshome/ui/commit/49ac5ab4e2e09777b960454a7059ba7d08e38e70))
+* **menu:** one presentational wrapper between the menu and its rows ([de538dc](https://github.com/glasshome/ui/commit/de538dc4c841f2c17cbe16369e55f5ec5cba0631))
+* **motion:** glass surfaces keep their knob transitions; stagger never scrolls ([e635e23](https://github.com/glasshome/ui/commit/e635e23ae2dac439dbe5871a728ee2d3c5945f15))
+* **option-card:** flat choice rows, aligned with the title ([90066e1](https://github.com/glasshome/ui/commit/90066e1d93b696043c4f4690924fb14576e8d327))
+* **option-card:** name the drawer container for the linter too ([5e2b991](https://github.com/glasshome/ui/commit/5e2b99191d35278cac3d791bb8bb223e1bf62fb1))
+* **picker:** opening a panel no longer scrolls the page to the top; inactive icon-library chips lose their glass edge ([7809dbc](https://github.com/glasshome/ui/commit/7809dbc6b4b8befbf2217ad33cbf691167807c3c))
+* **pickers:** highlight a row at the row's own radius ([ce942fa](https://github.com/glasshome/ui/commit/ce942fa0d8dec6bc3ad00b7dbcec9660d5851a09))
+* **popover:** carry the Kobalte parts across the surface wrapper ([a261bcc](https://github.com/glasshome/ui/commit/a261bcc8716074629c501fe77ed2c4b2b65642be))
+* **schema-form:** stop a field label pointing at nothing ([0cffc62](https://github.com/glasshome/ui/commit/0cffc62bb79c23ef66e3f466f4cee0155654897b))
+* **scroll-area:** deprecate ScrollBar as a no-op ([bf1765f](https://github.com/glasshome/ui/commit/bf1765ff5d39bb8c982073fd54fc46c23068cccf))
+* **section-card:** no body slot without children; EmptyMedia names its kind twice ([2525fcb](https://github.com/glasshome/ui/commit/2525fcbbc20958a6e0b929b8e260cdca64692659))
+* **sliding-indicator:** guard the fonts.ready continuation against post-unmount ([7985c07](https://github.com/glasshome/ui/commit/7985c07a0732069f0e273c84f879fd5ee5458a1b))
+* **sliding-indicator:** observe every measured item, not just the container ([c42f772](https://github.com/glasshome/ui/commit/c42f772732e9117ecbcea0d7eba8f0c10ba881e6))
+* **sonner:** one mobile breakpoint, shared with everything else ([0566427](https://github.com/glasshome/ui/commit/056642734048d4b618c4d52d87f851566b1fd3c4))
+* **table:** keep TABLE_SCROLL_CLASS's default bound, type the bleed map ([8b65af8](https://github.com/glasshome/ui/commit/8b65af88f15e2f0bf800415fc33e9f3bc413c063))
+* **tabs:** keep the layout union module-private, it has no consumer ([0f046cb](https://github.com/glasshome/ui/commit/0f046cb3083d8ac758c7777f9ac056001d7de363))
+* **tabs:** root owns the content gap, trigger and indicator share one radius ([b46b090](https://github.com/glasshome/ui/commit/b46b09087238bac8e1f840048bb2ab9d969dbab7))
+* **toggle-group:** drop the !important escape hatch, match indicator radius ([cd31df1](https://github.com/glasshome/ui/commit/cd31df19d0e4197c2d85757d036a8039c8261f0c))
+* **toggle-group:** give a multi-select segment its hover back ([32e27bc](https://github.com/glasshome/ui/commit/32e27bc7ae2b83e6e2fbb472e13f87d547fe72e5))
+* **toggle:** move the unpressed hover fill out of the shared variants ([9365c1a](https://github.com/glasshome/ui/commit/9365c1a5f11943db31e9e0ea3b0b42f08aad9644))
+* **toggle:** outline variant wears glass instead of dead shadcn chrome ([1f666c1](https://github.com/glasshome/ui/commit/1f666c127afb4f1d4e8da09ca793fa078aa8d72d))
+* **toggle:** pressed default variant's hover survives the glass takeover ([8b86a2b](https://github.com/glasshome/ui/commit/8b86a2b5355313229403cffd2bbfb3175b650e68))
+* **ui:** one selection ornament, re-tap clears, indicator ignores row travel ([cc4412e](https://github.com/glasshome/ui/commit/cc4412e5070d59d4a7373d5e6b33fe892a02d7ba))
+* **ui:** pin the widget tile footer, keep Kobalte's tooltip namespace, drop the static hover sheen ([381452a](https://github.com/glasshome/ui/commit/381452aceb7d2e17080c38def10a6625c198063b))
+
 ## [1.6.0](https://github.com/glasshome/ui/compare/v1.5.0...v1.6.0) (2026-08-28)
 
 
