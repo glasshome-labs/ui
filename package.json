@@ -79,7 +79,7 @@
 	},
 	"dependencies": {
 		"@iconify-icon/solid": "^3.0.3",
-		"@kobalte/core": "^0.13.11",
+		"@kobalte/core": "^0.13.13",
 		"clsx": "^2.1.1",
 		"cva": "^1.0.0-beta.4",
 		"embla-carousel": "^8.5.1",

@@ -112,7 +112,9 @@ const BottomSheet: ParentComponent<BottomSheetRootProps> = (props) => {
 	);
 };
 
-type SheetButtonProps = ComponentProps<"button"> & { as?: ValidComponent };
+/* A button by default; rendered as a link it takes the anchor's own props. */
+type SheetButtonProps = ComponentProps<"button"> &
+	Partial<Pick<ComponentProps<"a">, "href" | "target" | "rel">> & { as?: ValidComponent };
 
 const BottomSheetTrigger: ParentComponent<SheetButtonProps> = (props) => {
 	const [local, rest] = splitProps(props, ["children", "onClick", "as"]);
