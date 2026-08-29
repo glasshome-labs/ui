@@ -11,7 +11,7 @@ vi.mock("@iconify-icon/solid", () => ({
 }));
 
 import { CARD_SURFACE } from "../../src/lib/card-classes.js";
-import { OptionCard, OptionCardGroup } from "../../src/solid/option-card.js";
+import { OptionCard, OptionCardGroup, OptionChoice } from "../../src/solid/option-card.js";
 
 afterEach(cleanup);
 
@@ -206,5 +206,27 @@ describe("OptionCard", () => {
 		fireEvent.click(item as HTMLElement);
 		fireEvent.click(item as HTMLElement);
 		expect(picks).toBe(2);
+	});
+
+	it("offers sub-options as rows of the card, chosen in place", () => {
+		const [len, setLen] = createSignal<string | undefined>("6");
+		const { container } = render(() => (
+			<OptionCardGroup value="code" onChange={() => {}}>
+				<OptionCard value="code" title="Share a code" subValue={len()} onSubChange={setLen}>
+					<OptionChoice value="6" label="Six digits" hint="Quick to type" />
+					<OptionChoice value="8" label="Eight digits" />
+				</OptionCard>
+			</OptionCardGroup>
+		));
+		const rows = container.querySelectorAll<HTMLElement>('[data-slot="option-choice"]');
+		expect(rows).toHaveLength(2);
+		expect(
+			container.querySelector('[data-slot="option-card-drawer"] [role="radiogroup"]'),
+		).not.toBeNull();
+		expect(rows[0]?.getAttribute("aria-checked")).toBe("true");
+		expect(container.querySelector("select, [data-slot='select-trigger']")).toBeNull();
+		fireEvent.click(rows[1] as HTMLElement);
+		expect(len()).toBe("8");
+		expect(rows[1]?.getAttribute("aria-checked")).toBe("true");
 	});
 });

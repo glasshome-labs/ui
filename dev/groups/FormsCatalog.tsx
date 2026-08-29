@@ -37,6 +37,7 @@ import {
 	NumberField,
 	OptionCard,
 	OptionCardGroup,
+	OptionChoice,
 	PasswordInput,
 	parseColor,
 	RadioGroup,
@@ -93,6 +94,7 @@ export function FormsCatalog() {
 	const [checked, setChecked] = createSignal(true);
 	const [radio, setRadio] = createSignal("comfortable");
 	const [door, setDoor] = createSignal<string | null>("invite");
+	const [codeLength, setCodeLength] = createSignal<string | undefined>("6");
 	const [switchOn, setSwitchOn] = createSignal(true);
 	const [fieldSwitch, setFieldSwitch] = createSignal(true);
 	const [slider, setSlider] = createSignal([60]);
@@ -247,19 +249,11 @@ export function FormsCatalog() {
 						icon="lucide:key-round"
 						title="Share a code"
 						description="Good for someone standing next to you."
+						subValue={codeLength()}
+						onSubChange={setCodeLength}
 					>
-						<Select
-							options={["Six digits", "Eight digits"]}
-							placeholder="Code length"
-							itemComponent={(itemProps) => (
-								<SelectItem item={itemProps.item}>{itemProps.item.rawValue}</SelectItem>
-							)}
-						>
-							<SelectTrigger>
-								<SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
-							</SelectTrigger>
-							<SelectContent />
-						</Select>
+						<OptionChoice value="6" label="Six digits" hint="Quick to type" />
+						<OptionChoice value="8" label="Eight digits" hint="Harder to guess" />
 					</OptionCard>
 					<OptionCard
 						value="managed"

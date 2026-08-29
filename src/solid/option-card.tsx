@@ -1,11 +1,23 @@
 import { Icon } from "@iconify-icon/solid";
 import { useRadioGroupContext } from "@kobalte/core/radio-group";
-import { children, type JSX, Show } from "solid-js";
+import {
+	children,
+	createContext,
+	createSignal,
+	type JSX,
+	onCleanup,
+	onMount,
+	Show,
+	useContext,
+} from "solid-js";
 import { CARD_SURFACE } from "../lib/card-classes.js";
 import { isNeutralTone, NEUTRAL_KNOBS } from "../lib/glass-tone.js";
+import { STAGGER } from "../lib/motion-classes.js";
 import { cn } from "../lib/utils.js";
 import { Ornament } from "./ornament.js";
+import { PickerRow } from "./picker-row.js";
 import { RadioGroup, RadioGroupItem } from "./radio-group.js";
+import { SlidingIndicator } from "./sliding-indicator.js";
 
 /* The card is the affordance, so the radio's own control is suppressed and the
  * toned surface plus the check ornament carry the picked state; an accented card keeps its own tone at rest. Tone alone (no
@@ -21,7 +33,52 @@ const OPTION_CARD_CHROME = `${CARD_SURFACE} group/option-card relative cursor-po
 const OPTION_CARD_DRAWER =
 	"grid grid-rows-[0fr] transition-[grid-template-rows] duration-(--duration-morph) ease-(--ease-morph) group-data-[checked]/option-card:grid-rows-[1fr]";
 const OPTION_CARD_DRAWER_CONTENT =
-	"-translate-y-2 px-3 pb-3 opacity-0 transition-[opacity,translate] duration-(--duration-expand) ease-(--ease-morph) group-data-[checked]/option-card:translate-y-0 group-data-[checked]/option-card:opacity-100 group-data-[checked]/option-card:delay-[80ms]";
+	"-translate-y-2 flex flex-col gap-0.5 px-1 pb-1 opacity-0 transition-[opacity,translate] duration-(--duration-expand) ease-(--ease-morph) group-data-[checked]/option-card:translate-y-0 group-data-[checked]/option-card:opacity-100 group-data-[checked]/option-card:delay-[80ms]";
+
+/* Sub-options are rows of the card, chosen in place: the same row a picker
+ * list shows, the indicator resting on the current one. The card owns the
+ * value (`subValue` / `onSubChange`); a choice registers so the card knows
+ * it has rows to name as a radiogroup. */
+type ChoiceContext = {
+	subValue: () => string | undefined;
+	pick: (value: string) => void;
+	register: (value: string) => () => void;
+	hovered: () => string | null;
+	setHovered: (value: string | null) => void;
+};
+const OptionChoiceContext = createContext<ChoiceContext>();
+
+export function OptionChoice(props: {
+	value: string;
+	label: string;
+	hint?: string;
+	icon?: string;
+	disabled?: boolean;
+}) {
+	const card = useContext(OptionChoiceContext);
+	if (!card) throw new Error("OptionChoice renders inside an OptionCard");
+	onMount(() => onCleanup(card.register(props.value)));
+	const selected = () => card.subValue() === props.value;
+	const highlighted = () => (card.hovered() ?? card.subValue()) === props.value;
+	return (
+		<PickerRow
+			as="button"
+			type="button"
+			role="radio"
+			aria-checked={selected()}
+			data-slot="option-choice"
+			data-highlighted={highlighted() || undefined}
+			disabled={props.disabled}
+			icon={props.icon}
+			title={props.label}
+			subtitle={props.hint}
+			selected={selected()}
+			multi={false}
+			onMouseEnter={() => card.setHovered(props.value)}
+			onClick={() => !props.disabled && card.pick(props.value)}
+		/>
+	);
+}
 
 export function OptionCardGroup(props: {
 	value: string | null;
@@ -57,12 +114,30 @@ export function OptionCard(props: {
 	onPick?: () => void;
 	disabled?: boolean;
 	class?: string;
-	/** Sub-options. The card grows to reveal them while it is picked. */
+	/** The current sub-option (an OptionChoice value). */
+	subValue?: string;
+	onSubChange?: (value: string) => void;
+	/** Sub-options (OptionChoice rows) or a custom body. The card grows to
+	 *  reveal them while it is picked. */
 	children?: JSX.Element;
 }) {
 	const group = useRadioGroupContext();
 	const checked = () => group.isSelectedValue(props.value);
-	const kids = children(() => props.children);
+	const [choices, setChoices] = createSignal<string[]>([]);
+	const [hovered, setHovered] = createSignal<string | null>(null);
+	const choice: ChoiceContext = {
+		subValue: () => props.subValue,
+		pick: (value) => props.onSubChange?.(value),
+		register: (value) => {
+			setChoices((list) => [...list, value]);
+			return () => setChoices((list) => list.filter((v) => v !== value));
+		},
+		hovered,
+		setHovered,
+	};
+	const kids = children(() => (
+		<OptionChoiceContext.Provider value={choice}>{props.children}</OptionChoiceContext.Provider>
+	));
 	return (
 		<div
 			data-slot="option-card"
@@ -72,14 +147,15 @@ export function OptionCard(props: {
 				props.accentVar ? ({ "--glass-tone": props.accentVar } as JSX.CSSProperties) : undefined
 			}
 		>
-			<Ornament kind={props.ornament ?? "check"} />
 			<RadioGroupItem
 				value={props.value}
 				disabled={props.disabled}
 				showControl={false}
 				onClick={() => !props.disabled && props.onPick?.()}
-				class="w-full cursor-pointer text-left"
+				class="relative w-full cursor-pointer overflow-hidden rounded-[inherit] text-left"
 			>
+				{/* On the header row, not the card: a grown card keeps its rows clear. */}
+				<Ornament kind={props.ornament ?? "check"} />
 				<div data-slot="option-card-row" class="flex w-full items-start gap-3 p-3">
 					<Show when={props.iconImage} fallback={<OptionIcon icon={props.icon} />}>
 						{(src) => (
@@ -106,7 +182,18 @@ export function OptionCard(props: {
 			<Show when={kids.toArray().length > 0}>
 				<div data-slot="option-card-drawer" class={OPTION_CARD_DRAWER}>
 					<div class="min-h-0 overflow-hidden">
-						<div class={OPTION_CARD_DRAWER_CONTENT}>{kids()}</div>
+						<SlidingIndicator
+							role={choices().length > 0 ? "radiogroup" : undefined}
+							aria-label={choices().length > 0 ? `${props.title} options` : undefined}
+							activeSelector="[data-highlighted]"
+							orientation="vertical"
+							indicatorClass="rounded-sm"
+							class={OPTION_CARD_DRAWER_CONTENT}
+							classList={{ [STAGGER]: checked() }}
+							onMouseLeave={() => setHovered(null)}
+						>
+							{kids()}
+						</SlidingIndicator>
 					</div>
 				</div>
 			</Show>

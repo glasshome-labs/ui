@@ -14,7 +14,7 @@ export const PICKER_ROW_HEIGHT = 52;
 
 type PickerRowProps = Omit<ComponentProps<"button">, "title"> & {
 	as?: ValidComponent;
-	icon: string;
+	icon?: string;
 	title: JSX.Element;
 	subtitle?: JSX.Element;
 	meta?: JSX.Element;
@@ -47,17 +47,21 @@ export function PickerRow(props: PickerRowProps) {
 			style={{ "min-height": `${PICKER_ROW_HEIGHT}px` }}
 			{...rest}
 		>
-			<div
-				class={cn(
-					"size-8 rounded-lg",
-					local.selected
-						? `${ICON_PILL_TINT} text-foreground [--glass-tone:var(--primary)]`
-						: ICON_PILL,
-					local.dimmed && "opacity-50",
+			<Show when={local.icon}>
+				{(icon) => (
+					<div
+						class={cn(
+							"size-8 rounded-lg",
+							local.selected
+								? `${ICON_PILL_TINT} text-foreground [--glass-tone:var(--primary)]`
+								: ICON_PILL,
+							local.dimmed && "opacity-50",
+						)}
+					>
+						<Icon icon={icon()} width={18} height={18} />
+					</div>
 				)}
-			>
-				<Icon icon={local.icon} width={18} height={18} />
-			</div>
+			</Show>
 			<div class={cn("min-w-0 flex-1", local.dimmed && "opacity-60")}>
 				<div class="truncate font-medium">{local.title}</div>
 				<Show when={local.subtitle}>
