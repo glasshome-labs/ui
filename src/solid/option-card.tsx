@@ -17,7 +17,6 @@ import { cn } from "../lib/utils.js";
 import { Ornament } from "./ornament.js";
 import { PickerRow } from "./picker-row.js";
 import { RadioGroup, RadioGroupItem } from "./radio-group.js";
-import { SlidingIndicator } from "./sliding-indicator.js";
 
 /* The card is the affordance, so the radio's own control is suppressed and the
  * toned surface plus the check ornament carry the picked state; an accented card keeps its own tone at rest. Tone alone (no
@@ -32,19 +31,23 @@ const OPTION_CARD_CHROME = `${CARD_SURFACE} group/option-card relative cursor-po
  * in behind the growing edge. Nothing appears below the card. */
 const OPTION_CARD_DRAWER =
 	"grid grid-rows-[0fr] transition-[grid-template-rows] duration-(--duration-morph) ease-(--ease-morph) group-data-[checked]/option-card:grid-rows-[1fr]";
+/* Flat: hover is a tint, the current row is the check plus full text colour.
+ * The rows start under the title text (card pad + icon + gap, less the row's own pad). */
+const OPTION_CHOICE_ROW =
+	"rounded-sm text-foreground/75 transition-colors hover:bg-foreground/5 aria-checked:text-foreground";
+
 const OPTION_CARD_DRAWER_CONTENT =
-	"-translate-y-2 flex flex-col gap-0.5 px-1 pb-1 opacity-0 transition-[opacity,translate] duration-(--duration-expand) ease-(--ease-morph) group-data-[checked]/option-card:translate-y-0 group-data-[checked]/option-card:opacity-100 group-data-[checked]/option-card:delay-[80ms]";
+	"-translate-y-2 flex flex-col gap-0.5 pr-1 pb-2 pl-[calc(var(--spacing)*4+20px)] opacity-0 transition-[opacity,translate] duration-(--duration-expand) ease-(--ease-morph) group-data-[checked]/option-card:translate-y-0 group-data-[checked]/option-card:opacity-100 group-data-[checked]/option-card:delay-[80ms]";
 
 /* Sub-options are rows of the card, chosen in place: the same row a picker
- * list shows, the indicator resting on the current one. The card owns the
+ * list shows, flat on the card (a glass pill on a glass card is a layer too
+ * many), the check and text weight marking the current one. The card owns the
  * value (`subValue` / `onSubChange`); a choice registers so the card knows
  * it has rows to name as a radiogroup. */
 type ChoiceContext = {
 	subValue: () => string | undefined;
 	pick: (value: string) => void;
 	register: (value: string) => () => void;
-	hovered: () => string | null;
-	setHovered: (value: string | null) => void;
 };
 const OptionChoiceContext = createContext<ChoiceContext>();
 
@@ -59,7 +62,6 @@ export function OptionChoice(props: {
 	if (!card) throw new Error("OptionChoice renders inside an OptionCard");
 	onMount(() => onCleanup(card.register(props.value)));
 	const selected = () => card.subValue() === props.value;
-	const highlighted = () => (card.hovered() ?? card.subValue()) === props.value;
 	return (
 		<PickerRow
 			as="button"
@@ -67,14 +69,13 @@ export function OptionChoice(props: {
 			role="radio"
 			aria-checked={selected()}
 			data-slot="option-choice"
-			data-highlighted={highlighted() || undefined}
+			class={OPTION_CHOICE_ROW}
 			disabled={props.disabled}
 			icon={props.icon}
 			title={props.label}
 			subtitle={props.hint}
 			selected={selected()}
 			multi={false}
-			onMouseEnter={() => card.setHovered(props.value)}
 			onClick={() => !props.disabled && card.pick(props.value)}
 		/>
 	);
@@ -124,7 +125,6 @@ export function OptionCard(props: {
 	const group = useRadioGroupContext();
 	const checked = () => group.isSelectedValue(props.value);
 	const [choices, setChoices] = createSignal<string[]>([]);
-	const [hovered, setHovered] = createSignal<string | null>(null);
 	const choice: ChoiceContext = {
 		subValue: () => props.subValue,
 		pick: (value) => props.onSubChange?.(value),
@@ -132,8 +132,6 @@ export function OptionCard(props: {
 			setChoices((list) => [...list, value]);
 			return () => setChoices((list) => list.filter((v) => v !== value));
 		},
-		hovered,
-		setHovered,
 	};
 	const kids = children(() => (
 		<OptionChoiceContext.Provider value={choice}>{props.children}</OptionChoiceContext.Provider>
@@ -182,18 +180,14 @@ export function OptionCard(props: {
 			<Show when={kids.toArray().length > 0}>
 				<div data-slot="option-card-drawer" class={OPTION_CARD_DRAWER}>
 					<div class="min-h-0 overflow-hidden">
-						<SlidingIndicator
-							role={choices().length > 0 ? "radiogroup" : undefined}
-							aria-label={choices().length > 0 ? `${props.title} options` : undefined}
-							activeSelector="[data-highlighted]"
-							orientation="vertical"
-							indicatorClass="rounded-sm"
+						<div
+							role={choices().length > 0 ? "radiogroup" : "group"}
+							aria-label={`${props.title} options`}
 							class={OPTION_CARD_DRAWER_CONTENT}
 							classList={{ [STAGGER]: checked() }}
-							onMouseLeave={() => setHovered(null)}
 						>
 							{kids()}
-						</SlidingIndicator>
+						</div>
 					</div>
 				</div>
 			</Show>
