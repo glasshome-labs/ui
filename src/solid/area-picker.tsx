@@ -5,6 +5,7 @@ import { STAGGER } from "../lib/motion-classes.js";
 import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
 import { cn } from "../lib/utils.js";
 import { useEntityData } from "./entity-data.js";
+import { PickerRow } from "./picker-row.js";
 import { PickerSearch } from "./picker-search.js";
 import { Popover, PopoverAnchor, PopoverContent } from "./popover.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
@@ -228,40 +229,20 @@ export function AreaPicker(props: AreaPickerProps) {
 						</Show>
 						<For each={filtered()}>
 							{(area) => (
-								<button
+								<PickerRow
+									as="button"
 									type="button"
 									data-slot="area-picker-row"
 									data-highlighted={highlightedId() === area.id || undefined}
 									aria-pressed={multi() ? isSelected(area.id) : undefined}
-									class={cn(MENU_ITEM, "group w-full cursor-pointer text-left")}
-									classList={{
-										"text-foreground": isSelected(area.id),
-									}}
+									icon={area.icon || "mdi:home-floor-1"}
+									title={area.name}
+									subtitle={`${area.entityCount} ${area.entityCount === 1 ? "entity" : "entities"}`}
+									selected={isSelected(area.id)}
+									multi={multi()}
 									onMouseEnter={() => setHovered(area.id)}
 									onClick={() => (multi() ? toggleArea(area.id) : selectArea(area.id))}
-								>
-									<div class="flex size-[18px] shrink-0 items-center justify-center">
-										<Icon icon={area.icon || "mdi:home-floor-1"} width={18} height={18} />
-									</div>
-									<div class="flex min-w-0 flex-1 flex-col">
-										<span class="truncate font-medium">{area.name}</span>
-									</div>
-									<span
-										class="shrink-0 text-muted-foreground text-xs group-hover:text-foreground/60"
-										classList={{
-											"!text-foreground/60": isSelected(area.id),
-										}}
-									>
-										{area.entityCount} entities
-									</span>
-									<Show when={multi()}>
-										<div class="flex size-4 shrink-0 items-center justify-center">
-											<Show when={isSelected(area.id)}>
-												<Icon icon="lucide:check" width={16} height={16} class="text-primary" />
-											</Show>
-										</div>
-									</Show>
-								</button>
+								/>
 							)}
 						</For>
 					</SlidingIndicator>

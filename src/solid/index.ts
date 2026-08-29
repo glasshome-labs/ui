@@ -299,6 +299,7 @@ export {
 	PaginationPrevious,
 } from "./pagination.js";
 export { PasswordInput } from "./password-input.js";
+export { PICKER_ROW_HEIGHT, PickerRow } from "./picker-row.js";
 export { PickerSearch, type PickerSearchProps } from "./picker-search.js";
 export {
 	Popover,

@@ -10,9 +10,8 @@ import {
 	type ParentComponent,
 	Show,
 } from "solid-js";
-import { MENU_ITEM, MENU_LABEL } from "../lib/menu-classes.js";
+import { MENU_LABEL } from "../lib/menu-classes.js";
 import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
-import { ICON_PILL, ICON_PILL_TINT } from "../lib/pill-classes.js";
 import { createIsMobile } from "../lib/use-is-mobile.js";
 import { cn } from "../lib/utils.js";
 import {
@@ -22,8 +21,8 @@ import {
 	BottomSheetOverlay,
 	BottomSheetPortal,
 } from "./bottom-sheet/index.js";
-import { Checkbox } from "./checkbox.js";
 import { type EntityViewLike, useEntityData } from "./entity-data.js";
+import { PICKER_ROW_HEIGHT, PickerRow } from "./picker-row.js";
 import { PickerSearch } from "./picker-search.js";
 import { Popover, PopoverAnchor, PopoverContent } from "./popover.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
@@ -47,7 +46,7 @@ const DEVICE_CLASS_UNIT_FALLBACK: Record<string, readonly string[]> = {
 };
 
 const HEADER_HEIGHT = 30;
-const ROW_HEIGHT = 52;
+const ROW_HEIGHT = PICKER_ROW_HEIGHT;
 const OVERSCAN_PX = 200;
 const NO_AREA_KEY = "__no_area__";
 const FALLBACK_ICON = "mdi:shape-outline";
@@ -443,65 +442,24 @@ export function EntitySelector(props: EntitySelectorProps) {
 			return v ? stateLabel(v) : "";
 		};
 		return (
-			// A listbox option, not a button: the row carries a real Checkbox, and a
-			// form control inside a <button> is neither valid nor clickable once.
-			// biome-ignore lint/a11y/useFocusableInteractive: options stay unfocusable; the search input owns the roving highlight and the keys.
-			// biome-ignore lint/a11y/useKeyWithClickEvents: same, Enter is handled on the search input.
-			<div
+			<PickerRow
 				role="option"
 				id={optionId(p.entityIndex)}
 				data-slot="entity-selector-row"
 				aria-selected={selected()}
 				data-highlighted={(!isMobile() && activeIndex() === p.entityIndex) || undefined}
-				class={cn(MENU_ITEM, "absolute inset-x-0 cursor-pointer gap-3 py-0")}
+				class="absolute inset-x-0"
 				style={{ top: `${p.top}px`, height: `${ROW_HEIGHT}px` }}
+				icon={view()?.icon ?? FALLBACK_ICON}
+				title={view()?.friendlyName ?? p.id}
+				subtitle={p.id}
+				meta={state()}
+				selected={selected()}
+				multi={!isSingle()}
+				dimmed={unavailable()}
 				onMouseMove={() => setActiveIndex(p.entityIndex)}
 				onClick={() => toggleEntity(p.id)}
-			>
-				<div
-					class={cn(
-						"size-8 rounded-lg",
-						selected()
-							? `${ICON_PILL_TINT} text-foreground [--glass-tone:var(--primary)]`
-							: ICON_PILL,
-						unavailable() && "opacity-50",
-					)}
-				>
-					<Icon icon={view()?.icon ?? FALLBACK_ICON} width={18} height={18} />
-				</div>
-				<div class={cn("min-w-0 flex-1", unavailable() && "opacity-60")}>
-					<div class="truncate font-medium">{view()?.friendlyName ?? p.id}</div>
-					<div class="truncate text-muted-foreground text-xs">{p.id}</div>
-				</div>
-				<span
-					class={cn(
-						"max-w-24 shrink-0 truncate text-muted-foreground text-xs",
-						unavailable() && "italic",
-					)}
-				>
-					{state()}
-				</span>
-				<Show
-					when={isSingle()}
-					fallback={
-						// The row owns the click, so the control is presentation only.
-						<div aria-hidden="true" class="pointer-events-none shrink-0">
-							<Checkbox
-								checked={selected()}
-								disabled
-								size="sm"
-								class="cursor-pointer opacity-100"
-							/>
-						</div>
-					}
-				>
-					<div class="flex size-4 shrink-0 items-center justify-center">
-						<Show when={selected()}>
-							<Icon icon="lucide:check" width={16} height={16} class="text-primary" />
-						</Show>
-					</div>
-				</Show>
-			</div>
+			/>
 		);
 	};
 
