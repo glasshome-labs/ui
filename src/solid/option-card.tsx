@@ -180,6 +180,7 @@ export function OptionCard(props: {
 			<Show when={kids.toArray().length > 0}>
 				<div data-slot="option-card-drawer" class={OPTION_CARD_DRAWER}>
 					<div class="min-h-0 overflow-hidden">
+						{/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: the role is always radiogroup or group, both take aria-label */}
 						<div
 							role={choices().length > 0 ? "radiogroup" : "group"}
 							aria-label={`${props.title} options`}
