@@ -99,7 +99,7 @@ describe("OptionCard", () => {
 		expect(value()).toBeNull();
 	});
 
-	it("renders the children slot outside the radio item", () => {
+	it("renders sub-options inside the card, outside the radio item", () => {
 		const { container, getByTestId } = render(() => (
 			<OptionCardGroup value="person" onChange={() => {}}>
 				<OptionCard value="person" title="A person">
@@ -113,6 +113,14 @@ describe("OptionCard", () => {
 		const slot = getByTestId("slot");
 		expect(container.querySelector('[data-slot="option-card"]')?.contains(slot)).toBe(true);
 		expect(container.querySelector('[data-slot="radio-group-item"]')?.contains(slot)).toBe(false);
+		// Inside the card, in a drawer that morphs the card open on the morph token.
+		const drawer = container.querySelector('[data-slot="option-card-drawer"]');
+		expect(drawer?.contains(slot)).toBe(true);
+		expect(drawer?.className).toContain("grid-rows-[0fr]");
+		expect(drawer?.className).toContain("duration-(--duration-morph)");
+		expect(
+			container.querySelector('[data-slot="option-card"]:not(:has([data-testid]))'),
+		).toBeNull();
 	});
 
 	it("stacks the description under the title inside the card", () => {
@@ -129,7 +137,8 @@ describe("OptionCard", () => {
 		expect(item?.querySelector('[data-slot="option-card-description"]')?.textContent).toBe(
 			"They pick a password.",
 		);
-		expect(item?.className).toContain("data-[checked]:[--glass-tone:var(--primary)]");
+		const card = container.querySelector('[data-slot="option-card"]');
+		expect(card?.className).toContain("data-[checked]:[--glass-tone:var(--primary)]");
 	});
 
 	it("wears the card surface and tints it when picked, never a flat fill", () => {
@@ -139,8 +148,9 @@ describe("OptionCard", () => {
 			</OptionCardGroup>
 		));
 
-		const item = container.querySelector('[data-slot="radio-group-item"]');
-		const className = item?.className ?? "";
+		const card = container.querySelector('[data-slot="option-card"]');
+		const className = card?.className ?? "";
+		expect(card?.hasAttribute("data-checked")).toBe(true);
 		for (const token of CARD_SURFACE.split(" ")) expect(className, token).toContain(token);
 		// .glass-tint would tint the card's own body copy, and mix it toward
 		// `transparent` on every unpicked card.
@@ -190,10 +200,11 @@ describe("OptionCard", () => {
 				<OptionCard value="a" title="A" accentVar="var(--success)" onPick={() => picks++} />
 			</OptionCardGroup>
 		));
-		const card = container.querySelector<HTMLElement>('[data-slot="option-card"] [data-checked]');
+		const card = container.querySelector<HTMLElement>('[data-slot="option-card"][data-checked]');
 		expect(card?.style.getPropertyValue("--glass-tone")).toBe("var(--success)");
-		fireEvent.click(card as HTMLElement);
-		fireEvent.click(card as HTMLElement);
+		const item = card?.querySelector<HTMLElement>('[data-slot="radio-group-item"]');
+		fireEvent.click(item as HTMLElement);
+		fireEvent.click(item as HTMLElement);
 		expect(picks).toBe(2);
 	});
 });

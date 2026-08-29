@@ -121,6 +121,33 @@ In server-run `.astro` frontmatter you cannot import `@glasshome/ui/solid`
 (Solid `template()` throws at module load). Use the `@glasshome/ui/astro`
 components, or the pure recipes/tokens from the root `@glasshome/ui`.
 
+## Motion (the pillar)
+
+Motion is one system, not per-component flair. Four rules, all held by
+`lib/motion-classes.ts`, `.gh-stagger` and the `--glass-*` transition in
+`globals.css`, on the theme tokens `--duration-*` / `--ease-*` (zeroed under
+`prefers-reduced-motion`):
+
+1. **Colours never snap.** A tinted state change (checked, selected, hover, tone
+   swap) morphs on `--duration-state`. Every glass surface gets this from the
+   base rule; a surface that names its own transition says `transition-glass`,
+   never `transition-all` (Chromium's `all` skips registered custom properties).
+2. **Shapes morph, they do not appear.** A thing that opens grows out of what
+   opened it: a picker or menu panel unrolls out of its trigger's box
+   (`MORPH_MOTION`, `FIELD_MOTION`), a dialog rises into place (`MODAL_MOTION`),
+   a card with sub-options grows to reveal them (OptionCard's drawer), an
+   indicator slides and stretches (SlidingIndicator, position bars). Nothing is
+   swapped in below or beside its origin.
+3. **Children arrive one after another.** The rows behind a growing edge stagger
+   in (`STAGGER` = `.gh-stagger`, base 80ms, 60ms per row, capped), so a panel is
+   read top to bottom as it opens. Mount-only: live re-renders never re-stagger.
+4. **Leaving is the same path, faster.** Contract on `--ease-contract` at half
+   the arrival time. Pressables dip (`PRESS_DIP`).
+
+A new component with an open, pick or reveal state uses these doors before it
+gets any motion of its own; a motion need none of them covers is added to
+`motion-classes.ts`, not written inline.
+
 ## Prop language
 
 - `tone` — a CSS **color** string on glass primitives (`Badge`, indicators).

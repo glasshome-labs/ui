@@ -3,8 +3,8 @@ import { ALERT_ICON_BG_CLASS, alertIconBgStyle, iconBgMaskStyle } from "../lib/a
 
 /* The big glyph bleeding out of a card's lower-right corner (HeroAction,
  * HeroOption, OptionCard). "arrow" is always on, in the card's tone, and
- * nudges on hover; "check" is the selection mark: primary, fading in while
- * an ancestor carries data-checked. Absolutely positioned, a sibling of the
+ * nudges on hover; "check" is the selection mark, in the card's tone as
+ * well, fading in while an ancestor carries data-checked. Absolutely positioned, a sibling of the
  * card's row, so it never competes for row gap. */
 export function Ornament(props: { kind: "arrow" | "check" | "none" }) {
 	return (
@@ -33,7 +33,7 @@ export function Ornament(props: { kind: "arrow" | "check" | "none" }) {
 				<span
 					data-slot="ornament-check"
 					class={`${ALERT_ICON_BG_CLASS} opacity-0 transition-opacity duration-(--duration-state) [[data-checked]_&]:opacity-[0.32]`}
-					style={iconBgMaskStyle("var(--primary)")}
+					style={iconBgMaskStyle("var(--surface-tone)")}
 					aria-hidden="true"
 				>
 					<svg
