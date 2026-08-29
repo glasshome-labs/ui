@@ -22,6 +22,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Switch } from "./switch.js";
 
 export interface ExtendedJSONSchema extends JSONSchema7 {
+	/* Nested schemas carry the same extensions, so a whole tree types as one. */
+	properties?: { [key: string]: ExtendedJSONSchema | boolean };
+	items?: ExtendedJSONSchema | (ExtendedJSONSchema | boolean)[] | boolean;
 	/** Explicit control choice from the SDK's field.* helpers. */
 	formType?: string;
 	domain?: string;
