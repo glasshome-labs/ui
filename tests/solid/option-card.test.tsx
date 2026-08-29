@@ -170,4 +170,30 @@ describe("OptionCard", () => {
 		expect(description).toContain("text-sm");
 		expect(description).toContain("text-muted-foreground");
 	});
+
+	it("marks the picked card with the corner ornament, or none when asked", () => {
+		const { container } = render(() => (
+			<OptionCardGroup value="a" onChange={() => {}}>
+				<OptionCard value="a" title="A" />
+				<OptionCard value="b" title="B" ornament="none" />
+			</OptionCardGroup>
+		));
+		const items = container.querySelectorAll('[data-slot="radio-group-item"], [role="radio"]');
+		expect(container.querySelectorAll('[data-slot="ornament-check"]')).toHaveLength(1);
+		expect(items.length).toBeGreaterThan(0);
+	});
+
+	it("keeps an accented card on its own tone and reports every pick, re-picks included", () => {
+		let picks = 0;
+		const { container } = render(() => (
+			<OptionCardGroup value="a" onChange={() => {}}>
+				<OptionCard value="a" title="A" accentVar="var(--success)" onPick={() => picks++} />
+			</OptionCardGroup>
+		));
+		const card = container.querySelector<HTMLElement>('[data-slot="option-card"] [data-checked]');
+		expect(card?.style.getPropertyValue("--glass-tone")).toBe("var(--success)");
+		fireEvent.click(card as HTMLElement);
+		fireEvent.click(card as HTMLElement);
+		expect(picks).toBe(2);
+	});
 });

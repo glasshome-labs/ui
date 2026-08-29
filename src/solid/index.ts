@@ -216,7 +216,7 @@ export {
 	FormMessage,
 	useFormField,
 } from "./form.js";
-export { HeroAction, HeroOption } from "./hero-action.js";
+export { HeroAction } from "./hero-action.js";
 export {
 	HoverCard,
 	HoverCardContent,

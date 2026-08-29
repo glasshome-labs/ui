@@ -1,11 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show } from "solid-js";
-import { glassToneText, isNeutralTone, NEUTRAL_KNOBS, NEUTRAL_TONE } from "../lib/glass-tone.js";
+import { glassToneText, isNeutralTone, NEUTRAL_KNOBS } from "../lib/glass-tone.js";
 import { SECTION_OUTER_RADIUS } from "../lib/section-tokens.js";
 import { cn } from "../lib/utils.js";
 import { Badge } from "./badge.js";
 import { Ornament } from "./ornament.js";
-import { RadioGroupItem } from "./radio-group.js";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip.js";
 
 /* One card for every "pick one of a few big choices" screen: the setup
@@ -114,59 +113,5 @@ export function HeroAction(props: {
 				ornament="arrow"
 			/>
 		</button>
-	);
-}
-
-/** A `HeroAction` used inside `OptionCardGroup` as a persisted, revisable
- *  choice instead of a one-shot navigation button — People's pick-one
- *  dialogs. Radio semantics (role, aria-checked, keyboard nav) come from
- *  `RadioGroupItem`, same accessible door as `OptionCard`. */
-export function HeroOption(props: {
-	value: string;
-	icon: string;
-	iconImage?: string;
-	title: string;
-	description: string;
-	/** Neutral by default — People's pickers don't carry setup's per-option
-	 *  brand colors. */
-	accentVar?: string;
-	/** Drop the tick when picking the card is itself the next step. */
-	ornament?: "check" | "none";
-	/** Fires on every click, including a re-pick of the already-checked card,
-	 *  which `onChange` alone never reports. */
-	onPick?: () => void;
-	disabled?: boolean;
-	/** Content revealed under the card when it's the picked option (e.g. a
-	 *  nested field), same slot `OptionCard` offers. */
-	children?: JSX.Element;
-	class?: string;
-}) {
-	const accentVar = () => props.accentVar ?? NEUTRAL_TONE;
-	return (
-		<div data-slot="hero-option" class="flex min-w-0 flex-col gap-2">
-			<RadioGroupItem
-				value={props.value}
-				disabled={props.disabled}
-				showControl={false}
-				onClick={() => !props.disabled && props.onPick?.()}
-				class={cn(
-					HERO_ACTION_CHROME,
-					isNeutralTone(accentVar()) && NEUTRAL_KNOBS,
-					"min-w-0 cursor-pointer data-[checked]:border-primary",
-					props.class,
-				)}
-				style={{ "--glass-tone": accentVar() } as JSX.CSSProperties}
-			>
-				<HeroActionContent
-					icon={props.icon}
-					iconImage={props.iconImage}
-					title={props.title}
-					description={props.description}
-					accentVar={accentVar()}
-					ornament={props.ornament ?? "check"}
-				/>
-			</RadioGroupItem>
-			{props.children}
-		</div>
 	);
 }

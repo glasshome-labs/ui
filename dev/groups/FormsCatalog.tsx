@@ -22,7 +22,6 @@ import {
 	FormLabel,
 	FormMessage,
 	HeroAction,
-	HeroOption,
 	Input,
 	InputGroup,
 	InputGroupAddon,
@@ -94,7 +93,6 @@ export function FormsCatalog() {
 	const [checked, setChecked] = createSignal(true);
 	const [radio, setRadio] = createSignal("comfortable");
 	const [door, setDoor] = createSignal<string | null>("invite");
-	const [heroDoor, setHeroDoor] = createSignal<string | null>("invite");
 	const [switchOn, setSwitchOn] = createSignal(true);
 	const [fieldSwitch, setFieldSwitch] = createSignal(true);
 	const [slider, setSlider] = createSignal([60]);
@@ -242,6 +240,7 @@ export function FormsCatalog() {
 						icon="lucide:mail"
 						title="Send an invite"
 						description="They set their own password from a link."
+						accentVar="var(--success)"
 					/>
 					<OptionCard
 						value="code"
@@ -289,23 +288,6 @@ export function FormsCatalog() {
 					accentVar="var(--primary)"
 					onClick={() => {}}
 				/>
-			</CatalogItem>
-
-			<CatalogItem name="HeroOption" hint={`value: ${heroDoor() ?? "none"}`} span={2}>
-				<OptionCardGroup value={heroDoor()} onChange={setHeroDoor} aria-label="How they sign in">
-					<HeroOption
-						value="invite"
-						icon="lucide:link-2"
-						title="Invite link"
-						description="They open it and pick a password"
-					/>
-					<HeroOption
-						value="ha"
-						icon="simple-icons:homeassistant"
-						title="Home Assistant sign-in"
-						description="For people who already have a Home Assistant account"
-					/>
-				</OptionCardGroup>
 			</CatalogItem>
 
 			<CatalogItem name="Switch" hint={switchOn() ? "on" : "off"}>
