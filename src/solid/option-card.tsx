@@ -213,3 +213,6 @@ function OptionIcon(props: { icon?: string }) {
 		</Show>
 	);
 }
+
+/** @deprecated OptionCard carries the same props; HeroOption is an alias. */
+export const HeroOption = OptionCard;

@@ -389,7 +389,11 @@ const BottomSheetHandle: Component<ComponentProps<"div">> = (props) => {
 
 /* Only the Body: a titled, footed sheet is a ResponsiveDialog, which renders
  * its own Header and Footer around this same surface. */
-const { Body: BottomSheetBody } = createModalParts("bottom-sheet");
+const {
+	Header: BottomSheetHeader,
+	Body: BottomSheetBody,
+	Footer: BottomSheetFooter,
+} = createModalParts("bottom-sheet");
 
 const BottomSheetTitle: Component<ComponentProps<"h2">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);
@@ -436,13 +440,16 @@ const BottomSheetClose: ParentComponent<SheetButtonProps> = (props) => {
 	);
 };
 
+/** @deprecated the shared modal parts; `BottomSheetHeader` and `BottomSheetFooter` stay as aliases. */
 export {
 	BottomSheet,
 	BottomSheetBody,
 	BottomSheetClose,
 	BottomSheetContent,
 	BottomSheetDescription,
+	BottomSheetFooter,
 	BottomSheetHandle,
+	BottomSheetHeader,
 	BottomSheetOverlay,
 	BottomSheetPortal,
 	BottomSheetTitle,
