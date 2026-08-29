@@ -34,7 +34,7 @@ const Switch: Component<SwitchProps> = (props) => {
 				// Unchecked wears the recessed input surface, the same dug-out glass as
 				// the slider rail; checked matches the slider fill. A `border-input`
 				// utility here would beat `:where(.glass)` and flatten the rim.
-				`group/switch peer relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-xl transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS_RING}`,
+				`group/switch peer relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-xl transition-glass duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS_RING}`,
 				checked() ? "glass glass-tint [--glass-tone:var(--primary)]" : FIELD_CHROME,
 				local.class,
 			)}

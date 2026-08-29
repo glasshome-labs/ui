@@ -31,7 +31,7 @@ export const CARD_PADDING = {
 export type CardPadding = keyof typeof CARD_PADDING;
 
 export const CARD_INTERACTIVE =
-	"cursor-pointer transition-colors duration-200 hover:[--glass-light:0.09] focus-within:[--glass-edge:var(--border)]";
+	"cursor-pointer transition-glass hover:[--glass-light:0.09] focus-within:[--glass-edge:var(--border)]";
 
 export const CARD_HEADER_CLASS =
 	"@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 has-data-[slot=card-action]:grid-cols-[1fr_auto]";

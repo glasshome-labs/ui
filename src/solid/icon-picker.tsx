@@ -386,7 +386,7 @@ export function IconPicker(props: IconPickerProps) {
 									aria-pressed={activeLib() === lib.prefix}
 									class={cn(
 										CHIP,
-										"cursor-pointer transition-colors",
+										"cursor-pointer transition-glass",
 										activeLib() === lib.prefix
 											? "[--glass-tone:var(--primary)]"
 											: "text-muted-foreground [--glass-base:transparent] [--glass-edge:transparent] [--glass-light:0] [--glass-rim:0] hover:text-foreground",
@@ -412,7 +412,7 @@ export function IconPicker(props: IconPickerProps) {
 										type="button"
 										aria-pressed={props.value === icon}
 										class={cn(
-											"mx-auto flex size-11 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-accent",
+											"mx-auto flex size-11 cursor-pointer items-center justify-center rounded-full transition-glass hover:bg-accent",
 											props.value === icon &&
 												`${ICON_PILL_TINT} text-foreground [--glass-tone:var(--primary)] hover:bg-transparent`,
 										)}

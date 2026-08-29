@@ -12,7 +12,7 @@ export const buttonVariants = cva({
 	// structural-ok: the [&_svg]: utilities stay in Tailwind's utility layer so a
 	// caller's own [&_svg]:size-* override can still win; unlayered real CSS in
 	// globals.css would beat every consumer utility regardless of specificity.
-	base: "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium text-sm outline-none transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+	base: "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium text-sm outline-none transition-glass focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
 	variants: {
 		variant: {
 			default:
@@ -48,4 +48,4 @@ export const BUTTON_OUTLINE_CLASS = buttonVariants({ variant: "outline", size: "
 /* Round ghost icon button (copy buttons, small icon actions). Size and text
  * color stay at the call site. */
 export const ICON_BUTTON_CLASS =
-	"inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full transition-all duration-150 hover:bg-primary/10 active:scale-[0.97]";
+	"inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full transition-glass duration-150 hover:bg-primary/10 active:scale-[0.97]";

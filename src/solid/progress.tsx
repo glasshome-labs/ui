@@ -17,7 +17,7 @@ const Progress: Component<
 			<ProgressPrimitive.Track class="h-full w-full">
 				<ProgressPrimitive.Fill
 					data-slot="progress-indicator"
-					class="glass glass-tint h-full w-full flex-1 transition-all"
+					class="glass glass-tint h-full w-full flex-1 transition-glass"
 					style={{
 						"--glass-tone": local.tone ?? "var(--primary)",
 						transform: `translateX(-${100 - (local.value || 0)}%)`,

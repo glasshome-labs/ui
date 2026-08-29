@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "./radio-group.js";
  * colour toward the tone, and toward `transparent` while nothing is picked.
  * Padding lives inside the label, not on the item, so the whole card is a
  * click target. */
-const OPTION_CARD_CHROME = `${CARD_SURFACE} group/option-card cursor-pointer rounded-md transition-all duration-200 hover:[--glass-base:color-mix(in_srgb,var(--card)_80%,transparent)] has-[:focus-visible]:[--glass-edge:var(--ring)] has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50 data-[checked]:[--glass-tone:var(--primary)] data-[checked]:[--glass-edge:color-mix(in_srgb,var(--primary)_45%,transparent)] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50`;
+const OPTION_CARD_CHROME = `${CARD_SURFACE} group/option-card cursor-pointer rounded-md transition-glass duration-200 hover:[--glass-base:color-mix(in_srgb,var(--card)_80%,transparent)] has-[:focus-visible]:[--glass-edge:var(--ring)] has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50 data-[checked]:[--glass-tone:var(--primary)] data-[checked]:[--glass-edge:color-mix(in_srgb,var(--primary)_45%,transparent)] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50`;
 
 export function OptionCardGroup(props: {
 	value: string | null;

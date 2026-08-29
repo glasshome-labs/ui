@@ -33,7 +33,7 @@ const RadioGroupItem: Component<
 					<RadioGroupPrimitive.ItemControl
 						data-slot="radio-group-item-control"
 						class={cn(
-							"relative flex aspect-square size-7 shrink-0 items-center justify-center overflow-hidden rounded-full transition-all duration-200 ease-out active:scale-90",
+							"relative flex aspect-square size-7 shrink-0 items-center justify-center overflow-hidden rounded-full transition-glass duration-200 ease-out active:scale-90",
 							FIELD_CHROME,
 							"peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50 peer-focus-visible:[--glass-edge:var(--ring)]",
 							"data-[disabled]:opacity-40 data-[invalid]:ring-destructive/20 data-[invalid]:[--glass-edge:var(--destructive)]",

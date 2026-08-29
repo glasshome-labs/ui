@@ -56,7 +56,7 @@ export function SectionCard(props: SectionCardProps) {
 				CARD_SURFACE_BASE,
 				SECTION_OUTER_RADIUS,
 				SECTION_PADDING,
-				"relative flex flex-col gap-3 overflow-hidden transition-colors [contain:layout_style_paint] md:gap-4",
+				"relative flex flex-col gap-3 overflow-hidden transition-glass [contain:layout_style_paint] md:gap-4",
 				props.class,
 			)}
 			classList={{ [CARD_BLUR]: !active() }}

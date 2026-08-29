@@ -87,8 +87,29 @@
  * so they reset here instead. MUST stay in @layer base so [--glass-*] utilities
  * and inline style knobs still win. Rim shadows are declared on .glass (not
  * :root) so calc(var(--glass-rim)) resolves per element, not frozen at :root. */
+:root {
+	--glass-transition:
+		--glass-tone, --glass-wash, --glass-light, --glass-shade, --glass-rim, --glass-lift,
+		--glass-glow, --glass-drop, --glass-text, color, background-color, border-color, box-shadow,
+		opacity, transform, translate, scale, width, height;
+}
+
+@layer utilities {
+	.transition-glass {
+		transition-property: var(--glass-transition);
+	}
+}
+
 @layer base {
 	:where(.glass) {
+		/* State never cuts: the registered knobs interpolate, so a tone, wash or
+		 * sheen swap (checked, selected, hover) morphs on the state duration.
+		 * Layered, so a surface that names its own transition keeps it; such a
+		 * surface says transition-glass, never transition-all: Chromium's `all`
+		 * does not cover registered custom properties. */
+		transition-property: var(--glass-transition);
+		transition-duration: var(--duration-state);
+		transition-timing-function: var(--ease-emphasis);
 		--glass-base: var(--card);
 		--glass-edge: color-mix(in srgb, var(--border) 60%, transparent);
 		--glass-rim-raise:
@@ -139,16 +160,6 @@
 	--glass-wash-2: calc(var(--glass-wash) / 3);
 	--glass-wash-angle: 135deg;
 	border: 1px solid var(--glass-edge);
-	/* State never cuts: the registered knobs interpolate, so a tone, wash or
-	 * sheen swap (checked, selected, hover, tone change) morphs on the state
-	 * duration. Unlayered, so it also sets the pace for every glass surface
-	 * that carries a transition utility. */
-	transition-property:
-		--glass-tone, --glass-wash, --glass-light, --glass-shade, --glass-rim, --glass-lift,
-		--glass-glow, --glass-drop, --glass-text, color, background-color, border-color, box-shadow,
-		opacity, transform, translate, scale;
-	transition-duration: var(--duration-state);
-	transition-timing-function: var(--ease-emphasis);
 	/* Base is a gradient layer (not background-color) so the frost slice can sit
 	 * BELOW it — background-color always paints under every image layer, which
 	 * would put the frost above the fill. Layer order top→bottom: grain, light,
@@ -310,7 +321,9 @@
 @keyframes stagger-in {
 	from {
 		opacity: 0;
-		translate: 0 8px;
+		/* Upward: a child of a scroll container must not extend its scrollable
+		 * height mid-animation, and rows trail a downward-growing edge. */
+		translate: 0 -8px;
 	}
 	to {
 		opacity: 1;
