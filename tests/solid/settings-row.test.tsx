@@ -57,6 +57,23 @@ describe("SwitchRow", () => {
 		expect(toggle(container).getAttribute("aria-label")).toBe("Show in Dock");
 	});
 
+	it("toggles when the label text is clicked", () => {
+		const [checked, setChecked] = createSignal(false);
+		const { container } = render(() => (
+			<SwitchRow
+				label="Weekly digest"
+				description="Every Monday."
+				checked={checked()}
+				onChange={setChecked}
+			/>
+		));
+
+		const label = container.querySelector<HTMLLabelElement>("label");
+		expect(label?.getAttribute("for")).toBe(toggle(container).id);
+		fireEvent.click(label as HTMLLabelElement);
+		expect(checked()).toBe(true);
+	});
+
 	it("marks the row disabled and blocks the toggle", () => {
 		const [checked, setChecked] = createSignal(true);
 		const { container } = render(() => (

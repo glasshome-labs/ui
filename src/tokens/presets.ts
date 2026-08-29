@@ -81,7 +81,7 @@ export const THEME_PRESETS: ThemePreset[] = [
 				border: "oklch(0.26 0.012 250)",
 				card: "oklch(0.17 0.01 250)",
 				background: "oklch(0.12 0.01 250)",
-				popover: "oklch(0.19 0.008 250)",
+				popover: "oklch(0.11 0.005 250)",
 				muted: "oklch(0.22 0.02 250)",
 				mutedForeground: "oklch(0.81 0 0)",
 				input: "oklch(0.19 0.01 250)",

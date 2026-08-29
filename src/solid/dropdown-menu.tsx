@@ -1,5 +1,8 @@
 import { DropdownMenu as DropdownMenuPrimitive } from "@kobalte/core/dropdown-menu";
+import { useMenuContext } from "@kobalte/core/menu";
 import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
+import { MORPH_MOTION } from "../lib/motion-classes.js";
+import { anchorToTriggerTop } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 import {
 	MENU_CONTENT_CLASS,
@@ -13,7 +16,15 @@ import {
 	MenuSubTriggerPart,
 } from "./menu-parts.js";
 
-const DropdownMenu = DropdownMenuPrimitive;
+/* The panel covers the trigger (see MORPH_MOTION); statics carried across so
+ * `DropdownMenu.Portal` keeps resolving. */
+const DropdownMenuRoot: Component<ComponentProps<typeof DropdownMenuPrimitive>> = (props) => (
+	<DropdownMenuPrimitive gutter={0} getAnchorRect={anchorToTriggerTop} {...props} />
+);
+const DropdownMenu = Object.assign(DropdownMenuRoot, DropdownMenuPrimitive) as Component<
+	ComponentProps<typeof DropdownMenuPrimitive>
+> &
+	typeof DropdownMenuPrimitive;
 const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
@@ -28,11 +39,27 @@ const DropdownMenuContent: Component<ComponentProps<typeof DropdownMenuPrimitive
 	props,
 ) => {
 	const [local, others] = splitProps(props, ["class", "children"]);
+	const menu = useMenuContext();
+	// The morph starts as the trigger's box: its height and radius are read
+	// from the trigger itself, its width is kobalte's anchor width.
+	const writeMorphStart = (el: HTMLElement) => {
+		const trigger = menu.triggerRef();
+		if (!trigger) return;
+		const height = trigger.getBoundingClientRect().height;
+		// A pill's radius is "infinite"; the rendered one is half its height.
+		const radius = Math.min(
+			Number.parseFloat(getComputedStyle(trigger).borderTopLeftRadius) || 0,
+			height / 2,
+		);
+		el.style.setProperty("--morph-h", `${height}px`);
+		el.style.setProperty("--morph-radius", `${radius}px`);
+	};
 	return (
 		<DropdownMenuPrimitive.Portal>
 			<DropdownMenuPrimitive.Content
+				ref={writeMorphStart}
 				data-slot="dropdown-menu-content"
-				class={cn(MENU_CONTENT_CLASS, local.class)}
+				class={cn(MENU_CONTENT_CLASS, MORPH_MOTION, local.class)}
 				{...others}
 			>
 				<MenuContentIndicator>{local.children}</MenuContentIndicator>

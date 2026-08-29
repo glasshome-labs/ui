@@ -22,6 +22,10 @@ const args = process.argv.slice(2);
 const flag = (name, fallback) => {
 	const i = args.indexOf(`--${name}`);
 	if (i === -1) return fallback;
+	if (fallback === false) {
+		args.splice(i, 1);
+		return true;
+	}
 	const v = args[i + 1];
 	args.splice(i, v !== undefined && !v.startsWith("--") ? 2 : 1);
 	return v !== undefined && !v.startsWith("--") ? v : true;

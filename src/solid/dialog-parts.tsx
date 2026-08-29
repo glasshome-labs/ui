@@ -18,6 +18,7 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { Z_CLASS } from "../lib/layers.js";
+import { MODAL_MOTION, SCRIM_MOTION } from "../lib/motion-classes.js";
 import { OVERLAY_SURFACE, SCRIM_CLASS } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 import { acquireScrollLock, releaseScrollLock } from "./bottom-sheet/scroll-lock.js";
@@ -41,12 +42,26 @@ export const MODAL_WIDTH: Record<ModalSize, string> = {
 	full: "max-w-5xl",
 };
 
+/* Where the panel sits. Up to lg it centres; xl and full (the workbench
+ * dialogs: tabs, steps, editors) hang from the line a full-height panel would
+ * start on, so a body that changes height grows downward instead of
+ * re-centring and jumping. */
+const MODAL_CENTER = "top-1/2 -translate-y-1/2";
+const MODAL_HANG = "top-[calc((100dvh-var(--modal-max-h))/2)] translate-y-0";
+export const MODAL_ANCHOR: Record<ModalSize, string> = {
+	sm: MODAL_CENTER,
+	md: MODAL_CENTER,
+	lg: MODAL_CENTER,
+	xl: MODAL_HANG,
+	full: MODAL_HANG,
+};
+
 /* The panel: it clips, it never scrolls, and it carries no padding. Every inset
  * belongs to Header, Body or Footer, so the Body scrollbar rides inside the
  * panel edge instead of under the header. */
-export const MODAL_PANEL = `${OVERLAY_SURFACE} data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 fixed top-1/2 left-1/2 flex ${MODAL_MAX_H} w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg outline-none ${Z_CLASS.overlay} duration-200 data-[closed]:animate-out data-[expanded]:animate-in`;
+export const MODAL_PANEL = `${OVERLAY_SURFACE} ${MODAL_MOTION} fixed left-1/2 flex ${MODAL_MAX_H} w-[calc(100%-2rem)] -translate-x-1/2 flex-col overflow-hidden rounded-lg outline-none ${Z_CLASS.overlay}`;
 
-export const MODAL_SCRIM = `data-[closed]:fade-out-0 data-[expanded]:fade-in-0 fixed inset-0 ${Z_CLASS.overlay} ${SCRIM_CLASS} data-[closed]:animate-out data-[expanded]:animate-in`;
+export const MODAL_SCRIM = `${SCRIM_MOTION} fixed inset-0 ${Z_CLASS.overlay} ${SCRIM_CLASS}`;
 
 const MODAL_HEADER = "flex shrink-0 items-start gap-4 px-6 pt-6 pb-3";
 const MODAL_HEADER_MEDIA = "flex shrink-0 items-center";
@@ -66,10 +81,10 @@ const MODAL_HEADER_ACTION = "flex shrink-0 items-center gap-2";
  * - The reserved scrollbar lives inside the right inset, so the content column
  *   ends where the Header's and Footer's do. */
 const MODAL_BODY =
-	"gh-scroll flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain [touch-action:pan-y_pinch-zoom] [scrollbar-gutter:stable] pl-6 pr-[calc(var(--spacing)*6-var(--scrollbar-w))] pt-6 pb-6 [[data-slot$='-header']~&]:pt-3 [&:has(~[data-slot$='-footer'])]:pb-3";
+	"gh-scroll gh-stagger flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain [touch-action:pan-y_pinch-zoom] [scrollbar-gutter:stable] pl-6 pr-[calc(var(--spacing)*6-var(--scrollbar-w))] pt-6 pb-6 [[data-slot$='-header']~&]:pt-3 [&:has(~[data-slot$='-footer'])]:pb-3";
 
 const MODAL_FOOTER =
-	"flex shrink-0 flex-col-reverse gap-2 px-6 pt-3 pb-6 sm:flex-row sm:justify-end";
+	"gh-stagger flex shrink-0 flex-col-reverse gap-2 px-6 pt-3 pb-6 sm:flex-row sm:justify-end";
 
 export const MODAL_TITLE = "font-semibold text-foreground text-lg leading-none tracking-tight";
 export const MODAL_DESCRIPTION = "text-muted-foreground text-sm";

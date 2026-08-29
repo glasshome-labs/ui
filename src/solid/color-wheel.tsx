@@ -3,7 +3,7 @@ import type { Color } from "@kobalte/core/colors";
 import type { Component } from "solid-js";
 import { splitProps } from "solid-js";
 import { FOCUS_RING } from "../lib/input-classes.js";
-import { THUMB_CLASS, THUMB_SIZE } from "../lib/thumb-classes.js";
+import { THUMB_CLASS, THUMB_COLOR_RING, THUMB_SIZE } from "../lib/thumb-classes.js";
 import { cn } from "../lib/utils.js";
 
 interface ColorWheelProps {
@@ -63,7 +63,7 @@ const ColorWheel: Component<ColorWheelProps> = (props) => {
 				{/* Always a circle: the thumb rides a circular track, theme corner radius looks broken there. */}
 				<KColorWheel.Thumb
 					data-slot="color-wheel-thumb"
-					class={cn(THUMB_CLASS, FOCUS_RING, "rounded-full")}
+					class={cn(THUMB_CLASS, FOCUS_RING, THUMB_COLOR_RING, "rounded-full")}
 					aria-label={local["aria-label"] ?? "Hue"}
 					style={{ background: "var(--kb-color-current)" }}
 				>

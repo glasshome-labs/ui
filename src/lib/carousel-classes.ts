@@ -1,7 +1,7 @@
 /* Shared by the Solid <Carousel> and astro/Carousel.astro so the two render the
  * same markup. Astro renders slides server-side (SEO, LCP) and enhances them on
  * the client with the same embla engine. */
-import { DOT, DOT_ACTIVE } from "./dot-classes.js";
+import { POSITION_BAR, POSITION_BAR_LIT } from "./position-bar-classes.js";
 
 export type CarouselTransition = "slide" | "fade" | "wipe";
 
@@ -41,5 +41,5 @@ export function carouselItem(
 export const CAROUSEL_DOTS = "flex items-center justify-center gap-2";
 
 export function carouselDot(active: boolean) {
-	return `${DOT} ${active ? DOT_ACTIVE : "hover:bg-foreground/70"}`;
+	return `${POSITION_BAR} ${active ? `w-6 ${POSITION_BAR_LIT}` : "w-2.5 hover:[--glass-light:0.12]"}`;
 }

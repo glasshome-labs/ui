@@ -1,7 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
+import { STAGGER } from "../lib/motion-classes.js";
 import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
-import { CHIP } from "../lib/pill-classes.js";
+import { CHIP, ICON_PILL_TINT } from "../lib/pill-classes.js";
 import { cn } from "../lib/utils.js";
 import { PickerSearch } from "./picker-search.js";
 import { Popover, PopoverAnchor, PopoverContent } from "./popover.js";
@@ -376,7 +377,7 @@ export function IconPicker(props: IconPickerProps) {
 						placeholder="Search icons..."
 						aria-label="Search icons"
 					/>
-					<div class="flex gap-1 overflow-x-auto border-border/50 border-b px-2 py-1.5">
+					<div class="flex flex-wrap gap-1 border-border/50 border-b px-2 py-1.5">
 						<For each={ICON_LIBRARIES}>
 							{(lib) => (
 								<button
@@ -404,13 +405,17 @@ export function IconPicker(props: IconPickerProps) {
 						<Show when={!loading() && search().trim() && displayIcons().length === 0}>
 							<div class="py-4 text-center text-muted-foreground text-sm">No icons found</div>
 						</Show>
-						<div class="grid grid-cols-6 gap-1">
+						<div class={cn("grid grid-cols-6 gap-1", STAGGER)}>
 							<For each={displayIcons()}>
 								{(icon) => (
 									<button
 										type="button"
-										class="flex cursor-pointer flex-col items-center gap-0.5 rounded-md p-2 transition-colors hover:bg-accent"
-										classList={{ "bg-primary/10 text-primary": props.value === icon }}
+										aria-pressed={props.value === icon}
+										class={cn(
+											"mx-auto flex size-11 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-accent",
+											props.value === icon &&
+												`${ICON_PILL_TINT} text-foreground [--glass-tone:var(--primary)] hover:bg-transparent`,
+										)}
 										onClick={() => selectIcon(icon)}
 										title={icon}
 									>
@@ -420,13 +425,6 @@ export function IconPicker(props: IconPickerProps) {
 							</For>
 						</div>
 					</div>
-					<Show when={!search().trim()}>
-						<div class="border-border/50 border-t px-3 py-1.5 text-muted-foreground text-xs">
-							Type to search{" "}
-							{activeLib() ? ICON_LIBRARIES.find((l) => l.prefix === activeLib())?.label : "all"}{" "}
-							icons
-						</div>
-					</Show>
 				</div>
 			</PopoverContent>
 		</Popover>

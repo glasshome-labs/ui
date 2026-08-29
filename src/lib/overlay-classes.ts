@@ -1,15 +1,16 @@
 import { Z_CLASS } from "./layers.js";
 
-/* Rim/sheen raised above card level (0.3/0.05) so the bevel and highlight read
- * on large panels instead of smearing into a flat matte gray. */
+/* Flat frost. No corner sheen: on a panel this size the 120% radial is a
+ * 13-step grey ramp that bands and washes half the surface, so the glass read
+ * comes from the rim line, the blur and the grain instead. */
 const OVERLAY_KNOBS =
-	"glass [--glass-rim:1] [--glass-lift:0.6] [--glass-light:0.05] [--glass-edge:color-mix(in_srgb,var(--border)_90%,transparent)]";
+	"glass glass-frost [--glass-rim:0.5] [--glass-lift:0.6] [--glass-light:0] [--glass-edge:color-mix(in_srgb,var(--border)_90%,transparent)]";
 
 /* Split from the surface the way CARD_BLUR is, so a host can gate it off and
  * paint a precomputed frost instead. */
-export const OVERLAY_BLUR = "backdrop-blur-[var(--glass-blur,20px)] backdrop-saturate-[1.6]";
+export const OVERLAY_BLUR = "backdrop-blur-[var(--glass-blur,24px)] backdrop-saturate-[1.2]";
 
-export const OVERLAY_SURFACE_BASE = `${OVERLAY_KNOBS} [--glass-base:color-mix(in_srgb,var(--popover)_75%,transparent)]`;
+export const OVERLAY_SURFACE_BASE = `${OVERLAY_KNOBS} [--glass-base:color-mix(in_srgb,var(--popover)_92%,transparent)]`;
 
 /* Floating-panel glass: translucent popover fill over a blur, so a menu reads
  * as glass and not as a flat plate. */
@@ -23,14 +24,6 @@ export const OVERLAY_SURFACE_OPAQUE = `${OVERLAY_KNOBS} [--glass-base:var(--popo
 /* Modal scrim behind dialogs/sheets. BottomSheet keeps its own unblurred scrim
  * (backdrop-blur is too slow on mobile). */
 export const SCRIM_CLASS = "bg-background/70 backdrop-blur-md";
-
-/* Anchored panels (menu, popover, hover card) fade and zoom from their side. */
-export const OVERLAY_MOTION =
-	"data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[closed]:animate-out data-[expanded]:animate-in";
-
-/* Paired with gutter={0} + anchorToTriggerTop, the clip-path reveal is what
- * makes a picker panel read as the field expanding, not a box dropping in. */
-export const FIELD_MOTION = "data-[closed]:animate-select-out data-[expanded]:animate-select-in";
 
 /* The floating panel every anchored surface wears. Padding is the caller's:
  * menus add p-1, popovers p-4, pickers none. */

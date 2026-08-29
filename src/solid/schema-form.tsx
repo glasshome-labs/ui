@@ -2,6 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import type { JSONSchema7 } from "json-schema";
 import { createMemo, createSignal, For, Index, Match, Show, Switch as SwitchFlow } from "solid-js";
 import { FIELD_CHROME } from "../lib/input-classes.js";
+import { SETTLE_MOTION } from "../lib/motion-classes.js";
 import { cn } from "../lib/utils.js";
 import { Alert } from "./alert.js";
 import { AreaPicker } from "./area-picker.js";
@@ -750,7 +751,7 @@ function VariantsControl(props: FieldProps) {
 			</Select>
 			<Show when={currentKind()} keyed>
 				{(_kind) => (
-					<div class="fade-in-0 flex animate-in flex-col gap-3 duration-(--duration-state)">
+					<div class={cn(SETTLE_MOTION, "flex flex-col gap-3")}>
 						<For each={branchFields()}>
 							{([subKey, subProp]) => (
 								<LabeledField

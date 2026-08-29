@@ -13,5 +13,9 @@ export const THUMB_CLASS =
 
 /* A rail pads by half a thumb so the knob stays inside the track at both ends;
  * the fill cancels the same inset to reach the rounded edges. */
+/* A thumb painted the live channel colour sits on a track of that same colour,
+ * so it needs its own edge to be found. */
+export const THUMB_COLOR_RING = "border-2 border-white/90";
+
 export const THUMB_RAIL_PAD = "px-3.5";
 export const THUMB_RAIL_BLEED = "-mx-3.5";

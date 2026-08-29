@@ -9,10 +9,18 @@ import {
 	MENU_SEPARATOR,
 } from "../../src/lib/menu-classes.js";
 import {
-	anchorToTriggerTop,
 	FIELD_MOTION,
-	FLOATING_PANEL,
+	MODAL_MOTION,
+	MORPH_MOTION,
 	OVERLAY_MOTION,
+	PRESS_DIP,
+	SCRIM_MOTION,
+	SETTLE_MOTION,
+	STAGGER,
+} from "../../src/lib/motion-classes.js";
+import {
+	anchorToTriggerTop,
+	FLOATING_PANEL,
 	OVERLAY_SURFACE,
 } from "../../src/lib/overlay-classes.js";
 import { CHIP, ICON_PILL } from "../../src/lib/pill-classes.js";
@@ -47,6 +55,23 @@ describe("floating panel recipe", () => {
 	it("motion strings are exported once", () => {
 		expect(OVERLAY_MOTION).toContain("data-[expanded]:animate-in");
 		expect(FIELD_MOTION).toContain("data-[expanded]:animate-select-in");
+	});
+});
+
+describe("motion vocabulary", () => {
+	it("arrives by growing, leaves faster, on theme tokens only", () => {
+		expect(OVERLAY_MOTION).toContain("origin-(--kb-popper-content-transform-origin)");
+		expect(OVERLAY_MOTION).toContain("data-[expanded]:zoom-in-90");
+		expect(MODAL_MOTION).toContain("data-[expanded]:zoom-in-[0.94]");
+		expect(MODAL_MOTION).toContain("data-[expanded]:slide-in-from-bottom-2");
+		expect(SETTLE_MOTION).toContain("animate-in");
+		for (const recipe of [OVERLAY_MOTION, MODAL_MOTION, SCRIM_MOTION, SETTLE_MOTION]) {
+			expect(recipe).not.toMatch(/duration-\d/);
+			expect(recipe).toContain("duration-(--duration-");
+		}
+		expect(MORPH_MOTION).toContain("data-[expanded]:animate-morph-in");
+		expect(STAGGER).toBe("gh-stagger");
+		expect(PRESS_DIP).toBe("active:scale-[0.97]");
 	});
 
 	it("anchorToTriggerTop returns a zero-height rect on the trigger's top edge", () => {

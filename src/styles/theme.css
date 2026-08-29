@@ -58,8 +58,15 @@
 	 * exposes no data-side, only --kb-select-content-transform-origin (set to the
 	 * trigger edge per placement), so a scaleY from that origin grows the panel
 	 * down when it opens below and up when above, no direction class needed. */
-	--animate-select-in: select-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
-	--animate-select-out: select-out 0.12s ease-in both;
+	--animate-select-in: select-in var(--duration-expand) var(--ease-expand) both;
+	--animate-select-out: select-out var(--duration-micro) var(--ease-contract) both;
+
+	/* Trigger morph: the panel is anchored over the trigger's top edge and starts
+	 * clipped to the trigger's own box and radius (--morph-w/h/radius, written by
+	 * the content from its trigger), then unrolls into its own box. The pill
+	 * becomes the panel; nothing scales, so no row or radius distorts. */
+	--animate-morph-in: morph-in var(--duration-morph) var(--ease-morph) both;
+	--animate-morph-out: morph-out calc(var(--duration-morph) / 2) var(--ease-contract) both;
 }
 
 @keyframes collapsible-down {
@@ -102,6 +109,40 @@
 		opacity: 1;
 		clip-path: inset(0 0 0 0 round var(--radius-md));
 		pointer-events: auto;
+	}
+}
+@keyframes morph-in {
+	from {
+		opacity: 0;
+		clip-path: inset(
+			0 calc(100% - var(--morph-w, 100%)) calc(100% - var(--morph-h, 2.5rem)) 0 round
+				var(--morph-radius, 9999px)
+		);
+		pointer-events: none;
+	}
+	35% {
+		opacity: 1;
+	}
+	90% {
+		pointer-events: none;
+	}
+	to {
+		opacity: 1;
+		clip-path: inset(0 0 0 0 round var(--radius-md));
+		pointer-events: auto;
+	}
+}
+@keyframes morph-out {
+	from {
+		opacity: 1;
+		clip-path: inset(0 0 0 0 round var(--radius-md));
+	}
+	to {
+		opacity: 0;
+		clip-path: inset(
+			0 calc(100% - var(--morph-w, 100%)) calc(100% - var(--morph-h, 2.5rem)) 0 round
+				var(--morph-radius, 9999px)
+		);
 	}
 }
 @keyframes select-out {
@@ -185,6 +226,13 @@
 	 * border change, state a tone or chip swap, expand an open/close. Theme
 	 * independent, so declared once; zeroed under prefers-reduced-motion. */
 	--ease-emphasis: cubic-bezier(0.22, 1, 0.36, 1);
+	/* Arrivals overshoot-free and quick to settle; departures fall away. */
+	--ease-expand: cubic-bezier(0.16, 1, 0.3, 1);
+	--ease-contract: cubic-bezier(0.4, 0, 1, 1);
+	/* A morph is a shape becoming another shape: slower than an arrival, and it
+	 * leaves the start shape gently instead of snapping out of it. */
+	--duration-morph: 400ms;
+	--ease-morph: cubic-bezier(0.32, 0.72, 0, 1);
 	--duration-micro: 120ms;
 	--duration-state: 160ms;
 	--duration-expand: 200ms;
@@ -195,7 +243,7 @@
 	--foreground: oklch(0.9551 0 0);
 	--card: oklch(0.17 0.01 250);
 	--card-foreground: oklch(0.9551 0 0);
-	--popover: oklch(0.19 0.008 250);
+	--popover: oklch(0.11 0.005 250);
 	--popover-foreground: oklch(0.9551 0 0);
 	--primary: oklch(0.48 0.2 215.221);
 	--primary-foreground: oklch(1 0 0);
@@ -457,6 +505,12 @@
 		--duration-micro: 0ms;
 		--duration-state: 0ms;
 		--duration-expand: 0ms;
+		--duration-morph: 0ms;
+	}
+	/* tw-animate enter/exit classes carry their own fallback duration. */
+	.animate-in,
+	.animate-out {
+		--tw-animation-duration: 1ms;
 	}
 }
 

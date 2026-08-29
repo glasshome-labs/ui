@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show } from "solid-js";
 import { ALERT_ICON_BG_CLASS, alertIconBgStyle } from "../lib/alert-tones.js";
-import { glassToneText } from "../lib/glass-tone.js";
+import { glassToneText, isNeutralTone, NEUTRAL_KNOBS, NEUTRAL_TONE } from "../lib/glass-tone.js";
 import { SECTION_OUTER_RADIUS } from "../lib/section-tokens.js";
 import { cn } from "../lib/utils.js";
 import { Badge } from "./badge.js";
@@ -131,7 +131,7 @@ export function HeroAction(props: {
 			data-slot="hero-action"
 			onClick={() => !props.disabled && props.onClick()}
 			disabled={props.disabled}
-			class={cn(HERO_ACTION_CHROME, props.class)}
+			class={cn(HERO_ACTION_CHROME, isNeutralTone(props.accentVar) && NEUTRAL_KNOBS, props.class)}
 			style={{ "--glass-tone": props.accentVar } as JSX.CSSProperties}
 		>
 			<HeroActionContent
@@ -172,7 +172,7 @@ export function HeroOption(props: {
 	children?: JSX.Element;
 	class?: string;
 }) {
-	const accentVar = () => props.accentVar ?? "var(--muted-foreground)";
+	const accentVar = () => props.accentVar ?? NEUTRAL_TONE;
 	return (
 		<div data-slot="hero-option" class="flex min-w-0 flex-col gap-2">
 			<RadioGroupItem
@@ -182,6 +182,7 @@ export function HeroOption(props: {
 				onClick={() => !props.disabled && props.onPick?.()}
 				class={cn(
 					HERO_ACTION_CHROME,
+					isNeutralTone(accentVar()) && NEUTRAL_KNOBS,
 					"min-w-0 cursor-pointer data-[checked]:border-primary",
 					props.class,
 				)}

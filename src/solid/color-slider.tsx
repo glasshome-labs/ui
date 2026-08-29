@@ -3,7 +3,7 @@ import type { Color, ColorChannel } from "@kobalte/core/colors";
 import type { Component } from "solid-js";
 import { splitProps } from "solid-js";
 import { FOCUS_RING } from "../lib/input-classes.js";
-import { THUMB_CLASS, THUMB_RAIL_PAD } from "../lib/thumb-classes.js";
+import { THUMB_CLASS, THUMB_COLOR_RING, THUMB_RAIL_PAD } from "../lib/thumb-classes.js";
 import { cn } from "../lib/utils.js";
 
 interface ColorSliderProps {
@@ -81,6 +81,7 @@ const ColorSlider: Component<ColorSliderProps> = (props) => {
 					class={cn(
 						THUMB_CLASS,
 						FOCUS_RING,
+						THUMB_COLOR_RING,
 						"absolute top-0",
 						local.disabled && "cursor-not-allowed",
 					)}

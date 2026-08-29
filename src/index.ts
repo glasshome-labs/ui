@@ -40,7 +40,6 @@ export {
 	carouselItem,
 	carouselTrack,
 } from "./lib/carousel-classes.js";
-export { DOT, DOT_ACTIVE } from "./lib/dot-classes.js";
 export { glassToneText, toneTextMix } from "./lib/glass-tone.js";
 export {
 	CONTROL_H,
@@ -74,11 +73,19 @@ export {
 	MENU_SEPARATOR,
 } from "./lib/menu-classes.js";
 export {
-	anchorToTriggerTop,
 	FIELD_MOTION,
+	MODAL_MOTION,
+	MORPH_MOTION,
+	OVERLAY_MOTION,
+	PRESS_DIP,
+	SCRIM_MOTION,
+	SETTLE_MOTION,
+	STAGGER,
+} from "./lib/motion-classes.js";
+export {
+	anchorToTriggerTop,
 	FLOATING_PANEL,
 	OVERLAY_BLUR,
-	OVERLAY_MOTION,
 	OVERLAY_SURFACE,
 	OVERLAY_SURFACE_BASE,
 	OVERLAY_SURFACE_OPAQUE,
@@ -86,6 +93,7 @@ export {
 } from "./lib/overlay-classes.js";
 export { CONTROL_H_TOUCH, PICKER_LIST, PICKER_TRIGGER } from "./lib/picker-classes.js";
 export { CHIP, ICON_PILL, ICON_PILL_TINT } from "./lib/pill-classes.js";
+export { POSITION_BAR, POSITION_BAR_LIT } from "./lib/position-bar-classes.js";
 export {
 	SECTION_INNER_RADIUS,
 	SECTION_OUTER_RADIUS,

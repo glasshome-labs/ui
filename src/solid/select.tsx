@@ -4,13 +4,14 @@ import { type Component, type ComponentProps, type ParentComponent, splitProps }
 import { CONTROL_H, INPUT_SURFACE } from "../lib/input-classes.js";
 import { Z_CLASS } from "../lib/layers.js";
 import { MENU_ITEM, MENU_LABEL, MENU_SEPARATOR } from "../lib/menu-classes.js";
-import { anchorToTriggerTop, FIELD_MOTION } from "../lib/overlay-classes.js";
+import { FIELD_MOTION, STAGGER } from "../lib/motion-classes.js";
+import { anchorToTriggerTop } from "../lib/overlay-classes.js";
 import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
 import { cn } from "../lib/utils.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
 
 const Select = ((props: ComponentProps<typeof SelectPrimitive>) => (
-	<SelectPrimitive gutter={0} getAnchorRect={anchorToTriggerTop} {...props} />
+	<SelectPrimitive gutter={0} getAnchorRect={anchorToTriggerTop} flip={false} overlap {...props} />
 )) as typeof SelectPrimitive;
 const SelectValue = SelectPrimitive.Value;
 
@@ -70,7 +71,7 @@ const SelectContent: ParentComponent<
 					indicatorClass="rounded-sm"
 					class={cn("w-full", PICKER_LIST)}
 				>
-					<SelectPrimitive.Listbox class={cn(local.listboxClass)} />
+					<SelectPrimitive.Listbox class={cn(STAGGER, local.listboxClass)} />
 				</SlidingIndicator>
 			</SelectPrimitive.Content>
 		</SelectPrimitive.Portal>

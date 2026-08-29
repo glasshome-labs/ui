@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
-import { type JSX, Show } from "solid-js";
+import { createUniqueId, type JSX, Show } from "solid-js";
 import { Button } from "./button.js";
-import { Field, FieldContent, FieldDescription, FieldTitle } from "./field.js";
+import { Field, FieldContent, FieldDescription, FieldLabel } from "./field.js";
 import { IconPicker, type IconPickerProps } from "./icon-picker.js";
 import { Input } from "./input.js";
 import { Switch } from "./switch.js";
@@ -112,6 +112,7 @@ export function SwitchRow(props: {
 	disabled?: boolean;
 	onChange: (value: boolean) => void;
 }) {
+	const id = createUniqueId();
 	return (
 		<Field
 			orientation="horizontal"
@@ -129,15 +130,25 @@ export function SwitchRow(props: {
 					/>
 				)}
 			</Show>
-			<Show when={props.description} fallback={<FieldTitle>{props.label}</FieldTitle>}>
+			<Show
+				when={props.description}
+				fallback={
+					<FieldLabel for={id} class="cursor-pointer">
+						{props.label}
+					</FieldLabel>
+				}
+			>
 				{(description) => (
 					<FieldContent>
-						<FieldTitle>{props.label}</FieldTitle>
+						<FieldLabel for={id} class="cursor-pointer">
+							{props.label}
+						</FieldLabel>
 						<FieldDescription class="text-xs">{description()}</FieldDescription>
 					</FieldContent>
 				)}
 			</Show>
 			<Switch
+				id={id}
 				checked={props.checked}
 				disabled={props.disabled}
 				onChange={props.onChange}

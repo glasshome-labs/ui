@@ -7,6 +7,7 @@ import { cn } from "../lib/utils.js";
 import {
 	createModalDismiss,
 	createModalParts,
+	MODAL_ANCHOR,
 	MODAL_DESCRIPTION,
 	MODAL_PANEL,
 	MODAL_SCRIM,
@@ -55,7 +56,12 @@ const AlertDialogContent: ParentComponent<AlertDialogContentProps> = (props) => 
 				data-slot="alert-dialog-content"
 				role="alertdialog"
 				aria-label={context.titleId() ? undefined : local.ariaLabel}
-				class={cn(MODAL_PANEL, MODAL_WIDTH[local.size ?? "md"], local.class)}
+				class={cn(
+					MODAL_PANEL,
+					MODAL_WIDTH[local.size ?? "md"],
+					MODAL_ANCHOR[local.size ?? "md"],
+					local.class,
+				)}
 				{...rest}
 			>
 				{local.children}

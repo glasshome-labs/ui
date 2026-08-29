@@ -21,3 +21,11 @@ export function toneTextMix(color: string): number {
 export function glassToneText(color: string): string {
 	return `color-mix(in oklab, ${color} ${toneTextMix(color)}%, var(--foreground))`;
 }
+
+/* The neutral tone every "no verdict" surface passes (neutral badges,
+ * HeroOption's default accent). Through the tint formula a light grey tone
+ * lifts the fill to the same grey as its text, so a neutral surface sinks
+ * its wash to keep the text on a deeper ground. */
+export const NEUTRAL_TONE = "var(--muted-foreground)";
+export const NEUTRAL_KNOBS = "[--glass-wash:12%]";
+export const isNeutralTone = (tone: string | undefined) => tone === NEUTRAL_TONE;

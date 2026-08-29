@@ -1,5 +1,6 @@
 import { type Component, type ComponentProps, splitProps } from "solid-js";
-import { FLOATING_PANEL, OVERLAY_MOTION } from "../lib/overlay-classes.js";
+import { OVERLAY_MOTION } from "../lib/motion-classes.js";
+import { FLOATING_PANEL } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 
 /* The floating glass panel material, for custom floating surfaces that are not

@@ -1,6 +1,7 @@
 import { Tooltip as TooltipPrimitive } from "@kobalte/core/tooltip";
 import { type Component, type ComponentProps, splitProps } from "solid-js";
-import { FLOATING_PANEL, OVERLAY_MOTION } from "../lib/overlay-classes.js";
+import { OVERLAY_MOTION } from "../lib/motion-classes.js";
+import { FLOATING_PANEL } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 
 /* Kobalte takes the popper options on the root, not on the content, so the

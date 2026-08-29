@@ -1,5 +1,6 @@
 import { ContextMenu as ContextMenuPrimitive } from "@kobalte/core/context-menu";
 import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
+import { OVERLAY_MOTION } from "../lib/motion-classes.js";
 import { cn } from "../lib/utils.js";
 import {
 	MENU_CONTENT_CLASS,
@@ -40,7 +41,12 @@ const ContextMenuContent: Component<ComponentProps<typeof ContextMenuPrimitive.C
 		<ContextMenuPrimitive.Portal>
 			<ContextMenuPrimitive.Content
 				data-slot="context-menu-content"
-				class={cn(MENU_CONTENT_CLASS, "overflow-y-auto overflow-x-hidden", local.class)}
+				class={cn(
+					MENU_CONTENT_CLASS,
+					OVERLAY_MOTION,
+					"overflow-y-auto overflow-x-hidden",
+					local.class,
+				)}
 				{...rest}
 			>
 				<MenuContentIndicator>{local.children}</MenuContentIndicator>

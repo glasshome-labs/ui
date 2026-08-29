@@ -17,7 +17,7 @@ vi.mock("@iconify-icon/solid", () => ({
 }));
 
 import { FIELD_CHROME, FOCUS_RING } from "../../src/lib/input-classes.js";
-import { THUMB_CLASS } from "../../src/lib/thumb-classes.js";
+import { THUMB_CLASS, THUMB_COLOR_RING } from "../../src/lib/thumb-classes.js";
 import { Checkbox } from "../../src/solid/checkbox.js";
 import { ColorSlider } from "../../src/solid/color-slider.js";
 import { ColorWheel } from "../../src/solid/color-wheel.js";
@@ -93,6 +93,23 @@ describe("one thumb", () => {
 		] as const) {
 			expectTokens(actual, THUMB_CLASS, `${label} thumb`);
 		}
+	});
+
+	it("gives the colour thumbs their own edge, since they sit on their own colour", () => {
+		const slider = render(() => (
+			<ColorSlider channel="hue" defaultValue={parseColor("hsl(200, 98%, 39%)")} />
+		));
+		const wheel = render(() => <ColorWheel />);
+		expectTokens(
+			classOf(slider.container, '[data-slot="color-slider-thumb"]'),
+			THUMB_COLOR_RING,
+			"colour slider thumb",
+		);
+		expectTokens(
+			classOf(wheel.container, '[data-slot="color-wheel-thumb"]'),
+			THUMB_COLOR_RING,
+			"wheel thumb",
+		);
 	});
 
 	it("keeps the colour wheel on the same recipe, circular", () => {

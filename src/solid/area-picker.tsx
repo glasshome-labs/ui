@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { MENU_ITEM } from "../lib/menu-classes.js";
+import { STAGGER } from "../lib/motion-classes.js";
 import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
 import { cn } from "../lib/utils.js";
 import { useEntityData } from "./entity-data.js";
@@ -188,7 +189,7 @@ export function AreaPicker(props: AreaPickerProps) {
 						activeSelector="[data-highlighted]"
 						orientation="vertical"
 						indicatorClass="rounded-sm"
-						class={cn("flex flex-col gap-0.5 p-1", PICKER_LIST)}
+						class={cn("flex flex-col gap-0.5 p-1", STAGGER, PICKER_LIST)}
 						onMouseLeave={() => setHovered(null)}
 					>
 						<Show when={filtered().length === 0 && missing().length === 0}>

@@ -318,9 +318,18 @@ export function OverlaysCatalog() {
 								wrap
 								action={
 									<TabsList class="w-auto">
-										<TabsTrigger value="controls">Controls</TabsTrigger>
-										<TabsTrigger value="edit">Edit</TabsTrigger>
-										<TabsTrigger value="debug">Debug</TabsTrigger>
+										<TabsTrigger value="controls">
+											<Icon icon="lucide:sliders-horizontal" width={14} height={14} />
+											Controls
+										</TabsTrigger>
+										<TabsTrigger value="edit">
+											<Icon icon="lucide:pencil" width={14} height={14} />
+											Edit
+										</TabsTrigger>
+										<TabsTrigger value="debug">
+											<Icon icon="lucide:bug" width={14} height={14} />
+											Debug
+										</TabsTrigger>
 									</TabsList>
 								}
 							>

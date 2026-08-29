@@ -1,6 +1,7 @@
 import { Tabs as TabsPrimitive } from "@kobalte/core/tabs";
 import { type Component, type ComponentProps, splitProps } from "solid-js";
 import { TRACK_SURFACE } from "../lib/card-classes.js";
+import { PRESS_DIP, SETTLE_MOTION } from "../lib/motion-classes.js";
 import { SEGMENT_ITEM } from "../lib/segment-classes.js";
 import { cn } from "../lib/utils.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
@@ -56,7 +57,12 @@ const TabsTrigger: Component<ComponentProps<typeof TabsPrimitive.Trigger>> = (pr
 	return (
 		<TabsPrimitive.Trigger
 			data-slot="tabs-trigger"
-			class={cn(SEGMENT_ITEM, "hover:text-primary/80 data-[selected]:text-primary", local.class)}
+			class={cn(
+				SEGMENT_ITEM,
+				PRESS_DIP,
+				"hover:text-primary/80 data-[selected]:text-primary",
+				local.class,
+			)}
 			{...others}
 		/>
 	);
@@ -68,6 +74,7 @@ const TabsContent: Component<ComponentProps<typeof TabsPrimitive.Content>> = (pr
 		<TabsPrimitive.Content
 			data-slot="tabs-content"
 			class={cn(
+				SETTLE_MOTION,
 				"outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
 				local.class,
 			)}

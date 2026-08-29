@@ -6,6 +6,7 @@ import { cn } from "../lib/utils.js";
 import {
 	createModalDismiss,
 	createModalParts,
+	MODAL_ANCHOR,
 	MODAL_DESCRIPTION,
 	MODAL_PANEL,
 	MODAL_SCRIM,
@@ -67,7 +68,12 @@ const DialogContent: ParentComponent<DialogContentProps> = (props) => {
 				data-slot="dialog-content"
 				role="dialog"
 				aria-label={context.titleId() ? undefined : local.ariaLabel}
-				class={cn(MODAL_PANEL, MODAL_WIDTH[local.size ?? "lg"], local.class)}
+				class={cn(
+					MODAL_PANEL,
+					MODAL_WIDTH[local.size ?? "lg"],
+					MODAL_ANCHOR[local.size ?? "lg"],
+					local.class,
+				)}
 				{...others}
 			>
 				{local.children}

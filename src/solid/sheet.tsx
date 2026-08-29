@@ -10,6 +10,7 @@ import {
 } from "solid-js";
 import { buttonVariants } from "../lib/button-variants.js";
 import { Z_CLASS } from "../lib/layers.js";
+import { SCRIM_MOTION } from "../lib/motion-classes.js";
 import { OVERLAY_SURFACE, SCRIM_CLASS } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 import {
@@ -59,7 +60,7 @@ const SheetOverlay: Component<ComponentProps<typeof DialogPrimitive.Overlay>> = 
 		<DialogPrimitive.Overlay
 			data-slot="sheet-overlay"
 			class={cn(
-				`data-[closed]:fade-out-0 data-[expanded]:fade-in-0 pointer-events-auto fixed inset-0 select-none ${Z_CLASS.overlay} ${SCRIM_CLASS} data-[closed]:animate-out data-[expanded]:animate-in`,
+				`${SCRIM_MOTION} pointer-events-auto fixed inset-0 select-none ${Z_CLASS.overlay} ${SCRIM_CLASS}`,
 				local.class,
 			)}
 			{...rest}

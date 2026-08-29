@@ -12,6 +12,7 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { CARD_SURFACE } from "../lib/card-classes.js";
+import { PRESS_DIP } from "../lib/motion-classes.js";
 import { cn } from "../lib/utils.js";
 import { Badge } from "./badge.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
@@ -51,7 +52,8 @@ const DockIconButton: Component<DockIconButtonProps> = (props) => {
 				type="button"
 				data-slot="dock-item"
 				class={cn(
-					"group relative flex size-11 touch-manipulation items-center justify-center rounded-lg sm:size-12",
+					"group relative flex size-11 touch-manipulation items-center justify-center rounded-lg transition-transform duration-(--duration-micro) sm:size-12",
+					PRESS_DIP,
 					local.class,
 				)}
 				aria-label={local.label}
@@ -80,7 +82,7 @@ const DockIconButton: Component<DockIconButtonProps> = (props) => {
 					<Badge
 						role="status"
 						tone="var(--primary)"
-						class="absolute top-0 right-0 h-4 min-w-4 justify-center px-1 py-0 font-semibold text-[10px]"
+						class="absolute top-0 right-0 h-4 min-w-4 justify-center px-1 pt-0.5 pb-0 font-medium font-mono text-[9px] tabular-nums leading-none"
 						aria-label={`${local.badge} pending`}
 					>
 						{local.badge != null && local.badge > 9 ? "9+" : local.badge}

@@ -1,4 +1,4 @@
-import { Popover as PopoverPrimitive } from "@kobalte/core/popover";
+import { Popover as PopoverPrimitive, usePopoverContext } from "@kobalte/core/popover";
 import {
 	type Component,
 	type ComponentProps,
@@ -8,12 +8,8 @@ import {
 } from "solid-js";
 import { INPUT_SURFACE } from "../lib/input-classes.js";
 import { Z_CLASS } from "../lib/layers.js";
-import {
-	anchorToTriggerTop,
-	FIELD_MOTION,
-	FLOATING_PANEL,
-	OVERLAY_MOTION,
-} from "../lib/overlay-classes.js";
+import { FIELD_MOTION, MORPH_MOTION, STAGGER } from "../lib/motion-classes.js";
+import { anchorToTriggerTop, FLOATING_PANEL } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
 
 type PopoverSurface = "overlay" | "field";
@@ -27,7 +23,7 @@ const PopoverSurfaceContext = createContext<() => PopoverSurface>(
  * by the panel, so the panel edge and the trigger edge are one rectangle. */
 const FIELD_PANEL = `${INPUT_SURFACE} ${FIELD_MOTION} relative ${Z_CLASS.overlay} w-[var(--kb-popper-anchor-width)] overflow-hidden rounded-md text-popover-foreground outline-hidden`;
 
-const OVERLAY_PANEL = `${FLOATING_PANEL} ${OVERLAY_MOTION} w-72 p-4`;
+const OVERLAY_PANEL = `${FLOATING_PANEL} ${MORPH_MOTION} ${STAGGER} w-72 p-4`;
 
 type PopoverProps = ComponentProps<typeof PopoverPrimitive> & {
 	/** "field" anchors the panel over the trigger's top edge, so the field reads
@@ -38,12 +34,13 @@ type PopoverProps = ComponentProps<typeof PopoverPrimitive> & {
 const PopoverRoot: Component<PopoverProps> = (props) => {
 	const [local, rest] = splitProps(props, ["surface", "gutter", "getAnchorRect"]);
 	const surface = () => local.surface ?? "overlay";
-	const field = () => surface() === "field";
 	return (
 		<PopoverSurfaceContext.Provider value={surface}>
 			<PopoverPrimitive
-				gutter={local.gutter ?? (field() ? 0 : undefined)}
-				getAnchorRect={local.getAnchorRect ?? (field() ? anchorToTriggerTop : undefined)}
+				gutter={local.gutter ?? 0}
+				getAnchorRect={local.getAnchorRect ?? anchorToTriggerTop}
+				flip={false}
+				overlap
 				{...rest}
 			/>
 		</PopoverSurfaceContext.Provider>
@@ -72,9 +69,24 @@ const PopoverContent: Component<PopoverContentProps> = (props) => {
 	const [local, rest] = splitProps(props, ["class", "surface"]);
 	const fromRoot = useContext(PopoverSurfaceContext);
 	const surface = () => local.surface ?? fromRoot();
+	const popover = usePopoverContext();
+	// The morph starts as the trigger's box (pill radius clamped to h/2). A
+	// field picker has an Anchor, not a Trigger, and keeps its clip reveal.
+	const writeMorphStart = (el: HTMLElement) => {
+		const trigger = popover.triggerRef();
+		if (!trigger || surface() === "field") return;
+		const height = trigger.getBoundingClientRect().height;
+		const radius = Math.min(
+			Number.parseFloat(getComputedStyle(trigger).borderTopLeftRadius) || 0,
+			height / 2,
+		);
+		el.style.setProperty("--morph-h", `${height}px`);
+		el.style.setProperty("--morph-radius", `${radius}px`);
+	};
 	return (
 		<PopoverPrimitive.Portal>
 			<PopoverPrimitive.Content
+				ref={writeMorphStart}
 				data-slot="popover-content"
 				data-surface={surface()}
 				class={cn(surface() === "field" ? FIELD_PANEL : OVERLAY_PANEL, local.class)}
