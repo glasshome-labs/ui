@@ -57,5 +57,7 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
       - run: node -e "await import('./dist/index.js'); await import('./dist/tokens/index.js')"
         if: ${{ steps.release.outputs.release_created }}
-      - run: npm publish --provenance --access public
+      # Explicit --tag: 2.0.0 was published in error and cannot be unpublished,
+      # so npm refuses to move "latest" implicitly onto a lower version.
+      - run: npm publish --provenance --access public --tag latest
         if: ${{ steps.release.outputs.release_created }}
