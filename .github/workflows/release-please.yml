@@ -3,6 +3,16 @@ name: Release Please
 on:
   push:
     branches: [main]
+  # Recovery door: npm can reject a publish the tag already happened for (a
+  # version published in error sits higher and cannot be unpublished). This
+  # republishes what package.json says, from this file, because the npm
+  # trusted-publisher binding names this workflow and no other.
+  workflow_dispatch:
+    inputs:
+      publish_current:
+        description: Publish the version in package.json
+        type: boolean
+        default: false
 
 # `contents`/`pull-requests` for the release PR and the tag; `id-token` for the
 # npm OIDC exchange in the publish steps below.
@@ -27,37 +37,40 @@ jobs:
         with:
           release-type: node
 
+      - id: gate
+        run: echo "go=${{ steps.release.outputs.release_created || inputs.publish_current }}" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v4
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
       - uses: oven-sh/setup-bun@v2
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
       # npm >= 11.5.1 (node 24) required for OIDC trusted publishing; auth is
       # the npmjs trusted-publisher binding (org glasshome, repo ui, this
       # workflow file), no NPM_TOKEN involved.
       - uses: actions/setup-node@v4
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
       - run: bun install --frozen-lockfile
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
       - run: bun run lint
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
       - run: bun run check:tokens
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
       - run: bun run check:structural
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
       - run: bun run check:types
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
       - run: bun run test
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
       - run: bun run build
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
       - run: bun run check:publish
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
       - run: node -e "await import('./dist/index.js'); await import('./dist/tokens/index.js')"
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
       # Explicit --tag: 2.0.0 was published in error and cannot be unpublished,
       # so npm refuses to move "latest" implicitly onto a lower version.
       - run: npm publish --provenance --access public --tag latest
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.gate.outputs.go == 'true' }}
