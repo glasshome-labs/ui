@@ -50,13 +50,9 @@ const Switch: Component<SwitchProps> = (props) => {
 					THUMB_CLASS,
 					"pointer-events-none transition-transform duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] group-data-[checked]/switch:translate-x-full",
 				)}
-				style={{
-					// Only ON wears the accent. A knob painted --primary in both states
-					// makes an off switch read as on, which is the one thing a switch
-					// has to say; off takes the neutral the rest of the system uses for
-					// inert chrome. Inline, so a caller cannot fix it with a class.
-					background: checked() ? "var(--primary)" : "var(--muted-foreground)",
-				}}
+				// One knob material in both states: the track says on or off, so a knob
+				// that changes colour makes off read as loudly as on.
+				style={{ background: "var(--thumb-face)" }}
 			/>
 			{local.name && <input type="hidden" name={local.name} value={checked() ? "on" : "off"} />}
 		</button>

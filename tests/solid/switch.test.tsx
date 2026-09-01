@@ -1,6 +1,8 @@
-/* The switch's whole job is to say on or off at a glance, and both halves of
- * that (the track surface and the thumb color) are set from state rather than
- * from a stylesheet a caller can inspect, so they get asserted here. */
+/* The switch's whole job is to say on or off at a glance, and the track surface
+ * carries all of it from state rather than from a stylesheet a caller can
+ * inspect, so it gets asserted here along with the knob staying one material. */
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { fireEvent, render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { describe, expect, it } from "vitest";
@@ -15,12 +17,24 @@ function parts(container: HTMLElement) {
 }
 
 describe("Switch", () => {
-	it("paints the thumb neutral when off and accented when on", () => {
+	it("paints the thumb with one material in both states", () => {
 		const off = render(() => <Switch checked={false} />);
-		expect(parts(off.container).thumb.style.background).toBe("var(--muted-foreground)");
-
 		const on = render(() => <Switch checked />);
-		expect(parts(on.container).thumb.style.background).toBe("var(--primary)");
+		expect(parts(off.container).thumb.style.background).toBe("var(--thumb-face)");
+		expect(parts(on.container).thumb.style.background).toBe(
+			parts(off.container).thumb.style.background,
+		);
+	});
+
+	it("resolves the thumb face in both themes", () => {
+		const css = readFileSync(
+			path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../src/styles/theme.css"),
+			"utf-8",
+		);
+		const light = css.slice(css.indexOf(":root"), css.indexOf(".dark"));
+		const dark = css.slice(css.indexOf(".dark"));
+		expect(light).toMatch(/--thumb-face:\s*[^;]+;/);
+		expect(dark).toMatch(/--thumb-face:\s*[^;]+;/);
 	});
 
 	it("wears the empty-well chrome when off and the tinted glass when on", () => {
@@ -55,15 +69,17 @@ describe("Switch", () => {
 		expect(parts(described.container).root.getAttribute("aria-labelledby")).toBe("away-mode-title");
 	});
 
-	it("repaints the thumb when the controlled value flips", () => {
+	it("repaints the track, not the thumb, when the controlled value flips", () => {
 		const [checked, setChecked] = createSignal(false);
 		const { container } = render(() => (
 			<Switch checked={checked()} onChange={(next) => setChecked(next)} />
 		));
-		expect(parts(container).thumb.style.background).toBe("var(--muted-foreground)");
+		const face = parts(container).thumb.style.background;
+		expect(parts(container).root.className).not.toContain("glass-tint");
 
 		fireEvent.click(parts(container).root);
 		expect(checked()).toBe(true);
-		expect(parts(container).thumb.style.background).toBe("var(--primary)");
+		expect(parts(container).root.className).toContain("glass-tint");
+		expect(parts(container).thumb.style.background).toBe(face);
 	});
 });

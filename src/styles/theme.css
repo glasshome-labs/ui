@@ -196,6 +196,9 @@
 	 * card, exactly what the fill drop used to carry, at 1px instead of a slab. */
 	--field: var(--card);
 	--field-edge: var(--border);
+	/* One knob material for both switch states, so it has to read on the tinted
+	 * --primary track; the thumb shadow separates it from the pale --input well. */
+	--thumb-face: oklch(1 0 0);
 	--chart-1: oklch(0.7459 0.1483 156.4499);
 	--chart-2: oklch(0.48 0.2 215.221);
 	--chart-3: oklch(0.7336 0.1758 50.5517);
@@ -270,6 +273,7 @@
 	 * and the glass formula's own soft edge. See the light block. */
 	--field: var(--input);
 	--field-edge: color-mix(in srgb, var(--border) 60%, transparent);
+	--thumb-face: oklch(0.88 0.01 250);
 	--chart-1: oklch(0.8003 0.1821 151.711);
 	--chart-2: oklch(0.48 0.2 215.221);
 	--chart-3: oklch(0.8077 0.1035 19.5706);
