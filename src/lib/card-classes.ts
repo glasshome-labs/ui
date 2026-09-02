@@ -1,3 +1,5 @@
+import { PRESS_DIP } from "./motion-classes.js";
+
 const CARD_KNOBS =
 	"glass [--glass-wash:20%] [--glass-rim:0.3] [--glass-lift:0.45] [--glass-shade:0.05] dark:[--glass-shade:0]";
 
@@ -32,6 +34,10 @@ export type CardPadding = keyof typeof CARD_PADDING;
 
 export const CARD_INTERACTIVE =
 	"cursor-pointer transition-glass hover:[--glass-light:0.09] focus-within:[--glass-edge:var(--border)]";
+
+/* A row that activates as a whole. Two focus selectors, one look: the row may
+ * be focusable itself, or hold an absolutely-positioned overlay button. */
+export const SECTION_ROW_INTERACTIVE = `${CARD_INTERACTIVE} ${PRESS_DIP} outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50`;
 
 export const CARD_HEADER_CLASS =
 	"@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 has-data-[slot=card-action]:grid-cols-[1fr_auto]";

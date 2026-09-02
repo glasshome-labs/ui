@@ -1,6 +1,11 @@
 import { Icon } from "@iconify-icon/solid";
 import { type ComponentProps, children, type JSX, Show, splitProps } from "solid-js";
-import { CARD_BLUR, CARD_SURFACE_BASE, SECTION_ROW_SURFACE } from "../lib/card-classes.js";
+import {
+	CARD_BLUR,
+	CARD_SURFACE_BASE,
+	SECTION_ROW_INTERACTIVE,
+	SECTION_ROW_SURFACE,
+} from "../lib/card-classes.js";
 import { ICON_PILL, ICON_PILL_TINT } from "../lib/pill-classes.js";
 import {
 	SECTION_INNER_RADIUS,
@@ -103,14 +108,95 @@ export function SectionCard(props: SectionCardProps) {
 	);
 }
 
-export function SectionRow(props: ComponentProps<"div">) {
-	const [local, rest] = splitProps(props, ["class"]);
+export function SectionRow(props: ComponentProps<"div"> & { interactive?: boolean }) {
+	const [local, rest] = splitProps(props, ["class", "interactive"]);
 	return (
 		<div
 			data-slot="section-row"
-			class={cn(SECTION_ROW_SURFACE, SECTION_INNER_RADIUS, SECTION_PADDING, local.class)}
+			class={cn(
+				SECTION_ROW_SURFACE,
+				SECTION_INNER_RADIUS,
+				SECTION_PADDING,
+				local.interactive && SECTION_ROW_INTERACTIVE,
+				local.class,
+			)}
 			{...rest}
 		/>
+	);
+}
+
+type ListRowProps = {
+	/** Leading visual: SectionIcon, Avatar, drag handle. */
+	leading?: JSX.Element;
+	title: JSX.Element;
+	/** Chips inline after the title. */
+	badges?: JSX.Element;
+	subtitle?: JSX.Element;
+	/** Quiet trailing text: versions, timestamps, counts. */
+	meta?: JSX.Element;
+	/** Controls at the row's end. Stacked above the open overlay. */
+	actions?: JSX.Element;
+	/** Activates the whole row. Renders a chevron when there are no actions. */
+	onOpen?: () => void;
+	/** Accessible name for the whole-row activation. */
+	openLabel?: string;
+	class?: string;
+};
+
+/**
+ * One item in a settings list. Fixed slots so every list reads the same
+ * whatever it holds; the row itself, not a nested button, is what you press.
+ */
+export function ListRow(props: ListRowProps) {
+	return (
+		<SectionRow
+			interactive={props.onOpen !== undefined}
+			class={cn("@container/list-row relative flex items-center gap-3", props.class)}
+		>
+			<Show when={props.onOpen}>
+				<button
+					type="button"
+					class="absolute inset-0 rounded-[inherit] outline-none"
+					aria-label={props.openLabel}
+					onClick={() => props.onOpen?.()}
+				/>
+			</Show>
+			<Show when={props.leading}>
+				<span class="flex shrink-0 items-center gap-2">{props.leading}</span>
+			</Show>
+			{/* Identity column. The floor is what gives the name priority: without
+			    it this is the only shrinkable child, so flex crushes it to an
+			    ellipsis and hands every spare pixel to meta. Sized to hold a name
+			    plus its badge. */}
+			<div class="min-w-[9rem] flex-1">
+				<div class="flex min-w-0 items-center gap-2">
+					<p class="truncate text-sm leading-tight font-semibold">{props.title}</p>
+					{props.badges}
+				</div>
+				<Show when={props.subtitle}>
+					<p class="text-muted-foreground mt-1 truncate text-xs">{props.subtitle}</p>
+				</Show>
+			</div>
+			{/* Trailing meta, centred across both identity lines. shrink-0, because
+			    a squeeze-driven wrap fires off whichever meta happens to be widest
+			    while the flex-1 identity column still holds unused slack. Meta that
+			    wants to reflow reads @container/list-row and says so itself. */}
+			<Show when={props.meta}>
+				<div class="text-muted-foreground shrink-0 text-xs">{props.meta}</div>
+			</Show>
+			<Show when={props.actions}>
+				<div class="relative flex shrink-0 items-center gap-1">{props.actions}</div>
+			</Show>
+			<Show when={props.onOpen !== undefined && props.actions === undefined}>
+				<Icon
+					icon="lucide:chevron-right"
+					width={16}
+					height={16}
+					class="text-muted-foreground shrink-0"
+					aria-hidden="true"
+				/>
+			</Show>
+		</SectionRow>
 	);
 }
 
