@@ -24,24 +24,24 @@ describe("Switch", () => {
 		expect(parts(on.container).thumb.style.background).toBe("var(--thumb-face-on)");
 	});
 
-	// The bug this file exists for: an off knob louder than an on knob reads as on.
-	it("keeps the off knob quieter than the on knob in both themes", () => {
+	// The bug this file exists for: an off knob that competes with the on knob.
+	// Lightness cannot express it in both themes (light reads lit by going
+	// darker, dark by going lighter), so the invariant is the hue: on carries
+	// --primary's chroma, off stays neutral metal.
+	it("tints the on knob and keeps the off knob neutral in both themes", () => {
 		const css = readFileSync(
 			path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../src/styles/theme.css"),
 			"utf-8",
 		);
-		const lightness = (block: string, token: string) => {
-			const match = block.match(new RegExp(`${token}:\\s*oklch\\(([0-9.]+)`));
+		const chroma = (block: string, token: string) => {
+			const match = block.match(new RegExp(`${token}:\\s*oklch\\([0-9.]+\\s+([0-9.]+)`));
 			if (!match?.[1]) throw new Error(`no ${token} in block`);
 			return Number.parseFloat(match[1]);
 		};
 		const darkStart = css.indexOf(".dark {");
-		const light = css.slice(0, darkStart);
-		const dark = css.slice(darkStart);
-		for (const block of [light, dark]) {
-			expect(lightness(block, "--thumb-face-off")).toBeLessThan(
-				lightness(block, "--thumb-face-on"),
-			);
+		for (const block of [css.slice(0, darkStart), css.slice(darkStart)]) {
+			expect(chroma(block, "--thumb-face-on")).toBeGreaterThan(0.05);
+			expect(chroma(block, "--thumb-face-off")).toBeLessThan(0.05);
 		}
 	});
 

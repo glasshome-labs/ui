@@ -206,9 +206,10 @@
 	 * the card and carry a solid --border edge, 1.39:1, at 1px instead of a slab. */
 	--field: var(--card);
 	--field-edge: var(--border);
-	/* The knob says the state too: lit on the tinted --primary track, dimmed to
-	 * inert metal in the recessed well. Off must never out-shout on. */
-	--thumb-face-on: oklch(1 0 0);
+	/* The knob says the state too: on wears --primary's hue, off stays inert
+	 * metal in the recessed well. Light reads lit by going darker than its pale
+	 * track, dark by going lighter; the hue is what carries across both. */
+	--thumb-face-on: oklch(0.55 0.16 215);
 	--thumb-face-off: oklch(0.62 0.015 250);
 	--chart-1: oklch(0.7459 0.1483 156.4499);
 	--chart-2: oklch(0.48 0.2 215.221);
