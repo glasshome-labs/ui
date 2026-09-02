@@ -21,9 +21,10 @@ export const OVERLAY_SURFACE = `${OVERLAY_SURFACE_BASE} ${OVERLAY_BLUR}`;
  * behind it would just be see-through. */
 export const OVERLAY_SURFACE_OPAQUE = `${OVERLAY_KNOBS} [--glass-base:var(--popover)]`;
 
-/* Modal scrim behind dialogs/sheets. BottomSheet keeps its own unblurred scrim
- * (backdrop-blur is too slow on mobile). */
-export const SCRIM_CLASS = "bg-background/70 backdrop-blur-md";
+/* Modal scrim behind dialogs/sheets, from the theme's own --scrim so light can
+ * darken while dark keeps its background wash. BottomSheet keeps its own
+ * unblurred scrim (backdrop-blur is too slow on mobile). */
+export const SCRIM_CLASS = "bg-scrim backdrop-blur-md";
 
 /* The floating panel every anchored surface wears. Padding is the caller's:
  * menus add p-1, popovers p-4, pickers none. */

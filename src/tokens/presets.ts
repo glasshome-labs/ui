@@ -61,17 +61,17 @@ export const THEME_PRESETS: ThemePreset[] = [
 				primary: "oklch(0.48 0.2 215.221)",
 				accent: "oklch(0.6 0.2 195)",
 				secondary: "oklch(0.96 0.01 250)",
-				border: "oklch(0.9 0.01 250)",
-				card: "oklch(0.995 0.004 250)",
-				background: "oklch(0.975 0.003 250)",
-				popover: "oklch(0.995 0.003 250)",
+				border: "oklch(0.855 0.014 250)",
+				card: "oklch(0.96 0.005 250)",
+				background: "oklch(0.995 0.003 250)",
+				popover: "oklch(0.937 0.006 250)",
 				muted: "oklch(0.9702 0.008 250)",
 				mutedForeground: "oklch(0.34 0 0)",
-				input: "oklch(0.9 0.012 250)",
-				// Darker than --accent, which they used to share: on a light ground the
-				// accent's own lightness leaves the focus ring and the destructive fill
-				// short of contrast. See the light block of styles/theme.css.
-				ring: "oklch(0.53 0.18 195)",
+				input: "oklch(0.85 0.016 250)",
+				// The focus ring follows primary here, not the derived accent: the two
+				// are different hues, so an accent ring landed teal on blue controls.
+				// See the light block of styles/theme.css.
+				ring: "oklch(0.48 0.2 215.221)",
 				destructive: "oklch(0.54 0.19 23.0704)",
 			},
 			dark: {

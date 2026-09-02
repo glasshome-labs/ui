@@ -18,6 +18,7 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+	--color-scrim: var(--scrim);
 	--color-success: var(--success);
 	--color-warning: var(--warning);
 	--color-primary-tint-foreground: var(--primary-tint-foreground);
@@ -157,11 +158,15 @@
 }
 
 :root {
-	--background: oklch(0.975 0.003 250);
+	--background: oklch(0.995 0.003 250);
 	--foreground: oklch(0 0 0);
-	--card: oklch(0.995 0.004 250);
+	/* Light glass scatters light away from the eye, so a pane sits BELOW its
+	 * ground here, the opposite of dark: the page is the lightest thing on
+	 * screen, the card steps down, the popover down again. Ratios 1.11 and 1.07,
+	 * and --popover is the floor the semantic roles below can still sit on. */
+	--card: oklch(0.96 0.005 250);
 	--card-foreground: oklch(0 0 0);
-	--popover: oklch(0.995 0.003 250);
+	--popover: oklch(0.937 0.006 250);
 	--popover-foreground: oklch(0 0 0);
 	--primary: oklch(0.48 0.2 215.221);
 	--primary-foreground: oklch(1 0 0);
@@ -171,29 +176,34 @@
 	--muted-foreground: oklch(0.34 0 0);
 	--accent: oklch(0.6 0.2 195);
 	--accent-foreground: oklch(1 0 0);
-	/* Semantic roles are one value per role, used as fill AND as text, so on this
-	 * L=0.975 ground they have to clear 4.5:1 (3:1 for --ring, a focus indicator)
-	 * against --background and --card. The dark theme's high-lightness versions
-	 * measure 2.1-3.6:1 here, so the light theme drops lightness and holds hue;
-	 * chroma comes down only as far as staying near the sRGB gamut edge needs.
-	 * Measured vs --background / --card / white-on-fill:
-	 *   success 5.24 / 5.56 / 5.63, warning 5.17 / 5.49 / 5.55,
-	 *   destructive 5.21 / 5.53 / 5.59, ring 4.68 / 4.97 / 5.03. */
+	/* Semantic roles are one value per role, used as fill AND as text, so they
+	 * clear 4.5:1 on every ground they land on. --popover is the darkest of them
+	 * and therefore the binding one: it is what stops the ladder above sinking
+	 * further. Chroma comes down only as far as the sRGB gamut edge needs.
+	 * Measured vs --background / --card / --popover / white-on-fill:
+	 *   success 5.56 / 5.01 / 4.66 / 5.63, warning 5.49 / 4.94 / 4.60 / 5.55,
+	 *   destructive 5.53 / 4.98 / 4.63 / 5.59. */
 	--success: oklch(0.5 0.15 145);
 	--warning: oklch(0.52 0.13 85);
 	--primary-tint-foreground: oklch(0.42 0.2 215.221);
 	--accent-tint-foreground: oklch(0.46 0.16 195);
 	--destructive: oklch(0.54 0.19 23.0704);
 	--destructive-foreground: oklch(1 0 0);
-	--border: oklch(0.9 0.01 250);
-	--input: oklch(0.9 0.012 250);
-	--ring: oklch(0.53 0.18 195);
+	--border: oklch(0.855 0.014 250);
+	/* Toggle wells (FIELD_CHROME), not text fields: the whole job is to read as
+	 * empty, and the constant white --thumb-face has to show against it. 1.58:1
+	 * to the thumb, 1.40:1 to the card. */
+	--input: oklch(0.85 0.016 250);
+	/* The focus ring wears --primary, not --accent: the two are different hues,
+	 * so an accent ring landed teal on blue controls. */
+	--ring: oklch(0.48 0.2 215.221);
+	/* Modal scrim: a wash darker than the page. A scrim keyed to --background is
+	 * the page colour at alpha, which computes to no darkening at all. */
+	--scrim: oklch(0.2 0.012 250 / 0.45);
 	/* Field material (INPUT_SURFACE). The recess is the .glass-sink rim, not a
-	 * darker fill: on a card of L=0.995 an --input fill of L=0.9 is a nine-point
-	 * drop, the same cue this library spends on `disabled`, so a form of light
-	 * fields reads switched off. Light fields sit AT the card and get a solid
-	 * --border edge instead — the boundary still measures 1.33:1 against the
-	 * card, exactly what the fill drop used to carry, at 1px instead of a slab. */
+	 * darker fill: on a light ground an --input-deep fill reads as the `disabled`
+	 * cue, so a form of light fields would read switched off. Light fields sit AT
+	 * the card and carry a solid --border edge, 1.39:1, at 1px instead of a slab. */
 	--field: var(--card);
 	--field-edge: var(--border);
 	/* One knob material for both switch states, so it has to read on the tinted
@@ -269,6 +279,7 @@
 	 * 0.01) keeps it from going flat gray. Same rail color as the slider track. */
 	--input: oklch(0.19 0.01 250);
 	--ring: oklch(0.6 0.2 195);
+	--scrim: color-mix(in oklab, var(--background) 70%, transparent);
 	/* Dark fields keep the dug-out fill (it reads as depth here, not as disabled)
 	 * and the glass formula's own soft edge. See the light block. */
 	--field: var(--input);
