@@ -87,7 +87,9 @@ const Alert: Component<AlertProps> = (props) => {
 				</AlertToneContext.Provider>
 			</div>
 			<Show when={local.action}>
-				<div class="flex shrink-0 items-center">{local.action}</div>
+				{/* self-center: the row is items-start for the icon, which would strand
+				    the action at the top of a multi-line body. */}
+				<div class="flex shrink-0 items-center self-center">{local.action}</div>
 			</Show>
 		</div>
 	);
