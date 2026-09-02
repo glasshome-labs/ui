@@ -168,11 +168,17 @@ function createTailPresence(tail: Accessor<DockItem[]>) {
 		});
 	});
 
+	onCleanup(() => {
+		for (const timeoutId of timers.values()) clearTimeout(timeoutId);
+		timers.clear();
+	});
+
 	return {
 		order,
 		entry: (id: string) => entries.get(id)?.[0](),
 		setRef: (id: string, node: HTMLDivElement) => refs.set(id, node),
-		onAnimationEnd: (id: string) => {
+		onAnimationEnd: (id: string, event: AnimationEvent) => {
+			if (event.target !== event.currentTarget) return;
 			if (entries.get(id)?.[0]().state === "leave") remove(id);
 		},
 	};
@@ -295,18 +301,23 @@ const Dock: Component<DockProps> = (props) => {
 									{(current) => (
 										<div
 											ref={(node) => tailPresence.setRef(id, node)}
-											class={TAIL_MOTION}
+											class={cn(TAIL_MOTION, current().state === "leave" && "pointer-events-none")}
 											data-state={current().state}
 											data-expanded={current().state === "enter" || undefined}
 											data-closed={current().state === "leave" || undefined}
-											onAnimationEnd={() => tailPresence.onAnimationEnd(id)}
+											aria-hidden={current().state === "leave" || undefined}
+											onAnimationEnd={(event) => tailPresence.onAnimationEnd(id, event)}
 										>
 											<DockIconButton
 												icon={current().item.icon}
 												label={current().item.label}
-												onClick={current().item.onClick}
+												onClick={() => {
+													if (current().state === "leave") return;
+													current().item.onClick?.();
+												}}
 												isActive={current().item.isActive}
 												badge={current().item.badge}
+												tabIndex={current().state === "leave" ? -1 : undefined}
 											/>
 										</div>
 									)}

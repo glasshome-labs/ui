@@ -51,4 +51,25 @@ describe("Dock tail", () => {
 
 		expect(container.querySelector('[data-slot="dock-bar"]')).toBeTruthy();
 	});
+
+	it("makes a leaving tail row inert: no click, aria-hidden", () => {
+		const onClick = vi.fn();
+		const [tail, setTail] = createSignal([
+			{ id: "pencil", icon: <span />, label: "pencil", onClick },
+		]);
+		const { container } = render(() => <Dock items={[item("a")]} tail={tail()} />);
+
+		setTail([]);
+
+		const leaving = container.querySelector('[data-slot="dock-tail"] [data-state="leave"]');
+		expect(leaving).toBeTruthy();
+		expect(leaving?.getAttribute("aria-hidden")).toBe("true");
+
+		const button = leaving?.querySelector('[data-slot="dock-item"]');
+		expect(button).toBeTruthy();
+		button?.dispatchEvent(new Event("pointerup", { bubbles: true }));
+		button?.dispatchEvent(new Event("click", { bubbles: true }));
+
+		expect(onClick).not.toHaveBeenCalled();
+	});
 });
