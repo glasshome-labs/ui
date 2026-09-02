@@ -191,8 +191,8 @@
 	--destructive-foreground: oklch(1 0 0);
 	--border: oklch(0.855 0.014 250);
 	/* Toggle wells (FIELD_CHROME), not text fields: the whole job is to read as
-	 * empty, and the constant white --thumb-face has to show against it. 1.58:1
-	 * to the thumb, 1.40:1 to the card. */
+	 * empty, and the off knob has to show against it. 2.50:1 to the off thumb,
+	 * 1.40:1 to the card. */
 	--input: oklch(0.85 0.016 250);
 	/* The focus ring wears --primary, not --accent: the two are different hues,
 	 * so an accent ring landed teal on blue controls. */
@@ -206,9 +206,10 @@
 	 * the card and carry a solid --border edge, 1.39:1, at 1px instead of a slab. */
 	--field: var(--card);
 	--field-edge: var(--border);
-	/* One knob material for both switch states, so it has to read on the tinted
-	 * --primary track; the thumb shadow separates it from the pale --input well. */
-	--thumb-face: oklch(1 0 0);
+	/* The knob says the state too: lit on the tinted --primary track, dimmed to
+	 * inert metal in the recessed well. Off must never out-shout on. */
+	--thumb-face-on: oklch(1 0 0);
+	--thumb-face-off: oklch(0.62 0.015 250);
 	--chart-1: oklch(0.7459 0.1483 156.4499);
 	--chart-2: oklch(0.48 0.2 215.221);
 	--chart-3: oklch(0.7336 0.1758 50.5517);
@@ -284,7 +285,10 @@
 	 * and the glass formula's own soft edge. See the light block. */
 	--field: var(--input);
 	--field-edge: color-mix(in srgb, var(--border) 60%, transparent);
-	--thumb-face: oklch(0.88 0.01 250);
+	/* Lit, not white: at 0.95 the knob matched --foreground and became the
+	 * loudest pixel in the row. 3.74:1 on the --primary track. */
+	--thumb-face-on: oklch(0.82 0.015 250);
+	--thumb-face-off: oklch(0.45 0.015 250);
 	--chart-1: oklch(0.8003 0.1821 151.711);
 	--chart-2: oklch(0.48 0.2 215.221);
 	--chart-3: oklch(0.8077 0.1035 19.5706);

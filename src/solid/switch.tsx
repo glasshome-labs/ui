@@ -50,9 +50,9 @@ const Switch: Component<SwitchProps> = (props) => {
 					THUMB_CLASS,
 					"pointer-events-none transition-transform duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] group-data-[checked]/switch:translate-x-full",
 				)}
-				// One knob material in both states: the track says on or off, so a knob
-				// that changes colour makes off read as loudly as on.
-				style={{ background: "var(--thumb-face)" }}
+				// Off must read quieter than on: the knob dims with the track rather
+				// than staying one bright material in both states.
+				style={{ background: checked() ? "var(--thumb-face-on)" : "var(--thumb-face-off)" }}
 			/>
 			{local.name && <input type="hidden" name={local.name} value={checked() ? "on" : "off"} />}
 		</button>

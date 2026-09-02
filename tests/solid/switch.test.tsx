@@ -17,13 +17,32 @@ function parts(container: HTMLElement) {
 }
 
 describe("Switch", () => {
-	it("paints the thumb with one material in both states", () => {
+	it("dims the knob when off and lights it when on", () => {
 		const off = render(() => <Switch checked={false} />);
 		const on = render(() => <Switch checked />);
-		expect(parts(off.container).thumb.style.background).toBe("var(--thumb-face)");
-		expect(parts(on.container).thumb.style.background).toBe(
-			parts(off.container).thumb.style.background,
+		expect(parts(off.container).thumb.style.background).toBe("var(--thumb-face-off)");
+		expect(parts(on.container).thumb.style.background).toBe("var(--thumb-face-on)");
+	});
+
+	// The bug this file exists for: an off knob louder than an on knob reads as on.
+	it("keeps the off knob quieter than the on knob in both themes", () => {
+		const css = readFileSync(
+			path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../src/styles/theme.css"),
+			"utf-8",
 		);
+		const lightness = (block: string, token: string) => {
+			const match = block.match(new RegExp(`${token}:\\s*oklch\\(([0-9.]+)`));
+			if (!match?.[1]) throw new Error(`no ${token} in block`);
+			return Number.parseFloat(match[1]);
+		};
+		const darkStart = css.indexOf(".dark {");
+		const light = css.slice(0, darkStart);
+		const dark = css.slice(darkStart);
+		for (const block of [light, dark]) {
+			expect(lightness(block, "--thumb-face-off")).toBeLessThan(
+				lightness(block, "--thumb-face-on"),
+			);
+		}
 	});
 
 	it("resolves the thumb face in both themes", () => {
@@ -33,8 +52,8 @@ describe("Switch", () => {
 		);
 		const light = css.slice(css.indexOf(":root"), css.indexOf(".dark"));
 		const dark = css.slice(css.indexOf(".dark"));
-		expect(light).toMatch(/--thumb-face:\s*[^;]+;/);
-		expect(dark).toMatch(/--thumb-face:\s*[^;]+;/);
+		expect(light).toMatch(/--thumb-face-on:\s*[^;]+;/);
+		expect(dark).toMatch(/--thumb-face-on:\s*[^;]+;/);
 	});
 
 	it("wears the empty-well chrome when off and the tinted glass when on", () => {
@@ -69,17 +88,17 @@ describe("Switch", () => {
 		expect(parts(described.container).root.getAttribute("aria-labelledby")).toBe("away-mode-title");
 	});
 
-	it("repaints the track, not the thumb, when the controlled value flips", () => {
+	it("repaints track and knob together when the controlled value flips", () => {
 		const [checked, setChecked] = createSignal(false);
 		const { container } = render(() => (
 			<Switch checked={checked()} onChange={(next) => setChecked(next)} />
 		));
-		const face = parts(container).thumb.style.background;
+		expect(parts(container).thumb.style.background).toBe("var(--thumb-face-off)");
 		expect(parts(container).root.className).not.toContain("glass-tint");
 
 		fireEvent.click(parts(container).root);
 		expect(checked()).toBe(true);
 		expect(parts(container).root.className).toContain("glass-tint");
-		expect(parts(container).thumb.style.background).toBe(face);
+		expect(parts(container).thumb.style.background).toBe("var(--thumb-face-on)");
 	});
 });
