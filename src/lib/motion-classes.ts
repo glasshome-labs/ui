@@ -38,3 +38,6 @@ export const SETTLE_MOTION =
 
 /* Every pressable dips the same amount. */
 export const PRESS_DIP = "active:scale-[0.97]";
+
+/** A slot whose occupant changes: the leaver contracts, the arriver grows from the same box. */
+export const TAIL_MOTION = `${ARRIVE} data-[state=enter]:fade-in-0 data-[state=enter]:zoom-in-75 ${LEAVE} data-[state=leave]:fade-out-0 data-[state=leave]:zoom-out-75`;

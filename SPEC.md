@@ -154,6 +154,8 @@ Motion is one system, not per-component flair. Four rules, all held by
    `paused`). A wrapper with `data-motion="still"` opts out: thumbnails are
    stills.
 
+`TAIL_MOTION`: one slot swaps occupants (the dock's pencil becoming done).
+
 A new component with an open, pick or reveal state uses these doors before it
 gets any motion of its own; a motion need none of them covers is added to
 `motion-classes.ts`, not written inline.

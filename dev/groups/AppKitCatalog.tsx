@@ -57,6 +57,38 @@ export function AppKitCatalog() {
 				</CatalogNote>
 			</CatalogItem>
 
+			<CatalogItem
+				name="Dock tail"
+				hint="fixed edit controls, outside the scrolling strip"
+				span={2}
+			>
+				<Dock
+					items={[
+						{
+							id: "home",
+							icon: <Icon icon="lucide:house" width={20} height={20} />,
+							label: "Home",
+							isActive: true,
+						},
+						{
+							id: "inbox",
+							icon: <Icon icon="lucide:inbox" width={20} height={20} />,
+							label: "Inbox",
+						},
+					]}
+					tail={[
+						{
+							id: "edit",
+							icon: <Icon icon="lucide:pencil" width={20} height={20} />,
+							label: "Edit",
+						},
+					]}
+				/>
+				<CatalogNote>
+					tail sits past a divider inside the same glass pill, never scrolls
+				</CatalogNote>
+			</CatalogItem>
+
 			<CatalogItem name="PageHeader" hint="banner — icon + title + count + actions" span={3}>
 				<div class="w-full">
 					<PageHeader

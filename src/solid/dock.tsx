@@ -12,7 +12,7 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { CARD_SURFACE } from "../lib/card-classes.js";
-import { PRESS_DIP } from "../lib/motion-classes.js";
+import { PRESS_DIP, STAGGER, TAIL_MOTION } from "../lib/motion-classes.js";
 import { cn } from "../lib/utils.js";
 import { Badge } from "./badge.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
@@ -31,6 +31,8 @@ interface DockItem {
 interface DockProps extends ComponentProps<"div"> {
 	items: DockItem[];
 	dockMode?: "floating" | "docked";
+	/** Fixed items rendered after the scrolling strip, outside the overflow bar. */
+	tail?: DockItem[];
 }
 
 interface DockIconButtonProps extends ComponentProps<"button"> {
@@ -95,9 +97,10 @@ const DockIconButton: Component<DockIconButtonProps> = (props) => {
 };
 
 const Dock: Component<DockProps> = (props) => {
-	const [local, rest] = splitProps(props, ["items", "class", "dockMode"]);
+	const [local, rest] = splitProps(props, ["items", "class", "dockMode", "tail"]);
 	const dockMode = () => local.dockMode ?? "floating";
 	let containerRef!: HTMLDivElement;
+	let tailRef: HTMLDivElement | undefined;
 	const [needsScroll, setNeedsScroll] = createSignal(false);
 
 	// The moving background: the shared SlidingIndicator tracks the active item.
@@ -109,7 +112,8 @@ const Dock: Component<DockProps> = (props) => {
 	const checkOverflow = () => {
 		if (containerRef) {
 			const naturalWidth = containerRef.scrollWidth;
-			const availableWidth = containerRef.parentElement?.clientWidth || window.innerWidth;
+			const parentWidth = containerRef.parentElement?.clientWidth || window.innerWidth;
+			const availableWidth = parentWidth - (tailRef?.offsetWidth ?? 0);
 			setNeedsScroll(naturalWidth > availableWidth);
 		}
 	};
@@ -147,15 +151,20 @@ const Dock: Component<DockProps> = (props) => {
 			)}
 			{...rest}
 		>
-			<div class="relative flex items-center justify-center">
+			<div
+				data-slot="dock-surface"
+				class={cn(
+					"relative flex items-center justify-center p-1.5 sm:p-2",
+					CARD_SURFACE,
+					"[--glass-lift:0.55]",
+					dockMode() === "floating" ? "rounded-xl" : "rounded-t-xl",
+				)}
+			>
 				<div
 					ref={containerRef}
 					data-slot="dock-bar"
 					class={cn(
-						"flex items-center gap-0.5 p-1.5 sm:gap-1 sm:p-2",
-						CARD_SURFACE,
-						"[--glass-lift:0.55]",
-						dockMode() === "floating" ? "rounded-xl" : "rounded-t-xl",
+						"flex items-center gap-0.5 sm:gap-1",
 						needsScroll() ? "scrollbar-hide overflow-x-auto" : "overflow-visible",
 						!needsScroll() && "justify-center",
 					)}
@@ -177,6 +186,28 @@ const Dock: Component<DockProps> = (props) => {
 						</Index>
 					</SlidingIndicator>
 				</div>
+				<Show when={(local.tail?.length ?? 0) > 0}>
+					<span data-slot="dock-divider" class="mx-1 h-8 w-px shrink-0 bg-border/30" />
+					<div
+						ref={tailRef}
+						data-slot="dock-tail"
+						class={cn("flex shrink-0 items-center gap-0.5 sm:gap-1", STAGGER)}
+					>
+						<Index each={local.tail}>
+							{(item) => (
+								<div class={TAIL_MOTION} data-state="enter">
+									<DockIconButton
+										icon={item().icon}
+										label={item().label}
+										onClick={item().onClick}
+										isActive={item().isActive}
+										badge={item().badge}
+									/>
+								</div>
+							)}
+						</Index>
+					</div>
+				</Show>
 			</div>
 		</div>
 	);
