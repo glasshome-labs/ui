@@ -1,4 +1,5 @@
 import { render } from "@solidjs/testing-library";
+import { createSignal } from "solid-js";
 import { describe, expect, it, vi } from "vitest";
 import { Dock } from "../../src/solid/dock.js";
 
@@ -22,5 +23,32 @@ describe("Dock tail", () => {
 		const { container } = render(() => <Dock items={[item("a")]} tail={[]} />);
 		expect(container.querySelector('[data-slot="dock-tail"]')).toBeNull();
 		expect(container.querySelector('[data-slot="dock-divider"]')).toBeNull();
+	});
+
+	it("keeps a leaving tail item mounted through its door, then drops it on animationend", () => {
+		const [tail, setTail] = createSignal([item("pencil")]);
+		const { container } = render(() => <Dock items={[item("a")]} tail={tail()} />);
+
+		setTail([]);
+
+		const leaving = container.querySelector('[data-slot="dock-tail"] [data-state="leave"]');
+		expect(leaving).toBeTruthy();
+		expect(leaving?.querySelector('[data-slot="dock-item"]')).toBeTruthy();
+
+		leaving?.dispatchEvent(new Event("animationend", { bubbles: true }));
+
+		expect(container.querySelector('[data-slot="dock-tail"] [data-state="leave"]')).toBeNull();
+		expect(container.querySelector('[data-slot="dock-item"][aria-label="pencil"]')).toBeNull();
+	});
+
+	it("does not throw computing overflow once the tail sits inside the surface", async () => {
+		const items = Array.from({ length: 8 }, (_, i) => item(`item-${i}`));
+		const { container } = render(() => <Dock items={items} tail={[item("pencil")]} />);
+
+		// checkOverflow runs on a mount timeout; happy-dom reports zero for all
+		// layout metrics, so this only proves the padding/sibling math never throws.
+		await new Promise((resolve) => setTimeout(resolve, 160));
+
+		expect(container.querySelector('[data-slot="dock-bar"]')).toBeTruthy();
 	});
 });

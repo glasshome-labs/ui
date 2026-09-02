@@ -1,12 +1,15 @@
 import {
+	type Accessor,
 	type Component,
 	type ComponentProps,
 	createEffect,
 	createSignal,
+	For,
 	Index,
 	type JSX,
 	onCleanup,
 	onMount,
+	type Setter,
 	Show,
 	splitProps,
 } from "solid-js";
@@ -96,12 +99,91 @@ const DockIconButton: Component<DockIconButtonProps> = (props) => {
 	);
 };
 
+interface TailEntry {
+	item: DockItem;
+	state: "enter" | "leave";
+}
+
+// A tail id dropped from props keeps its node mounted (state -> "leave") until
+// its own animationend, with a --duration-morph timeout as fallback so
+// prefers-reduced-motion (which zeroes the token) still clears it.
+function createTailPresence(tail: Accessor<DockItem[]>) {
+	const entries = new Map<string, [Accessor<TailEntry>, Setter<TailEntry>]>();
+	const refs = new Map<string, HTMLDivElement>();
+	const timers = new Map<string, ReturnType<typeof setTimeout>>();
+	const [order, setOrder] = createSignal<string[]>([]);
+
+	const clearTimer = (id: string) => {
+		const timeoutId = timers.get(id);
+		if (timeoutId !== undefined) {
+			clearTimeout(timeoutId);
+			timers.delete(id);
+		}
+	};
+
+	const remove = (id: string) => {
+		clearTimer(id);
+		entries.delete(id);
+		refs.delete(id);
+		setOrder((prev) => prev.filter((existing) => existing !== id));
+	};
+
+	const scheduleFallback = (id: string) => {
+		const node = refs.get(id);
+		const durationMs = node
+			? Number.parseFloat(getComputedStyle(node).getPropertyValue("--duration-morph")) || 0
+			: 0;
+		clearTimer(id);
+		timers.set(
+			id,
+			setTimeout(() => remove(id), durationMs),
+		);
+	};
+
+	createEffect(() => {
+		const next = tail();
+		const nextIds = new Set(next.map((it) => it.id));
+
+		for (const item of next) {
+			const existing = entries.get(item.id);
+			if (existing) {
+				clearTimer(item.id);
+				existing[1]({ item, state: "enter" });
+			} else {
+				entries.set(item.id, createSignal<TailEntry>({ item, state: "enter" }));
+			}
+		}
+
+		for (const [id, [get, set]] of entries) {
+			if (!nextIds.has(id) && get().state !== "leave") {
+				set({ ...get(), state: "leave" });
+				scheduleFallback(id);
+			}
+		}
+
+		setOrder((prev) => {
+			const keep = prev.filter((id) => entries.has(id));
+			const additions = next.map((it) => it.id).filter((id) => !keep.includes(id));
+			return [...keep, ...additions];
+		});
+	});
+
+	return {
+		order,
+		entry: (id: string) => entries.get(id)?.[0](),
+		setRef: (id: string, node: HTMLDivElement) => refs.set(id, node),
+		onAnimationEnd: (id: string) => {
+			if (entries.get(id)?.[0]().state === "leave") remove(id);
+		},
+	};
+}
+
 const Dock: Component<DockProps> = (props) => {
 	const [local, rest] = splitProps(props, ["items", "class", "dockMode", "tail"]);
 	const dockMode = () => local.dockMode ?? "floating";
 	let containerRef!: HTMLDivElement;
-	let tailRef: HTMLDivElement | undefined;
 	const [needsScroll, setNeedsScroll] = createSignal(false);
+	const tailPresence = createTailPresence(() => local.tail ?? []);
 
 	// The moving background: the shared SlidingIndicator tracks the active item.
 	const activeIndex = () => {
@@ -110,12 +192,27 @@ const Dock: Component<DockProps> = (props) => {
 	};
 
 	const checkOverflow = () => {
-		if (containerRef) {
-			const naturalWidth = containerRef.scrollWidth;
-			const parentWidth = containerRef.parentElement?.clientWidth || window.innerWidth;
-			const availableWidth = parentWidth - (tailRef?.offsetWidth ?? 0);
-			setNeedsScroll(naturalWidth > availableWidth);
+		if (!containerRef) return;
+		const surface = containerRef.parentElement;
+		if (!surface) {
+			setNeedsScroll(containerRef.scrollWidth > window.innerWidth);
+			return;
 		}
+		const surfaceStyle = getComputedStyle(surface);
+		const paddingX =
+			(Number.parseFloat(surfaceStyle.paddingLeft) || 0) +
+			(Number.parseFloat(surfaceStyle.paddingRight) || 0);
+		let siblingWidth = 0;
+		for (const child of Array.from(surface.children)) {
+			if (child === containerRef) continue;
+			const childStyle = getComputedStyle(child);
+			siblingWidth +=
+				child.getBoundingClientRect().width +
+				(Number.parseFloat(childStyle.marginLeft) || 0) +
+				(Number.parseFloat(childStyle.marginRight) || 0);
+		}
+		const availableWidth = surface.clientWidth - paddingX - siblingWidth;
+		setNeedsScroll(containerRef.scrollWidth > availableWidth);
 	};
 
 	onMount(() => {
@@ -186,26 +283,36 @@ const Dock: Component<DockProps> = (props) => {
 						</Index>
 					</SlidingIndicator>
 				</div>
-				<Show when={(local.tail?.length ?? 0) > 0}>
+				<Show when={tailPresence.order().length > 0}>
 					<span data-slot="dock-divider" class="mx-1 h-8 w-px shrink-0 bg-border/30" />
 					<div
-						ref={tailRef}
 						data-slot="dock-tail"
 						class={cn("flex shrink-0 items-center gap-0.5 sm:gap-1", STAGGER)}
 					>
-						<Index each={local.tail}>
-							{(item) => (
-								<div class={TAIL_MOTION} data-state="enter">
-									<DockIconButton
-										icon={item().icon}
-										label={item().label}
-										onClick={item().onClick}
-										isActive={item().isActive}
-										badge={item().badge}
-									/>
-								</div>
+						<For each={tailPresence.order()}>
+							{(id) => (
+								<Show when={tailPresence.entry(id)}>
+									{(current) => (
+										<div
+											ref={(node) => tailPresence.setRef(id, node)}
+											class={TAIL_MOTION}
+											data-state={current().state}
+											data-expanded={current().state === "enter" || undefined}
+											data-closed={current().state === "leave" || undefined}
+											onAnimationEnd={() => tailPresence.onAnimationEnd(id)}
+										>
+											<DockIconButton
+												icon={current().item.icon}
+												label={current().item.label}
+												onClick={current().item.onClick}
+												isActive={current().item.isActive}
+												badge={current().item.badge}
+											/>
+										</div>
+									)}
+								</Show>
 							)}
-						</Index>
+						</For>
 					</div>
 				</Show>
 			</div>
