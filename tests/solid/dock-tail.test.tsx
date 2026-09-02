@@ -105,4 +105,39 @@ describe("Dock tail", () => {
 			(slots[0]?.querySelector('[data-state="leave"]') as HTMLElement).className,
 		).not.toContain("absolute");
 	});
+
+	it("survives the full edit cycle and mounts a fresh node per arriving occupant", () => {
+		const [tail, setTail] = createSignal([item("edit")]);
+		const { container } = render(() => <Dock items={[item("a")]} tail={tail()} />);
+
+		const nodeFor = (label: string) =>
+			container
+				.querySelector(
+					`[data-slot="dock-tail-slot"] [data-slot="dock-item"][aria-label="${label}"]`,
+				)
+				?.closest("[data-state]") ?? null;
+		const settle = () => {
+			for (const leaving of container.querySelectorAll('[data-state="leave"]')) {
+				leaving.dispatchEvent(new Event("animationend", { bubbles: true }));
+			}
+		};
+
+		const firstEdit = nodeFor("edit");
+		expect(firstEdit).toBeTruthy();
+
+		expect(() => {
+			setTail([item("add"), item("done")]);
+			settle();
+			setTail([item("edit")]);
+			settle();
+		}).not.toThrow();
+
+		const secondEdit = nodeFor("edit");
+		expect(secondEdit).toBeTruthy();
+		// A reused node would carry the leaver's ref and replay no entrance door.
+		expect(secondEdit).not.toBe(firstEdit);
+		expect(secondEdit?.getAttribute("data-state")).toBe("enter");
+		expect(container.querySelectorAll('[data-slot="dock-tail-slot"]')).toHaveLength(1);
+		expect(container.querySelector('[data-state="leave"]')).toBeNull();
+	});
 });
