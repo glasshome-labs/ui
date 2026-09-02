@@ -285,9 +285,9 @@
 	 * and the glass formula's own soft edge. See the light block. */
 	--field: var(--input);
 	--field-edge: color-mix(in srgb, var(--border) 60%, transparent);
-	/* Lit, not white: at 0.95 the knob matched --foreground and became the
-	 * loudest pixel in the row. 3.74:1 on the --primary track. */
-	--thumb-face-on: oklch(0.82 0.015 250);
+	/* Lit through hue, not brightness: a neutral knob this light read as the
+	 * loudest pixel in the row. Carries --primary's hue, so on ties to the rim. */
+	--thumb-face-on: oklch(0.78 0.1 215);
 	--thumb-face-off: oklch(0.45 0.015 250);
 	--chart-1: oklch(0.8003 0.1821 151.711);
 	--chart-2: oklch(0.48 0.2 215.221);
