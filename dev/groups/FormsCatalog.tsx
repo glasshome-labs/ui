@@ -111,6 +111,7 @@ export function FormsCatalog() {
 		enabled: true,
 		placement: { room: "Living Room", pinned: false },
 		tags: ["evening"],
+		chips: ["lights"],
 	});
 	const [listData, setListData] = createSignal<Record<string, unknown>>({
 		nodes: [
@@ -414,6 +415,12 @@ export function FormsCatalog() {
 								},
 							},
 							tags: { type: "array", title: "Tags", items: { type: "string" } },
+							chips: {
+								type: "array",
+								title: "Show",
+								items: { type: "string", enum: ["lights", "locks", "climate"] },
+								labels: { lights: "Lights", locks: "Locks", climate: "Climate" },
+							},
 						},
 					}}
 					data={schemaData()}
@@ -421,7 +428,8 @@ export function FormsCatalog() {
 				/>
 				<CatalogNote>
 					Renders inputs from a JSON Schema (string → Input, integer → number, enum → Select,
-					boolean → Switch). Entity/area branches need HA context, so they are omitted here.
+					boolean → Switch, array of enum → multiple toggle group). Entity/area branches need HA
+					context, so they are omitted here.
 				</CatalogNote>
 			</CatalogItem>
 
