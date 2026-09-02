@@ -116,6 +116,21 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 		),
 	);
 
+	// A zero-size pass is not a resting state, and nothing is guaranteed to fire
+	// when it ends: an ancestor dialog's own open animation neither resizes this
+	// container nor bubbles its animationend down here.
+	const RETRY_FRAMES = 90;
+	let retries = 0;
+	let retryFrame: number | undefined;
+	const remeasureNextFrame = () => {
+		if (disposed || retryFrame !== undefined || retries >= RETRY_FRAMES) return;
+		retries += 1;
+		retryFrame = requestAnimationFrame(() => {
+			retryFrame = undefined;
+			if (!disposed) measure();
+		});
+	};
+
 	const measure = () => {
 		if (!containerRef) return;
 		syncObservedItems();
@@ -130,25 +145,25 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 			setPos(null);
 			return;
 		}
-		// Not laid out yet: a hidden/collapsing popover, a display:none tab panel, or
-		// a portal measured before Kobalte positions it all report a zero-size rect.
-		// Measuring then would fling the indicator to a bogus offset (a stray tinted blob
-		// that a screenshot catches mid-open), so hide until there is real geometry.
+		// Not laid out yet: a hidden/collapsing popover, a display:none tab panel, a
+		// portal measured before Kobalte positions it, or a dialog still running its
+		// open transform. Measuring then would fling the indicator to a bogus offset
+		// (a stray tinted blob a screenshot catches mid-open) or scale it by the
+		// ancestor's in-flight transform, so hide until there is real geometry.
+		// Rects, not clientWidth: a transformed ancestor leaves layout size intact.
 		const er = el.getBoundingClientRect();
-		if (er.width === 0 && er.height === 0) {
+		const cr = containerRef.getBoundingClientRect();
+		if (er.width === 0 || er.height === 0 || cr.width === 0 || cr.height === 0) {
 			setPos(null);
+			remeasureNextFrame();
 			return;
 		}
-		if (containerRef.clientWidth === 0 && containerRef.clientHeight === 0) {
-			setPos(null);
-			return;
-		}
+		retries = 0;
 		// Measure relative to the container via bounding rects (not offsetLeft),
 		// so the active item can be a deep descendant (Kobalte menu/listbox items),
 		// not just a direct child. Add the container's own scroll so the indicator,
 		// which scrolls with the content, lands at the content offset; subtract the
 		// border so it aligns to the padding box (where the absolute indicator anchors).
-		const cr = containerRef.getBoundingClientRect();
 		// A row arriving through gh-stagger is still translated: bounding rects
 		// include that travel, its resting place does not.
 		const [tx, ty] = readTranslate(el);
@@ -241,6 +256,7 @@ export function SlidingIndicator(props: SlidingIndicatorProps) {
 		}
 		onCleanup(() => {
 			disposed = true;
+			if (retryFrame !== undefined) cancelAnimationFrame(retryFrame);
 			ro?.disconnect();
 			mo.disconnect();
 			containerRef?.removeEventListener("focusin", onFocusIn);

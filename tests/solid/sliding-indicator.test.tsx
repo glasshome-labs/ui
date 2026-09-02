@@ -62,6 +62,13 @@ async function flush() {
 	await Promise.resolve();
 }
 
+async function frames(count = 3) {
+	for (let i = 0; i < count; i++) {
+		await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+	}
+	await flush();
+}
+
 describe("SlidingIndicator", () => {
 	it("observes the active item, not just the container, and follows it when it resizes", async () => {
 		const { container } = render(() => (
@@ -134,6 +141,52 @@ describe("SlidingIndicator", () => {
 			"100px",
 		);
 		Object.defineProperty(document, "fonts", { value: originalFonts, configurable: true });
+	});
+
+	it("retries after a zero-size pass instead of resting on it", async () => {
+		const { container } = render(() => (
+			<SlidingIndicator active={0}>
+				<button type="button">One</button>
+			</SlidingIndicator>
+		));
+		const root = container.firstElementChild;
+		const button = container.querySelector("button") as HTMLElement;
+		if (!(root instanceof HTMLElement)) throw new Error("no root");
+		// A dialog still running its open transform: layout size is intact, the
+		// rects are not, and nothing here observes the ancestor's animation.
+		stubRect(root, { left: 0, top: 0, width: 0, height: 0 });
+		stubRect(button, { left: 0, top: 0, width: 0, height: 0 });
+		Object.defineProperty(root, "clientWidth", { value: 100, configurable: true });
+		Object.defineProperty(root, "clientHeight", { value: 32, configurable: true });
+		await flush();
+		expect(container.querySelector("[data-sliding-indicator]")).toBeNull();
+
+		// The transform settles. No resize, no animationend, no mutation.
+		stubRect(root, { left: 0, top: 0, width: 100, height: 32 });
+		stubRect(button, { left: 0, top: 0, width: 100, height: 32 });
+		await frames();
+
+		expect(container.querySelector<HTMLElement>("[data-sliding-indicator]")?.style.width).toBe(
+			"100px",
+		);
+	});
+
+	it("treats one zero dimension as unmeasured, not as a zero-width item", async () => {
+		const { container } = render(() => (
+			<SlidingIndicator active={0}>
+				<button type="button">One</button>
+			</SlidingIndicator>
+		));
+		const root = container.firstElementChild;
+		const button = container.querySelector("button") as HTMLElement;
+		if (!(root instanceof HTMLElement)) throw new Error("no root");
+		stubRect(root, { left: 0, top: 0, width: 200, height: 32 });
+		stubRect(button, { left: 0, top: 0, width: 0, height: 32 });
+		Object.defineProperty(root, "clientWidth", { value: 200, configurable: true });
+		Object.defineProperty(root, "clientHeight", { value: 32, configurable: true });
+		await flush();
+
+		expect(container.querySelector("[data-sliding-indicator]")).toBeNull();
 	});
 
 	it("times the slide from one inline transition", async () => {
