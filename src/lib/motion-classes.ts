@@ -40,4 +40,4 @@ export const SETTLE_MOTION =
 export const PRESS_DIP = "active:scale-[0.97]";
 
 /** A slot whose occupant changes: the leaver contracts, the arriver grows from the same box. */
-export const TAIL_MOTION = `${ARRIVE} data-[state=enter]:fade-in-0 data-[state=enter]:zoom-in-75 ${LEAVE} data-[state=leave]:fade-out-0 data-[state=leave]:zoom-out-75`;
+export const TAIL_MOTION = `${ARRIVE} data-[expanded]:fade-in-0 data-[expanded]:zoom-in-75 ${LEAVE} data-[closed]:fade-out-0 data-[closed]:zoom-out-75`;

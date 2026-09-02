@@ -4,7 +4,6 @@ import {
 	type ComponentProps,
 	createEffect,
 	createSignal,
-	For,
 	Index,
 	type JSX,
 	onCleanup,
@@ -104,8 +103,13 @@ interface TailEntry {
 	state: "enter" | "leave";
 }
 
+interface TailSlot {
+	enter: string | undefined;
+	leave: string | undefined;
+}
+
 // A tail id dropped from props keeps its node mounted (state -> "leave") until
-// its own animationend, with a --duration-morph timeout as fallback so
+// its own animationend, with a --duration-micro timeout as fallback so
 // prefers-reduced-motion (which zeroes the token) still clears it.
 function createTailPresence(tail: Accessor<DockItem[]>) {
 	const entries = new Map<string, [Accessor<TailEntry>, Setter<TailEntry>]>();
@@ -131,7 +135,7 @@ function createTailPresence(tail: Accessor<DockItem[]>) {
 	const scheduleFallback = (id: string) => {
 		const node = refs.get(id);
 		const durationMs = node
-			? Number.parseFloat(getComputedStyle(node).getPropertyValue("--duration-morph")) || 0
+			? Number.parseFloat(getComputedStyle(node).getPropertyValue("--duration-micro")) || 0
 			: 0;
 		clearTimer(id);
 		timers.set(
@@ -173,8 +177,24 @@ function createTailPresence(tail: Accessor<DockItem[]>) {
 		timers.clear();
 	});
 
+	// Both rows are right-aligned into the same columns, so a leaver overlays the
+	// slot its successor takes (pencil turns into done in place) and the extra
+	// arrivals append beside it.
+	const slots = (): TailSlot[] => {
+		const ids = order();
+		const stateOf = (id: string) => entries.get(id)?.[0]().state;
+		const entering = ids.filter((id) => stateOf(id) === "enter");
+		const leaving = ids.filter((id) => stateOf(id) === "leave");
+		const columns = Math.max(entering.length, leaving.length);
+		return Array.from({ length: columns }, (_, i) => ({
+			enter: entering[i - (columns - entering.length)],
+			leave: leaving[i - (columns - leaving.length)],
+		}));
+	};
+
 	return {
 		order,
+		slots,
 		entry: (id: string) => entries.get(id)?.[0](),
 		setRef: (id: string, node: HTMLDivElement) => refs.set(id, node),
 		onAnimationEnd: (id: string, event: AnimationEvent) => {
@@ -183,6 +203,42 @@ function createTailPresence(tail: Accessor<DockItem[]>) {
 		},
 	};
 }
+
+type TailPresence = ReturnType<typeof createTailPresence>;
+
+const TailOccupant: Component<{ presence: TailPresence; id: string; overlay?: boolean }> = (
+	props,
+) => (
+	<Show when={props.presence.entry(props.id)}>
+		{(current) => (
+			<div
+				ref={(node) => props.presence.setRef(props.id, node)}
+				class={cn(
+					TAIL_MOTION,
+					current().state === "leave" && "pointer-events-none",
+					props.overlay && "absolute inset-0",
+				)}
+				data-state={current().state}
+				data-expanded={current().state === "enter" || undefined}
+				data-closed={current().state === "leave" || undefined}
+				aria-hidden={current().state === "leave" || undefined}
+				onAnimationEnd={(event) => props.presence.onAnimationEnd(props.id, event)}
+			>
+				<DockIconButton
+					icon={current().item.icon}
+					label={current().item.label}
+					onClick={() => {
+						if (current().state === "leave") return;
+						current().item.onClick?.();
+					}}
+					isActive={current().item.isActive}
+					badge={current().item.badge}
+					tabIndex={current().state === "leave" ? -1 : undefined}
+				/>
+			</div>
+		)}
+	</Show>
+);
 
 const Dock: Component<DockProps> = (props) => {
 	const [local, rest] = splitProps(props, ["items", "class", "dockMode", "tail"]);
@@ -295,35 +351,24 @@ const Dock: Component<DockProps> = (props) => {
 						data-slot="dock-tail"
 						class={cn("flex shrink-0 items-center gap-0.5 sm:gap-1", STAGGER)}
 					>
-						<For each={tailPresence.order()}>
-							{(id) => (
-								<Show when={tailPresence.entry(id)}>
-									{(current) => (
-										<div
-											ref={(node) => tailPresence.setRef(id, node)}
-											class={cn(TAIL_MOTION, current().state === "leave" && "pointer-events-none")}
-											data-state={current().state}
-											data-expanded={current().state === "enter" || undefined}
-											data-closed={current().state === "leave" || undefined}
-											aria-hidden={current().state === "leave" || undefined}
-											onAnimationEnd={(event) => tailPresence.onAnimationEnd(id, event)}
-										>
-											<DockIconButton
-												icon={current().item.icon}
-												label={current().item.label}
-												onClick={() => {
-													if (current().state === "leave") return;
-													current().item.onClick?.();
-												}}
-												isActive={current().item.isActive}
-												badge={current().item.badge}
-												tabIndex={current().state === "leave" ? -1 : undefined}
+						<Index each={tailPresence.slots()}>
+							{(slot) => (
+								<div data-slot="dock-tail-slot" class="relative flex items-center">
+									<Show when={slot().enter}>
+										{(id) => <TailOccupant presence={tailPresence} id={id()} />}
+									</Show>
+									<Show when={slot().leave}>
+										{(id) => (
+											<TailOccupant
+												presence={tailPresence}
+												id={id()}
+												overlay={slot().enter !== undefined}
 											/>
-										</div>
-									)}
-								</Show>
+										)}
+									</Show>
+								</div>
 							)}
-						</For>
+						</Index>
 					</div>
 				</Show>
 			</div>
