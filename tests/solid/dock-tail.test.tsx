@@ -72,4 +72,37 @@ describe("Dock tail", () => {
 
 		expect(onClick).not.toHaveBeenCalled();
 	});
+
+	it("overlays a leaver on the slot its successor takes", () => {
+		const [tail, setTail] = createSignal([item("pencil")]);
+		const { container } = render(() => <Dock items={[item("a")]} tail={tail()} />);
+
+		setTail([item("add"), item("done")]);
+
+		const slots = container.querySelectorAll('[data-slot="dock-tail-slot"]');
+		expect(slots).toHaveLength(2);
+		expect(slots[0]?.querySelector('[data-state="enter"] [aria-label="add"]')).toBeTruthy();
+		expect(slots[0]?.querySelector('[data-state="leave"]')).toBeNull();
+		const leaving = slots[1]?.querySelector('[data-state="leave"]');
+		expect(leaving?.querySelector('[data-slot="dock-item"][aria-label="pencil"]')).toBeTruthy();
+		expect((leaving as HTMLElement).className).toContain("absolute");
+		expect(slots[1]?.querySelector('[data-state="enter"] [aria-label="done"]')).toBeTruthy();
+	});
+
+	it("overlays the same way on the way back", () => {
+		const [tail, setTail] = createSignal([item("add"), item("done")]);
+		const { container } = render(() => <Dock items={[item("a")]} tail={tail()} />);
+
+		setTail([item("pencil")]);
+
+		const slots = container.querySelectorAll('[data-slot="dock-tail-slot"]');
+		expect(slots).toHaveLength(2);
+		expect(slots[1]?.querySelector('[data-state="enter"] [aria-label="pencil"]')).toBeTruthy();
+		expect(slots[1]?.querySelector('[data-state="leave"] [aria-label="done"]')).toBeTruthy();
+		// No successor of its own: the extra leaver holds its column in flow.
+		expect(slots[0]?.querySelector('[data-state="leave"] [aria-label="add"]')).toBeTruthy();
+		expect(
+			(slots[0]?.querySelector('[data-state="leave"]') as HTMLElement).className,
+		).not.toContain("absolute");
+	});
 });
