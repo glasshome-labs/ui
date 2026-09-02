@@ -20,6 +20,7 @@ import { useMediaStore } from "./media-store.js";
 import { NumberField } from "./number-field.js";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select.js";
 import { Switch } from "./switch.js";
+import { ToggleGroup, ToggleGroupItem } from "./toggle-group.js";
 
 export interface ExtendedJSONSchema extends JSONSchema7 {
 	/* Nested schemas carry the same extensions, so a whole tree types as one. */
@@ -103,6 +104,10 @@ function isEntityArray(prop: ExtendedJSONSchema): boolean {
 
 function isStringArray(prop: ExtendedJSONSchema): boolean {
 	return prop.type === "array" && itemsOf(prop).type === "string";
+}
+
+function isChoiceArray(prop: ExtendedJSONSchema): boolean {
+	return prop.type === "array" && itemsOf(prop).enum !== undefined;
 }
 
 function isObjectGroup(prop: ExtendedJSONSchema): boolean {
@@ -251,6 +256,7 @@ type ControlKind =
 	| "enum"
 	| "boolean"
 	| "number"
+	| "choices"
 	| "strings"
 	| "group"
 	| "text";
@@ -268,6 +274,7 @@ const CONTROL_KINDS: ReadonlyArray<
 	["enum", (prop) => prop.enum !== undefined],
 	["boolean", (prop) => prop.type === "boolean"],
 	["number", (prop) => prop.type === "number" || prop.type === "integer"],
+	["choices", (prop) => isChoiceArray(prop)],
 	["strings", (prop) => isStringArray(prop)],
 	["group", (prop) => isObjectGroup(prop)],
 ];
@@ -290,6 +297,7 @@ const LABEL_TARGET: Record<ControlKind, "for" | "labelledby" | "none"> = {
 	boolean: "labelledby",
 	list: "labelledby",
 	variants: "labelledby",
+	choices: "labelledby",
 	strings: "labelledby",
 	unknown: "none",
 	group: "none",
@@ -410,6 +418,9 @@ function FieldControl(props: FieldProps) {
 					step={props.prop.type === "integer" ? 1 : "any"}
 					onInput={(e) => props.onChange(Number(e.currentTarget.value))}
 				/>
+			</Match>
+			<Match when={kind() === "choices"}>
+				<ChoicesControl {...props} />
 			</Match>
 			<Match when={kind() === "strings"}>
 				<StringListField
@@ -771,6 +782,29 @@ function VariantsControl(props: FieldProps) {
 				)}
 			</Show>
 		</fieldset>
+	);
+}
+
+function ChoicesControl(props: FieldProps) {
+	const current = () => props.value ?? props.prop.default;
+	const enumValues = () => (itemsOf(props.prop).enum ?? []).map(String);
+	const labelFor = (v: string) => props.prop.labels?.[v] ?? v;
+
+	return (
+		<ToggleGroup
+			multiple
+			aria-labelledby={props.labelledBy}
+			value={(current() as string[] | undefined) ?? []}
+			onChange={(vals) => {
+				const order = enumValues();
+				props.onChange((vals ?? []).slice().sort((a, b) => order.indexOf(a) - order.indexOf(b)));
+			}}
+			class="flex flex-wrap gap-1"
+		>
+			<For each={enumValues()}>
+				{(v) => <ToggleGroupItem value={v}>{labelFor(v)}</ToggleGroupItem>}
+			</For>
+		</ToggleGroup>
 	);
 }
 

@@ -698,3 +698,30 @@ describe("SchemaForm labelling", () => {
 		}
 	});
 });
+
+describe("multi-choice arrays", () => {
+	it("renders an array of enum as a multiple toggle group and lifts toggles", () => {
+		const onChange = vi.fn();
+		const { getByRole } = render(() => (
+			<SchemaForm
+				schema={{
+					type: "object",
+					properties: {
+						chips: {
+							type: "array",
+							title: "Show",
+							items: { type: "string", enum: ["lights", "locks"] },
+							labels: { lights: "Lights", locks: "Locks" },
+						},
+					},
+				}}
+				data={{ chips: ["lights"] }}
+				onChange={onChange}
+			/>
+		));
+		const locks = getByRole("button", { name: "Locks" });
+		expect(getByRole("button", { name: "Lights" }).getAttribute("aria-pressed")).toBe("true");
+		fireEvent.click(locks);
+		expect(onChange).toHaveBeenCalledWith({ chips: ["lights", "locks"] });
+	});
+});
