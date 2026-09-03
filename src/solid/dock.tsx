@@ -17,6 +17,7 @@ import { CARD_SURFACE } from "../lib/card-classes.js";
 import { PRESS_DIP, STAGGER, TAIL_MOTION } from "../lib/motion-classes.js";
 import { cn } from "../lib/utils.js";
 import { Badge } from "./badge.js";
+import { pageCount, pageOf, pageOffset } from "./dock-paging.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip.js";
 
@@ -259,6 +260,8 @@ const Dock: Component<DockProps> = (props) => {
 	const dockMode = () => local.dockMode ?? "floating";
 	let containerRef!: HTMLDivElement;
 	const [needsScroll, setNeedsScroll] = createSignal(false);
+	const [pages, setPages] = createSignal(1);
+	const [page, setPage] = createSignal(0);
 	const tailPresence = createTailPresence(() => local.tail ?? []);
 
 	// The moving background: the shared SlidingIndicator tracks the active item.
@@ -289,7 +292,25 @@ const Dock: Component<DockProps> = (props) => {
 		}
 		const availableWidth = surface.clientWidth - paddingX - siblingWidth;
 		setNeedsScroll(containerRef.scrollWidth > availableWidth);
+		setPages(pageCount(containerRef.scrollWidth, containerRef.clientWidth));
+		setPage(pageOf(containerRef.scrollLeft, containerRef.clientWidth));
 	};
+
+	const goToPage = (next: number) => {
+		if (!containerRef) return;
+		containerRef.scrollTo({
+			left: pageOffset(next, containerRef.clientWidth, containerRef.scrollWidth),
+			behavior: "smooth",
+		});
+	};
+
+	// The active dashboard may sit on another page after a switch elsewhere.
+	createEffect(() => {
+		const i = activeIndex();
+		if (i === null || !containerRef || !needsScroll()) return;
+		const item = containerRef.querySelectorAll('[data-slot="dock-item"]')[i];
+		item?.scrollIntoView({ inline: "nearest", block: "nearest", behavior: "smooth" });
+	});
 
 	onMount(() => {
 		const timeoutId = setTimeout(checkOverflow, 100);
@@ -318,7 +339,7 @@ const Dock: Component<DockProps> = (props) => {
 		<div
 			data-slot="dock"
 			class={cn(
-				"flex items-center justify-center",
+				"flex max-w-full items-center justify-center",
 				dockMode() === "floating" ? "p-1 sm:p-2" : "",
 				local.class,
 			)}
@@ -327,7 +348,10 @@ const Dock: Component<DockProps> = (props) => {
 			<div
 				data-slot="dock-surface"
 				class={cn(
-					"relative flex items-center justify-center p-1.5 sm:p-2",
+					"relative flex max-w-full items-center justify-center p-1.5 sm:p-2",
+					// Room for the page dots inside the glass; outside it they sit on
+					// the screen edge and get clipped.
+					pages() > 1 && "pb-4 sm:pb-5",
 					CARD_SURFACE,
 					"[--glass-lift:0.55]",
 					dockMode() === "floating" ? "rounded-xl" : "rounded-t-xl",
@@ -336,9 +360,14 @@ const Dock: Component<DockProps> = (props) => {
 				<div
 					ref={containerRef}
 					data-slot="dock-bar"
+					onScroll={() => {
+						if (containerRef) setPage(pageOf(containerRef.scrollLeft, containerRef.clientWidth));
+					}}
 					class={cn(
 						"flex items-center gap-0.5 sm:gap-1",
-						needsScroll() ? "scrollbar-hide overflow-x-auto" : "overflow-visible",
+						needsScroll()
+							? "scrollbar-hide snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth"
+							: "overflow-visible",
 						!needsScroll() && "justify-center",
 					)}
 					style={{
@@ -349,6 +378,7 @@ const Dock: Component<DockProps> = (props) => {
 						<Index each={local.items}>
 							{(item) => (
 								<DockIconButton
+									class={needsScroll() ? "snap-start" : undefined}
 									icon={item().icon}
 									label={item().label}
 									onClick={item().onClick}
@@ -384,6 +414,27 @@ const Dock: Component<DockProps> = (props) => {
 										)}
 									</Show>
 								</div>
+							)}
+						</Index>
+					</div>
+				</Show>
+				<Show when={pages() > 1}>
+					<div
+						data-slot="dock-pages"
+						class="pointer-events-auto absolute inset-x-0 bottom-1.5 flex justify-center gap-1.5"
+					>
+						<Index each={Array.from({ length: pages() })}>
+							{(_, i) => (
+								<button
+									type="button"
+									aria-label={`Page ${i + 1}`}
+									aria-current={page() === i ? "true" : undefined}
+									onClick={() => goToPage(i)}
+									class={cn(
+										"h-1.5 rounded-full transition-glass",
+										page() === i ? "w-4 bg-foreground/70" : "w-1.5 bg-foreground/25",
+									)}
+								/>
 							)}
 						</Index>
 					</div>

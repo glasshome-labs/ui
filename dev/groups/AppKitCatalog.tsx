@@ -89,6 +89,29 @@ export function AppKitCatalog() {
 				</CatalogNote>
 			</CatalogItem>
 
+			<CatalogItem name="Dock paging" hint="more dashboards than fit" span={2}>
+				<div class="w-[320px]">
+					<Dock
+						items={Array.from({ length: 12 }, (_, i) => ({
+							id: `d${i}`,
+							icon: <Icon icon="lucide:layout-dashboard" width={20} height={20} />,
+							label: `Dashboard ${i + 1}`,
+							isActive: i === 0,
+						}))}
+						tail={[
+							{
+								id: "edit",
+								icon: <Icon icon="lucide:pencil" width={20} height={20} />,
+								label: "Edit",
+							},
+						]}
+					/>
+				</div>
+				<CatalogNote>
+					the strip snaps a page at a time; dots appear only past one page, and the tail stays put
+				</CatalogNote>
+			</CatalogItem>
+
 			<CatalogItem name="PageHeader" hint="banner — icon + title + count + actions" span={3}>
 				<div class="w-full">
 					<PageHeader

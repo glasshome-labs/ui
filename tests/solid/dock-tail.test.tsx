@@ -1,6 +1,6 @@
 import { render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { Dock } from "../../src/solid/dock.js";
 
 vi.mock("@iconify-icon/solid", () => ({ Icon: () => null }));
@@ -139,5 +139,66 @@ describe("Dock tail", () => {
 		expect(secondEdit?.getAttribute("data-state")).toBe("enter");
 		expect(container.querySelectorAll('[data-slot="dock-tail-slot"]')).toHaveLength(1);
 		expect(container.querySelector('[data-state="leave"]')).toBeNull();
+	});
+});
+
+describe("Dock paging", () => {
+	const items = (n: number) =>
+		Array.from({ length: n }, (_, i) => ({
+			id: `d${i}`,
+			icon: <span />,
+			label: `Dashboard ${i}`,
+			onClick: () => {},
+		}));
+
+	function measured(scrollWidth: number, clientWidth: number) {
+		Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+			configurable: true,
+			get() {
+				return this.getAttribute("data-slot") === "dock-bar" ? scrollWidth : 0;
+			},
+		});
+		Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+			configurable: true,
+			get() {
+				return this.getAttribute("data-slot") === "dock-bar" ? clientWidth : 400;
+			},
+		});
+	}
+
+	afterEach(() => {
+		// @ts-expect-error restoring the prototype the measurement stub replaced
+		delete HTMLElement.prototype.scrollWidth;
+		// @ts-expect-error restoring the prototype the measurement stub replaced
+		delete HTMLElement.prototype.clientWidth;
+	});
+
+	it("shows no page dots while every item fits", async () => {
+		measured(300, 400);
+		const { container } = render(() => <Dock items={items(3)} />);
+		await new Promise((r) => setTimeout(r, 150));
+
+		expect(container.querySelector('[data-slot="dock-pages"]')).toBeNull();
+	});
+
+	it("shows a dot per page once the strip overflows, the first one current", async () => {
+		measured(1000, 400);
+		const { container } = render(() => <Dock items={items(12)} />);
+		await new Promise((r) => setTimeout(r, 150));
+
+		const dots = container.querySelectorAll('[data-slot="dock-pages"] button');
+		expect(dots).toHaveLength(3);
+		expect(dots[0]?.getAttribute("aria-current")).toBe("true");
+		expect(dots[1]?.getAttribute("aria-current")).toBeNull();
+	});
+
+	it("snaps the strip instead of free-scrolling it", async () => {
+		measured(1000, 400);
+		const { container } = render(() => <Dock items={items(12)} />);
+		await new Promise((r) => setTimeout(r, 150));
+
+		const bar = container.querySelector('[data-slot="dock-bar"]');
+		expect(bar?.className).toContain("snap-x");
+		expect(container.querySelector('[data-slot="dock-item"]')?.className).toContain("snap-start");
 	});
 });
