@@ -303,8 +303,8 @@ const LABEL_TARGET: Record<ControlKind, "for" | "labelledby" | "none"> = {
 	group: "none",
 };
 
-/* A control's own hint sits below the control; a group carries its legend and
- * explanation above its rows, so the group branch renders its own caption. */
+/* A hint belongs to the label above it, not to the control below: under the
+ * control it reads as the next field's. Groups carry their own caption. */
 function LabeledField(props: FieldProps) {
 	const kind = () => controlKind(props.prop, props.name);
 	const labelId = () => `${props.id}-label`;
@@ -315,10 +315,10 @@ function LabeledField(props: FieldProps) {
 				<FieldLabel id={labelId()} for={target() === "for" ? props.id : undefined}>
 					{props.prop.title || props.name}
 				</FieldLabel>
-				<FieldControl {...props} labelledBy={target() === "labelledby" ? labelId() : undefined} />
 				<Show when={props.prop.description}>
 					{(description) => <FieldDescription>{description()}</FieldDescription>}
 				</Show>
+				<FieldControl {...props} labelledBy={target() === "labelledby" ? labelId() : undefined} />
 			</Field>
 		</Show>
 	);

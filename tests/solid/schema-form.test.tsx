@@ -522,11 +522,11 @@ describe("field stack", () => {
 		expect(root?.className).not.toContain("space-y");
 	});
 
-	it("puts a field's own hint below its control", () => {
+	it("puts a field's own hint between its label and its control", () => {
 		const { container } = renderScene();
 		const field = container.querySelector<HTMLElement>('[data-slot="field"]');
 		const slots = Array.from(field?.children ?? []).map((child) => child.getAttribute("data-slot"));
-		expect(slots).toEqual(["field-label", "input", "field-description"]);
+		expect(slots).toEqual(["field-label", "field-description", "input"]);
 	});
 
 	it("puts a group's explanation above the group", () => {
