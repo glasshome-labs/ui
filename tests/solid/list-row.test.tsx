@@ -64,7 +64,12 @@ describe("ListRow", () => {
 		cleanup();
 
 		const withActions = render(() => (
-			<ListRow title="A" onOpen={() => {}} openLabel="A" actions={<button type="button">x</button>} />
+			<ListRow
+				title="A"
+				onOpen={() => {}}
+				openLabel="A"
+				actions={<button type="button">x</button>}
+			/>
 		));
 		expect(withActions.container.querySelector('[data-icon="lucide:chevron-right"]')).toBeNull();
 	});
