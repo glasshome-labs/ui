@@ -18,6 +18,25 @@ Hand-written; drop this section once release-please cuts the version from the co
 
 * **input-classes:** add `FIELD_CHROME`, the recipe SPEC.md already documented. Toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) wear it and stay keyed to `--input` in both themes, so they keep reading as empty wells now that fields do not.
 
+## [1.8.0](https://github.com/glasshome/ui/compare/v1.7.0...v1.8.0) (2026-09-03)
+
+
+### Features
+
+* **section-card:** ListRow, one shape for every settings list ([b1d8df3](https://github.com/glasshome/ui/commit/b1d8df34e7c14f89afa8f70f1d967536e5785654))
+
+
+### Bug Fixes
+
+* **alert:** the action centers against a multi-line body ([f1e6326](https://github.com/glasshome/ui/commit/f1e63268e200acd6eb7e33756739e0c8b7986f32))
+* **sliding-indicator:** ignore a zero-size measure, retry on the next frame ([6c92807](https://github.com/glasshome/ui/commit/6c92807b38e9d8b11493891f5aba8322a196ea6f))
+* **switch:** light wears the same on-knob tint as dark ([3549e9d](https://github.com/glasshome/ui/commit/3549e9d292bd4655de5569760b8564d83906c2ce))
+* **switch:** one knob material, the track carries the state ([075b3fc](https://github.com/glasshome/ui/commit/075b3fc2a8048fce9ec70a655d62644b7678d4a1))
+* **switch:** the knob dims when off, and stops matching foreground when on ([b1f2c49](https://github.com/glasshome/ui/commit/b1f2c49e49b8107815d3a5f5d94812c8da81a767))
+* **switch:** the on knob reads lit through hue, not brightness ([cd4ba31](https://github.com/glasshome/ui/commit/cd4ba315aef5a12a35e071635ff06760a749b7a3))
+* **tests:** answer iconify's fetches instead of reaching the network ([6622088](https://github.com/glasshome/ui/commit/66220887b4c0990a9b04e96ee16ecc63ecf86106))
+* **theme:** light gets a surface ladder, and the ring follows primary ([5f45fce](https://github.com/glasshome/ui/commit/5f45fceabafaf103947854e29d0b58038c7aadd7))
+
 ## [1.7.0](https://github.com/glasshome/ui/compare/v1.6.0...v1.7.0) (2026-08-29)
 
 
