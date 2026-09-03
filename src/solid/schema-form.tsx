@@ -327,6 +327,7 @@ function LabeledField(props: FieldProps) {
 /** The one recursive dispatch: every nesting level renders through here. */
 function FieldControl(props: FieldProps) {
 	const current = () => props.value ?? props.prop.default;
+	const enumLabel = (value: string) => props.prop.labels?.[value] ?? value;
 	const kind = () => controlKind(props.prop, props.name);
 	return (
 		<SwitchFlow
@@ -390,11 +391,13 @@ function FieldControl(props: FieldProps) {
 					}}
 					options={(props.prop.enum ?? []).map(String)}
 					itemComponent={(itemProps) => (
-						<SelectItem item={itemProps.item}>{String(itemProps.item.rawValue)}</SelectItem>
+						<SelectItem item={itemProps.item}>
+							{enumLabel(String(itemProps.item.rawValue))}
+						</SelectItem>
 					)}
 				>
 					<SelectTrigger class="w-full" aria-labelledby={props.labelledBy}>
-						<SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
+						<SelectValue<string>>{(state) => enumLabel(state.selectedOption())}</SelectValue>
 					</SelectTrigger>
 					<SelectContent />
 				</Select>

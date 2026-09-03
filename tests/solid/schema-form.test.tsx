@@ -725,3 +725,31 @@ describe("multi-choice arrays", () => {
 		expect(onChange).toHaveBeenCalledWith({ chips: ["lights", "locks"] });
 	});
 });
+
+describe("labelled choices", () => {
+	it("shows a choice's label instead of its raw value", () => {
+		const { getByText, queryByText } = render(() => (
+			<SchemaForm
+				schema={{
+					type: "object",
+					properties: {
+						scope: {
+							type: "string",
+							title: "Where",
+							enum: ["dashboard", "home", "area"],
+							labels: {
+								dashboard: "This dashboard's area",
+								home: "The whole home",
+								area: "Somewhere specific",
+							},
+						},
+					},
+				}}
+				data={{ scope: "dashboard" }}
+				onChange={() => {}}
+			/>
+		));
+		expect(getByText("This dashboard's area")).toBeTruthy();
+		expect(queryByText("dashboard")).toBeNull();
+	});
+});
