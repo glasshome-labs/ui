@@ -18,6 +18,14 @@ Hand-written; drop this section once release-please cuts the version from the co
 
 * **input-classes:** add `FIELD_CHROME`, the recipe SPEC.md already documented. Toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) wear it and stay keyed to `--input` in both themes, so they keep reading as empty wells now that fields do not.
 
+## [1.9.0](https://github.com/glasshome/ui/compare/v1.8.0...v1.9.0) (2026-09-05)
+
+
+### Features
+
+* **section-card:** SectionGroup owns labelled groups inside a card ([ce681d4](https://github.com/glasshome/ui/commit/ce681d4419cea08def38ec3a930639a4fc737337))
+* **theme:** the warning tint, love, caveat and bebas are theme tokens ([496e519](https://github.com/glasshome/ui/commit/496e519ff47fae5d1f0504484d941a41a66199a5))
+
 ## [1.8.0](https://github.com/glasshome/ui/compare/v1.7.0...v1.8.0) (2026-09-03)
 
 
