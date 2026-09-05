@@ -109,6 +109,7 @@ role clears 4.5:1 against `--background`/`--card`/`--popover`/`--muted` (3:1 for
 | a form inside a modal | `<Body as="form" id="…">` + a footer button with `form="…"` | a `display: contents` form wrapper inside the Body |
 | a status chip | `<Badge tone="var(--success)">` | `rounded-full bg-green-500/10` |
 | a callout | `<Alert tone="warning">` | `border-amber-500/30 bg-amber-500/10` |
+| a labelled group inside a card | `<SectionGroup icon label count action>` | a hand-rolled `SectionIcon` + `SectionSubtitle` header row |
 | a titled group of form rows | `<FieldSet>` + `<FieldLegend>` (+ `<FieldDescription>`) | a tracked uppercase `SectionLabel` eyebrow |
 | rows that belong to the row above them | `<FieldSubGroup>` | a bare `<Separator>` and a left pad |
 | picking one of a few described choices | `<OptionCardGroup>` + `<OptionCard>` | a hand-rolled `role="radio"` card list |
@@ -180,5 +181,5 @@ Checklist for a new component:
    around, cascade requirements, a11y invariants). One line each.
 
 Guards: `bun run check:tokens` (theme.css ↔ tokens/presets.ts sync) here;
-`bun run ui:check` in the apps (deny-by-default drift scan; escape with a
+`bun gov check --only ui-drift` in dash (deny-by-default drift scan for every app; escape with a
 `ui-drift-ok <reason>` line comment only for genuinely bespoke art).

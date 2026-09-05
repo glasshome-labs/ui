@@ -57,10 +57,11 @@ import {
 	RangeToggle,
 	ScopeIndicator,
 	SectionCard,
+	SectionGroup,
 	SectionIcon,
 	SectionMeta,
 	SectionRow,
-	SectionSubtitle,
+	SectionTitle,
 	Separator,
 	StackedBar,
 	Table,
@@ -443,7 +444,7 @@ export function DataCatalog() {
 						<SectionRow class="flex items-center gap-3">
 							<SectionIcon icon="lucide:cloud" size="sm" />
 							<div class="min-w-0">
-								<SectionSubtitle>SectionRow</SectionSubtitle>
+								<SectionTitle class="text-base">SectionRow</SectionTitle>
 								<SectionMeta>concentric inner surface</SectionMeta>
 							</div>
 						</SectionRow>
@@ -451,8 +452,34 @@ export function DataCatalog() {
 					</div>
 				</SectionCard>
 				<CatalogNote>
-					Also: SectionIcon, SectionLabel, SectionMeta, SectionSubtitle, SectionRowSkeleton. dash
-					injects its performant-blur engine via the glass prop; hub uses the frosted default.
+					Also: SectionIcon, SectionMeta, SectionRowSkeleton. dash injects its performant-blur
+					engine via the glass prop; hub uses the frosted default.
+				</CatalogNote>
+			</CatalogItem>
+
+			<CatalogItem name="SectionGroup" hint="labelled groups inside one card" span={3}>
+				<SectionCard icon="lucide:settings" title="Settings card">
+					<SectionGroup
+						icon="lucide:refresh-cw"
+						label="Automatic updates"
+						action={
+							<Button variant="outline" size="sm">
+								Manage
+							</Button>
+						}
+					>
+						<div class="space-y-2">
+							<SectionRow>Official widgets</SectionRow>
+							<SectionRow>Community widgets</SectionRow>
+						</div>
+					</SectionGroup>
+					<SectionGroup icon="lucide:life-buoy" label="Recovery" count={1}>
+						<SectionRow>Safe mode</SectionRow>
+					</SectionGroup>
+				</SectionCard>
+				<CatalogNote>
+					The group owns the rhythm: a label sits close to its own rows, far from the group above,
+					and the first group keeps its distance from the card header. No rule is drawn.
 				</CatalogNote>
 			</CatalogItem>
 

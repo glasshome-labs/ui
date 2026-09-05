@@ -340,6 +340,7 @@ export {
 	ListRow,
 	NOOP_GLASS,
 	SectionCard,
+	SectionGroup,
 	SectionIcon,
 	SectionLabel,
 	SectionMeta,

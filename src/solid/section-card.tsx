@@ -138,7 +138,9 @@ type ListRowProps = {
 	actions?: JSX.Element;
 	/** Activates the whole row. Renders a chevron when there are no actions. */
 	onOpen?: () => void;
-	/** Accessible name for the whole-row activation. */
+	/** The whole row is a link. Same chevron and press target as onOpen. */
+	href?: string;
+	/** Accessible name for the whole-row activation; required with href or onOpen. */
 	openLabel?: string;
 	class?: string;
 };
@@ -148,12 +150,20 @@ type ListRowProps = {
  * whatever it holds; the row itself, not a nested button, is what you press.
  */
 export function ListRow(props: ListRowProps) {
+	const opens = () => props.onOpen !== undefined || props.href !== undefined;
 	return (
 		<SectionRow
-			interactive={props.onOpen !== undefined}
+			interactive={opens()}
 			class={cn("@container/list-row relative flex items-center gap-3", props.class)}
 		>
-			<Show when={props.onOpen}>
+			<Show when={props.href}>
+				{(href) => (
+					<a href={href()} class="absolute inset-0 rounded-[inherit] outline-none">
+						<span class="sr-only">{props.openLabel}</span>
+					</a>
+				)}
+			</Show>
+			<Show when={props.href === undefined && props.onOpen}>
 				<button
 					type="button"
 					class="absolute inset-0 rounded-[inherit] outline-none"
@@ -170,11 +180,11 @@ export function ListRow(props: ListRowProps) {
 			    plus its badge. */}
 			<div class="min-w-[9rem] flex-1">
 				<div class="flex min-w-0 items-center gap-2">
-					<p class="truncate text-sm leading-tight font-semibold">{props.title}</p>
+					<p class="truncate font-semibold text-sm leading-tight">{props.title}</p>
 					{props.badges}
 				</div>
 				<Show when={props.subtitle}>
-					<p class="text-muted-foreground mt-1 truncate text-xs">{props.subtitle}</p>
+					<p class="mt-1 truncate text-muted-foreground text-xs">{props.subtitle}</p>
 				</Show>
 			</div>
 			{/* Trailing meta, centred across both identity lines. shrink-0, because
@@ -182,17 +192,17 @@ export function ListRow(props: ListRowProps) {
 			    while the flex-1 identity column still holds unused slack. Meta that
 			    wants to reflow reads @container/list-row and says so itself. */}
 			<Show when={props.meta}>
-				<div class="text-muted-foreground shrink-0 text-xs">{props.meta}</div>
+				<div class="shrink-0 text-muted-foreground text-xs">{props.meta}</div>
 			</Show>
 			<Show when={props.actions}>
 				<div class="relative flex shrink-0 items-center gap-1">{props.actions}</div>
 			</Show>
-			<Show when={props.onOpen !== undefined && props.actions === undefined}>
+			<Show when={opens() && props.actions === undefined}>
 				<Icon
 					icon="lucide:chevron-right"
 					width={16}
 					height={16}
-					class="text-muted-foreground shrink-0"
+					class="shrink-0 text-muted-foreground"
 					aria-hidden="true"
 				/>
 			</Show>
@@ -259,7 +269,7 @@ export function SectionTitle(props: { children: JSX.Element; class?: string }) {
 	);
 }
 
-export function SectionSubtitle(props: { children: JSX.Element; class?: string }) {
+function SectionHeading(props: { children: JSX.Element; class?: string }) {
 	return (
 		<h3
 			data-slot="section-subtitle"
@@ -267,6 +277,44 @@ export function SectionSubtitle(props: { children: JSX.Element; class?: string }
 		>
 			{props.children}
 		</h3>
+	);
+}
+
+/** @deprecated A bare heading has no owner: `SectionGroup` for a labelled group
+ *  inside a card, `FieldLegend` for a titled group of form rows. */
+export function SectionSubtitle(props: { children: JSX.Element; class?: string }) {
+	return <SectionHeading class={props.class}>{props.children}</SectionHeading>;
+}
+
+/** One labelled group inside a `SectionCard`: icon, label, optional count and
+ *  action, then its rows. Proximity does the grouping, so a label sits close to
+ *  its own rows and far from the group above; no rule is drawn. A zero count
+ *  renders no pill: the empty group below already says it. */
+export function SectionGroup(props: {
+	icon: string;
+	label: JSX.Element;
+	count?: number | string;
+	action?: JSX.Element;
+	class?: string;
+	children: JSX.Element;
+}) {
+	return (
+		<section data-slot="section-group" class={cn("mt-7 first:mt-3", props.class)}>
+			<header
+				data-slot="section-group-header"
+				class="mb-2 flex flex-wrap items-center justify-between gap-2"
+			>
+				<div data-slot="section-group-heading" class="flex min-w-0 items-center gap-2">
+					<SectionIcon icon={props.icon} size="sm" />
+					<SectionHeading>{props.label}</SectionHeading>
+					<Show when={props.count}>
+						<CountPill>{props.count}</CountPill>
+					</Show>
+				</div>
+				{props.action}
+			</header>
+			{props.children}
+		</section>
 	);
 }
 
