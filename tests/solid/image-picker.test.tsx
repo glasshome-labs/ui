@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@solidjs/testing-li
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@iconify-icon/solid", () => ({
+vi.mock("../../src/solid/icon.js", () => ({
 	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
 }));
 

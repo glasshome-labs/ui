@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { type Component, type ComponentProps, type JSX, mergeProps, Show } from "solid-js";
 import { type ExternalToast, Toaster as SolidSonner, toast as sonnerToast } from "solid-sonner";
 import {
@@ -13,6 +12,7 @@ import {
 import { glassToneText } from "../lib/glass-tone.js";
 import { createIsMobile } from "../lib/use-is-mobile.js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 import { Spinner } from "./spinner.js";
 
 type Position = ComponentProps<typeof SolidSonner>["position"];

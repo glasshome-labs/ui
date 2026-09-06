@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { useRadioGroupContext } from "@kobalte/core/radio-group";
 import {
 	children,
@@ -14,6 +13,7 @@ import { CARD_SURFACE } from "../lib/card-classes.js";
 import { isNeutralTone, NEUTRAL_KNOBS } from "../lib/glass-tone.js";
 import { STAGGER } from "../lib/motion-classes.js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 import { Ornament } from "./ornament.js";
 import { PickerRow } from "./picker-row.js";
 import { RadioGroup, RadioGroupItem } from "./radio-group.js";

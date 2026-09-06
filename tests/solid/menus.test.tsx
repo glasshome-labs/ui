@@ -9,7 +9,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 // The real iconify-icon custom element schedules render timers that fire
 // after this file's happy-dom window is torn down; nothing here asserts icons.
-vi.mock("@iconify-icon/solid", () => ({
+vi.mock("../../src/solid/icon.js", () => ({
 	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
 }));
 

@@ -1,7 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
 import { type Component, createSignal, Show } from "solid-js";
 import { ICON_BUTTON_CLASS } from "../lib/button-variants.js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 import { toast } from "./sonner.js";
 
 interface CopyButtonProps {

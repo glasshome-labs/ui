@@ -1,6 +1,6 @@
-import { Icon } from "@iconify-icon/solid";
 import { type Component, type ComponentProps, splitProps } from "solid-js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 
 const Spinner: Component<Omit<ComponentProps<typeof Icon>, "icon">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);

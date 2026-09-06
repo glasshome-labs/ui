@@ -1,9 +1,9 @@
-import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { STAGGER } from "../lib/motion-classes.js";
 import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
 import { CHIP, ICON_PILL_TINT } from "../lib/pill-classes.js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 import { PickerSearch } from "./picker-search.js";
 import { Popover, PopoverAnchor, PopoverContent } from "./popover.js";
 

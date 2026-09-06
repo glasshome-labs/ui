@@ -1,9 +1,9 @@
-import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show } from "solid-js";
 import { glassToneText, isNeutralTone, NEUTRAL_KNOBS } from "../lib/glass-tone.js";
 import { SECTION_OUTER_RADIUS } from "../lib/section-tokens.js";
 import { cn } from "../lib/utils.js";
 import { Badge } from "./badge.js";
+import { Icon } from "./icon.js";
 import { Ornament } from "./ornament.js";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip.js";
 

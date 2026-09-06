@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import {
 	createEffect,
 	createMemo,
@@ -22,6 +21,7 @@ import {
 	BottomSheetPortal,
 } from "./bottom-sheet/index.js";
 import { type EntityViewLike, useEntityData } from "./entity-data.js";
+import { Icon } from "./icon.js";
 import { PICKER_ROW_HEIGHT, PickerRow } from "./picker-row.js";
 import { PickerSearch } from "./picker-search.js";
 import { Popover, PopoverAnchor, PopoverContent } from "./popover.js";

@@ -1,10 +1,10 @@
-import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { MENU_ITEM } from "../lib/menu-classes.js";
 import { STAGGER } from "../lib/motion-classes.js";
 import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
 import { cn } from "../lib/utils.js";
 import { useEntityData } from "./entity-data.js";
+import { Icon } from "./icon.js";
 import { PickerRow } from "./picker-row.js";
 import { PickerSearch } from "./picker-search.js";
 import { Popover, PopoverAnchor, PopoverContent } from "./popover.js";

@@ -11,7 +11,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // after this file's happy-dom window is torn down ("document is not
 // defined" unhandled errors). The stub keeps the class contract (Spinner is
 // an Icon with a passed-through class) without the async render machinery.
-vi.mock("@iconify-icon/solid", () => ({
+vi.mock("../../src/solid/icon.js", () => ({
 	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
 }));
 

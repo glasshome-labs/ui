@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { Show } from "solid-js";
 import { FIELD_CHROME } from "../lib/input-classes.js";
 import { SCRIM_CLASS } from "../lib/overlay-classes.js";
@@ -6,6 +5,7 @@ import { SECTION_INNER_RADIUS } from "../lib/section-tokens.js";
 import { cn } from "../lib/utils.js";
 import { Badge } from "./badge.js";
 import { Button } from "./button.js";
+import { Icon } from "./icon.js";
 import type { StoredMedia } from "./media-store.js";
 
 export interface MediaTileProps {

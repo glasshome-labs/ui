@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import {
 	type Component,
 	type ComponentProps,
@@ -8,6 +7,7 @@ import {
 	splitProps,
 } from "solid-js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 import { Input } from "./input.js";
 
 /* Both affordances sit absolutely over the field, so their icons never reprint

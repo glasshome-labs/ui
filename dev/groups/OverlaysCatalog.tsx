@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { createSignal, For } from "solid-js";
 import {
 	AlertDialog,
@@ -79,6 +78,7 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "../../src/solid";
+import { Icon } from "../../src/solid/icon.js";
 import { CatalogGroup, CatalogItem } from "../CatalogKit";
 
 /* Dev-only: keeps a specimen open across HMR full-reloads (any edit to a

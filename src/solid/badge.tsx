@@ -6,11 +6,12 @@ import { CHIP } from "../lib/pill-classes.js";
 import { TIER_BADGE_CLASS, tierBadgeStyle } from "../lib/tier-badge.js";
 import { cn } from "../lib/utils.js";
 
-type BadgeProps = ComponentProps<"span"> & {
-	as?: ValidComponent;
-	/** Any CSS color (semantic token or arbitrary hue). Defaults to var(--primary). */
-	tone?: string;
-};
+type BadgeProps = ComponentProps<"span"> &
+	Partial<Pick<ComponentProps<"a">, "href" | "target" | "rel">> & {
+		as?: ValidComponent;
+		/** Any CSS color (semantic token or arbitrary hue). Defaults to var(--primary). */
+		tone?: string;
+	};
 
 const Badge: Component<BadgeProps> = (props) => {
 	const [local, others] = splitProps(props, ["class", "as", "tone", "children", "style"]);

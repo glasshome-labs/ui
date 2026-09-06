@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import {
 	createEffect,
 	createMemo,
@@ -32,6 +31,7 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "./empty.js";
+import { Icon } from "./icon.js";
 import { mediaIndexErrorCopy, mediaStoreErrorCopy, toMediaStoreError } from "./media-copy.js";
 import {
 	createBrokenMedia,

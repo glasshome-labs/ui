@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { Select as SelectPrimitive } from "@kobalte/core/select";
 import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
 import { CONTROL_H, INPUT_SURFACE } from "../lib/input-classes.js";
@@ -8,6 +7,7 @@ import { FIELD_MOTION, STAGGER } from "../lib/motion-classes.js";
 import { anchorToTriggerTop } from "../lib/overlay-classes.js";
 import { PICKER_LIST, PICKER_TRIGGER } from "../lib/picker-classes.js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
 
 const Select = ((props: ComponentProps<typeof SelectPrimitive>) => (

@@ -1,8 +1,8 @@
-import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show } from "solid-js";
 import { CARD_BLUR, CARD_SURFACE_BASE } from "../lib/card-classes.js";
 import { cn } from "../lib/utils.js";
 import { CountPill } from "./count-pill.js";
+import { Icon } from "./icon.js";
 import { type GlassSurface, NOOP_GLASS } from "./section-card.js";
 
 /**

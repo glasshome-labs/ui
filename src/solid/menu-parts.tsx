@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { DropdownMenu as MenuPrimitive } from "@kobalte/core/dropdown-menu";
 import {
 	type Component,
@@ -14,6 +13,7 @@ import { MENU_ITEM, MENU_ITEM_BASE, MENU_LABEL, MENU_SEPARATOR } from "../lib/me
 import { STAGGER } from "../lib/motion-classes.js";
 import { FLOATING_PANEL } from "../lib/overlay-classes.js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 import { SlidingIndicator } from "./sliding-indicator.js";
 
 /*

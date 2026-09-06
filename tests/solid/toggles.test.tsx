@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // The real custom element fetches icon data from the Iconify API; the request
 // is still in flight when happy-dom tears the window down, which surfaces as an
 // unhandled AbortError at teardown. Nothing here asserts icon internals.
-vi.mock("@iconify-icon/solid", () => ({
+vi.mock("../../src/solid/icon.js", () => ({
 	Icon: (props: { class?: string; icon?: string }) => (
 		<span class={props.class} data-icon-stub={props.icon} />
 	),

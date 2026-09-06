@@ -1,7 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
 import { type Component, type ComponentProps, splitProps } from "solid-js";
 import { cn } from "../lib/utils.js";
 import { buttonVariants } from "./button.js";
+import { Icon } from "./icon.js";
 
 const Pagination: Component<ComponentProps<"nav">> = (props) => {
 	const [local, rest] = splitProps(props, ["class"]);

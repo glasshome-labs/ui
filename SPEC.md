@@ -101,7 +101,7 @@ role clears 4.5:1 against `--background`/`--card`/`--popover`/`--muted` (3:1 for
 
 | Need | Use | Never |
 |---|---|---|
-| a panel | `<Card>` (Solid or `astro/Card.astro`) | `border bg-card/NN backdrop-blur` |
+| a panel | `<Card>` | `border bg-card/NN backdrop-blur` |
 | a floating panel | `<Overlay>` / the overlay-wearing primitive | raw `bg-popover shadow` |
 | a modal | `<ResponsiveDialog>` (desktop dialog + mobile bottom sheet), `<Dialog>` for desktop-only | `<Sheet side="bottom">` as a modal |
 | an avatar or icon beside a modal title | `<Header media={…}>` | a hand-rolled row inside the header |
@@ -118,9 +118,9 @@ role clears 4.5:1 against `--background`/`--card`/`--popover`/`--muted` (3:1 for
 | tinted text alone | `glassToneText(tone)` | ad-hoc color-mix |
 | a metallic tier chip | `<TierBadge>` | gradients by hand |
 
-In server-run `.astro` frontmatter you cannot import `@glasshome/ui/solid`
-(Solid `template()` throws at module load). Use the `@glasshome/ui/astro`
-components, or the pure recipes/tokens from the root `@glasshome/ui`.
+Server-run `.astro` markup imports `@glasshome/ui/solid` too: the `solid`
+export condition hands Astro the source, and a component with no `client:`
+directive renders to static HTML with no runtime shipped.
 
 ## Motion (the pillar)
 

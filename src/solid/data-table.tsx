@@ -1,9 +1,9 @@
-import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, Show, splitProps } from "solid-js";
 import { SECTION_PADDING } from "../lib/section-tokens.js";
 import { cn } from "../lib/utils.js";
 import { Button } from "./button.js";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia } from "./empty.js";
+import { Icon } from "./icon.js";
 import { Input } from "./input.js";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select.js";
 import { Skeleton } from "./skeleton.js";

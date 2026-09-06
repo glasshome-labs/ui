@@ -70,20 +70,9 @@ Framework-free theme model: presets, oklch parsing/derivation, and oklch→hex c
 import { THEME_PRESETS, DEFAULT_THEME_ID, resolveThemeColors, oklchToHex } from "@glasshome/ui/tokens";
 ```
 
-### `@glasshome/ui/astro/*` — zero-JS server components
+### Astro
 
-Astro components rendering the same surfaces with no client JS:
-
-```astro
----
-import Badge from "@glasshome/ui/astro/Badge.astro";
-import Button from "@glasshome/ui/astro/Button.astro";
-import Card from "@glasshome/ui/astro/Card.astro";
-import Alert from "@glasshome/ui/astro/Alert.astro";
----
-```
-
-Do not import `@glasshome/ui/solid` in server-run `.astro` files; use these or the root recipes instead.
+`.astro` files import `@glasshome/ui/solid` like any Solid file. The package ships its source under the `solid` export condition, so Astro's Solid integration compiles it for the server; a component with no `client:` directive renders to static HTML with no runtime shipped.
 
 ### `@glasshome/ui/styles` — Tailwind v4 CSS
 

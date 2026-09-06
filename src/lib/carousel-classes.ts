@@ -1,6 +1,5 @@
-/* Shared by the Solid <Carousel> and astro/Carousel.astro so the two render the
- * same markup. Astro renders slides server-side (SEO, LCP) and enhances them on
- * the client with the same embla engine. */
+/* Exported from the root entry so a server-rendered carousel (hub's content
+ * pages) shares the Solid <Carousel> markup. */
 import { POSITION_BAR, POSITION_BAR_LIT } from "./position-bar-classes.js";
 
 export type CarouselTransition = "slide" | "fade" | "wipe";

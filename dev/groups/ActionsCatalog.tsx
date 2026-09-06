@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { createSignal, For } from "solid-js";
 import {
 	Button,
@@ -14,6 +13,7 @@ import {
 	ToggleGroup,
 	ToggleGroupItem,
 } from "../../src/solid";
+import { Icon } from "../../src/solid/icon.js";
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
 
 export function ActionsCatalog() {
