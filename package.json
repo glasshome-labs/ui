@@ -51,8 +51,11 @@
 	},
 	"files": [
 		"dist",
+		"src/index.ts",
 		"src/lib",
+		"src/solid",
 		"src/styles",
+		"src/tokens",
 		"scripts",
 		"SPEC.md"
 	],
@@ -63,7 +66,7 @@
 		"check:styling": "fallow health --css",
 		"check:tokens": "bun scripts/check-tokens.ts",
 		"check:types": "tsc --noEmit -p tsconfig.test.json",
-		"check:publish": "publint && attw --pack . --profile esm-only --exclude-entrypoints ./styles ./styles/theme",
+		"check:publish": "publint && attw --pack . --profile esm-only --exclude-entrypoints ./styles ./styles/theme && bun scripts/check-pack.ts",
 		"dev": "tsc -b --force && vite build --watch",
 		"lint": "biome check .",
 		"test": "vitest run",
