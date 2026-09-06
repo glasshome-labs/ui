@@ -2,14 +2,7 @@
  * content in the DOM. Guards against regressions in the component wiring, not
  * visual output. */
 import { render } from "@solidjs/testing-library";
-import { describe, expect, it, vi } from "vitest";
-
-// The real iconify-icon custom element (rendered by Spinner) schedules render
-// timers that can fire after this file's happy-dom window is torn down
-// (unhandled "document is not defined"); nothing here asserts icon internals.
-vi.mock("../../src/solid/icon.js", () => ({
-	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
-}));
+import { describe, expect, it } from "vitest";
 
 import { Alert, AlertDescription, AlertTitle } from "../../src/solid/alert.js";
 import { Badge } from "../../src/solid/badge.js";

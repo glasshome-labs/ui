@@ -5,13 +5,7 @@
  * flows through --glass-tone instead of a variant color axis). */
 import { cleanup, fireEvent, render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-// The real iconify-icon custom element schedules render timers that fire
-// after this file's happy-dom window is torn down; nothing here asserts icons.
-vi.mock("../../src/solid/icon.js", () => ({
-	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
-}));
+import { afterEach, describe, expect, it } from "vitest";
 
 import { FLOATING_PANEL } from "../../src/lib/overlay-classes.js";
 import { Button } from "../../src/solid/button.js";

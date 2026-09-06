@@ -5,15 +5,7 @@
  * to SKIP with a written reason; an unhandled one fails CI here. */
 import { cleanup, fireEvent, render } from "@solidjs/testing-library";
 import type { JSX } from "solid-js";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-// The real iconify-icon custom element schedules render timers that fire
-// after this file's happy-dom window is torn down ("document is not
-// defined" unhandled errors). The stub keeps the class contract (Spinner is
-// an Icon with a passed-through class) without the async render machinery.
-vi.mock("../../src/solid/icon.js", () => ({
-	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
-}));
+import { afterEach, describe, expect, it } from "vitest";
 
 import type { EntityDataAdapter } from "../../src/solid/entity-data.js";
 import * as solid from "../../src/solid/index.js";

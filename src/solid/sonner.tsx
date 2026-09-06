@@ -57,8 +57,6 @@ type GlassToastProps = {
 const GlassToast: Component<GlassToastProps> = (props) => {
 	const tone = KIND_TONE[props.kind];
 	const toneIcon = KIND_ICON[props.kind];
-	// Explicit 112px (= the old [&>svg]:size-28) since host CSS can't reach the
-	// iconify shadow-DOM svg.
 	const watermarkGlyph: JSX.Element | null =
 		props.icon ?? (toneIcon ? <Icon icon={toneIcon} width={112} height={112} /> : null);
 

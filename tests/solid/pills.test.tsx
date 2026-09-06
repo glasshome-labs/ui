@@ -1,9 +1,5 @@
 import { cleanup, render } from "@solidjs/testing-library";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-vi.mock("../../src/solid/icon.js", () => ({
-	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
-}));
+import { afterEach, describe, expect, it } from "vitest";
 
 import { ICON_BUTTON_CLASS } from "../../src/lib/button-variants.js";
 import { CARD_SURFACE } from "../../src/lib/card-classes.js";

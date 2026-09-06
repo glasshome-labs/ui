@@ -7,11 +7,7 @@
  * `bun run dev:gallery` → Layout → "Carousel fade". */
 import { render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
-import { describe, expect, it, vi } from "vitest";
-
-vi.mock("../../src/solid/icon.js", () => ({
-	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
-}));
+import { describe, expect, it } from "vitest";
 
 import { carouselItem, carouselTrack } from "../../src/lib/carousel-classes.js";
 import {

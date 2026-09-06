@@ -213,9 +213,9 @@ export function ListRow(props: ListRowProps) {
 type SectionIconSize = "sm" | "md" | "lg";
 
 const ICON_DIMENSIONS: Record<SectionIconSize, string> = {
-	sm: "size-7 [&>iconify-icon]:text-[16px]",
-	md: "size-10 sm:size-11 [&>iconify-icon]:text-[20px] sm:[&>iconify-icon]:text-[22px]",
-	lg: "size-12 sm:size-14 [&>iconify-icon]:text-[24px] sm:[&>iconify-icon]:text-[28px]",
+	sm: "size-7 [&>[data-slot=icon]]:text-[16px]",
+	md: "size-10 sm:size-11 [&>[data-slot=icon]]:text-[20px] sm:[&>[data-slot=icon]]:text-[22px]",
+	lg: "size-12 sm:size-14 [&>[data-slot=icon]]:text-[24px] sm:[&>[data-slot=icon]]:text-[28px]",
 };
 
 /** @deprecated pass a CSS color to `tone` instead. */
