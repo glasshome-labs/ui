@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run check:tokens
+      - run: bun run check:structural
+      - run: bun run check:dead
+      # Styling health is a report, not a gate: it is a score, and failing CI on a
+      # score turns every honest refactor into a threshold argument. Read it in the
+      # log when touching CSS.
+      - run: bun run check:styling
+        continue-on-error: true
+      - run: bun run check:types
+      - run: bun run test
+      - run: bun run build
+      - run: bun run check:publish
+      # Real Node runtime import of the server-safe entries (root + tokens);
+      # ./solid is browser-only, it creates DOM templates at import time.
+      - run: node -e "await import('./dist/index.js'); await import('./dist/tokens/index.js')"
