@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 import {
 	Button,
@@ -17,6 +16,7 @@ import {
 	TableSkeleton,
 	TableSortHeader,
 } from "../../src/solid";
+import { Icon } from "../../src/solid/icon.js";
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
 
 export function AppKitCatalog() {

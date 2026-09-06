@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 import {
 	AreaChart,
@@ -82,6 +81,7 @@ import {
 	WidgetIdentity,
 	WidgetTrustBadge,
 } from "../../src/solid";
+import { Icon } from "../../src/solid/icon.js";
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
 
 export function DataCatalog() {
@@ -157,10 +157,10 @@ export function DataCatalog() {
 
 			<CatalogNote>
 				The neutral glass surface lives in the components, not a loose class: <strong>Card</strong>{" "}
-				(and its .astro twin) wears <code>CARD_SURFACE</code>, <strong>Overlay</strong> its own
-				opaque variant. Both are the one <code>.glass</code> formula with the tint off; set{" "}
-				<code>--glass-tone</code> for an accent card. <strong>Item</strong> is structure only. Never
-				hand-roll a <code>bg-card/NN border rounded</code> box.
+				wears <code>CARD_SURFACE</code>, <strong>Overlay</strong> its own opaque variant. Both are
+				the one <code>.glass</code> formula with the tint off; set <code>--glass-tone</code> for an
+				accent card. <strong>Item</strong> is structure only. Never hand-roll a{" "}
+				<code>bg-card/NN border rounded</code> box.
 			</CatalogNote>
 
 			<CatalogItem name="Card" hint="glass surface + header / content / footer" span={2}>

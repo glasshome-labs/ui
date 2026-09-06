@@ -12,7 +12,7 @@ import { describe, expect, it, vi } from "vitest";
 // The real iconify-icon custom element schedules render timers that can fire
 // after this file's happy-dom window is torn down (unhandled "document is not
 // defined"); nothing here asserts icon internals.
-vi.mock("@iconify-icon/solid", () => ({
+vi.mock("../../src/solid/icon.js", () => ({
 	Icon: (props: { class?: string; icon?: string }) => (
 		<span class={props.class} data-icon-stub={props.icon} />
 	),

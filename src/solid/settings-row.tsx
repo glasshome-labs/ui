@@ -1,7 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
 import { createUniqueId, type JSX, Show } from "solid-js";
 import { Button } from "./button.js";
 import { Field, FieldContent, FieldDescription, FieldLabel } from "./field.js";
+import { Icon } from "./icon.js";
 import { IconPicker, type IconPickerProps } from "./icon-picker.js";
 import { Input } from "./input.js";
 import { Switch } from "./switch.js";

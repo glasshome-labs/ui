@@ -1,7 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
 import { type JSX, mergeProps, Show } from "solid-js";
 import { cn } from "../lib/utils.js";
 import { Badge } from "./badge.js";
+import { Icon } from "./icon.js";
 import { ScopeIndicator } from "./scope-indicator.js";
 import { SectionIcon, SectionSubtitle } from "./section-card.js";
 import { WidgetTrustBadge } from "./widget-trust-badge.js";

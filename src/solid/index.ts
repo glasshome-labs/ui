@@ -1,6 +1,6 @@
 // Original components
 
-// Deliberately NOT re-exported here: `Icon` from @iconify-icon/solid. A barrel
+// Deliberately NOT re-exported here: `Icon` from ./icon.tsx. A barrel
 // re-export makes every ui import eagerly evaluate iconify-icon, which then
 // claims the <iconify-icon> element before the host registers its bundled icon
 // data — every icon silently falls back to a network fetch (see apps/dash

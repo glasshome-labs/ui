@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 import type { ExtendedJSONSchema } from "../../src/solid";
 import {
@@ -52,6 +51,7 @@ import {
 	Switch,
 	Textarea,
 } from "../../src/solid";
+import { Icon } from "../../src/solid/icon.js";
 import { CatalogGroup, CatalogItem, CatalogNote } from "../CatalogKit";
 
 /* Wire shape the SDK's field.list(field.variants(...)) serializes to. */

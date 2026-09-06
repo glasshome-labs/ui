@@ -1,10 +1,10 @@
-import { Icon } from "@iconify-icon/solid";
 import { type ComponentProps, type JSX, Show, splitProps, type ValidComponent } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { MENU_ITEM } from "../lib/menu-classes.js";
 import { ICON_PILL, ICON_PILL_TINT } from "../lib/pill-classes.js";
 import { cn } from "../lib/utils.js";
 import { Checkbox } from "./checkbox.js";
+import { Icon } from "./icon.js";
 
 /* One row for every picker that lists things with an icon (entities, areas):
  * icon well, title over a muted line, optional meta, and the selection

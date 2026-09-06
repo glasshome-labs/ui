@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 import {
 	Accordion,
@@ -25,6 +24,7 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "../../src/solid";
+import { Icon } from "../../src/solid/icon.js";
 import { CatalogGroup, CatalogItem } from "../CatalogKit";
 
 export function NavCatalog() {

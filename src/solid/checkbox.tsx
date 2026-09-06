@@ -1,8 +1,8 @@
-import { Icon } from "@iconify-icon/solid";
 import { Checkbox as CheckboxPrimitive } from "@kobalte/core/checkbox";
 import { type Component, type ComponentProps, type JSX, splitProps } from "solid-js";
 import { FIELD_CHROME } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 
 /* Two box sizes and the glyph that fits each: `sm` is the row-embedded control
  * (picker rows, dense lists), `default` the touch target of a standalone one. */

@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import EmblaCarousel, {
 	type EmblaCarouselType,
 	type EmblaOptionsType,
@@ -28,6 +27,7 @@ import {
 } from "../lib/carousel-classes.js";
 import { cn } from "../lib/utils.js";
 import { Button } from "./button.js";
+import { Icon } from "./icon.js";
 
 type CarouselApi = EmblaCarouselType;
 

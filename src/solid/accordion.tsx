@@ -1,7 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
 import { Accordion as AccordionPrimitive } from "@kobalte/core/accordion";
 import { type Component, type ComponentProps, type ParentComponent, splitProps } from "solid-js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 
 const Accordion = AccordionPrimitive;
 

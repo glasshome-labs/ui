@@ -1,4 +1,10 @@
-import { type Component, type ComponentProps, splitProps, type ValidComponent } from "solid-js";
+import {
+	type Component,
+	type ComponentProps,
+	Show,
+	splitProps,
+	type ValidComponent,
+} from "solid-js";
 import { Dynamic } from "solid-js/web";
 import {
 	CARD_ACTION_CLASS,
@@ -14,17 +20,32 @@ import {
 	type CardPadding,
 } from "../lib/card-classes.js";
 import { cn } from "../lib/utils.js";
+import { Ornament } from "./ornament.js";
 
-type CardProps = ComponentProps<"div"> & {
-	interactive?: boolean;
-	opaque?: boolean;
-	padding?: CardPadding;
-	as?: ValidComponent;
-	href?: string;
-};
+// `as` picks the tag at the call site, so the attributes of the tags a card is
+// rendered as (link, details, button) ride along with the div base.
+type CardProps = ComponentProps<"div"> &
+	Partial<Pick<ComponentProps<"a">, "href" | "target" | "rel">> &
+	Partial<Pick<ComponentProps<"details">, "name" | "open">> & {
+		interactive?: boolean;
+		opaque?: boolean;
+		padding?: CardPadding;
+		as?: ValidComponent;
+		type?: "button" | "submit" | "reset";
+		/** The corner glyph of a go-somewhere ("arrow") or picked ("check") card. */
+		ornament?: "arrow" | "check";
+	};
 
 const Card: Component<CardProps> = (props) => {
-	const [local, others] = splitProps(props, ["class", "interactive", "opaque", "padding", "as"]);
+	const [local, others] = splitProps(props, [
+		"class",
+		"interactive",
+		"opaque",
+		"padding",
+		"as",
+		"ornament",
+		"children",
+	]);
 	return (
 		<Dynamic
 			component={local.as ?? "div"}
@@ -34,10 +55,14 @@ const Card: Component<CardProps> = (props) => {
 				"rounded-[var(--radius)]",
 				CARD_PADDING[local.padding ?? "none"],
 				local.interactive && CARD_INTERACTIVE,
+				local.ornament && "group relative overflow-hidden",
 				local.class,
 			)}
 			{...others}
-		/>
+		>
+			<Show when={local.ornament}>{(kind) => <Ornament kind={kind()} />}</Show>
+			{local.children}
+		</Dynamic>
 	);
 };
 

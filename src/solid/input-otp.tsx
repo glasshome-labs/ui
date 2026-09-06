@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import {
 	type Component,
 	type ComponentProps,
@@ -11,6 +10,7 @@ import {
 } from "solid-js";
 import { CONTROL_H, FOCUS_RING, INPUT_SURFACE } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 
 interface InputOTPContextValue {
 	value: () => string;

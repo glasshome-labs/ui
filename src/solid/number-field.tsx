@@ -1,7 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
 import { type Component, type ComponentProps, splitProps } from "solid-js";
 import { INPUT_CLASS } from "../lib/input-classes.js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 
 /* The spinner column and the padding that reserves it: one pair, so the value
  * can never run under the chevrons. */

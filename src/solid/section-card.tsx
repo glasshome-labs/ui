@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { type ComponentProps, children, type JSX, Show, splitProps } from "solid-js";
 import {
 	CARD_BLUR,
@@ -14,6 +13,7 @@ import {
 } from "../lib/section-tokens.js";
 import { cn } from "../lib/utils.js";
 import { CountPill } from "./count-pill.js";
+import { Icon } from "./icon.js";
 
 /* Performant-blur injection (dash): when active() the card gates CARD_BLUR off
  * and paints the engine's precomputed slice via style() instead. */

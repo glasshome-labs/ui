@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import type { JSONSchema7 } from "json-schema";
 import { createMemo, createSignal, For, Index, Match, Show, Switch as SwitchFlow } from "solid-js";
 import { FIELD_CHROME } from "../lib/input-classes.js";
@@ -12,6 +11,7 @@ import { Card } from "./card.js";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible.js";
 import { EntitySelector } from "./entity-selector.js";
 import { Field, FieldDescription, FieldLabel, FieldLegend, FieldSet } from "./field.js";
+import { Icon } from "./icon.js";
 import { IconPicker, type IconPickerProps } from "./icon-picker.js";
 import { ImagePicker } from "./image-picker.js";
 import { Input } from "./input.js";

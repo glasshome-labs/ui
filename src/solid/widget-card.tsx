@@ -1,7 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
 import { type JSX, mergeProps, Show } from "solid-js";
 import { cn } from "../lib/utils.js";
 import { Card } from "./card.js";
+import { Icon } from "./icon.js";
 import { WidgetIdentity, WidgetMeta, type WidgetSummary, widgetHref } from "./widget-identity.js";
 
 /**

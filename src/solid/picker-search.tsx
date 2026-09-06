@@ -1,8 +1,8 @@
-import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show, splitProps } from "solid-js";
 import { CONTROL_H, FIELD_TEXT } from "../lib/input-classes.js";
 import { CONTROL_H_TOUCH } from "../lib/picker-classes.js";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 
 export interface PickerSearchProps
 	extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "value" | "onInput" | "class"> {

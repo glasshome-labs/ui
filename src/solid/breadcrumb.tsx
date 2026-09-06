@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import {
 	type Component,
 	type ComponentProps,
@@ -8,6 +7,7 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { cn } from "../lib/utils.js";
+import { Icon } from "./icon.js";
 
 const Breadcrumb: Component<ComponentProps<"nav">> = (props) => {
 	return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
