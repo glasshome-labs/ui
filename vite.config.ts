@@ -20,9 +20,6 @@ export default defineConfig({
 				"solid-js",
 				"solid-js/web",
 				"solid-js/store",
-				// Host-provided singleton via import map: bundling a copy here splits
-				// the <iconify-icon> element from the host's icon registrations.
-				"iconify-icon",
 				"@glasshome/sync-layer",
 				"@glasshome/sync-layer/solid",
 			],
