@@ -145,8 +145,11 @@ Motion is one system, not per-component flair. Four rules, all held by
 4. **Leaving is the same path, faster.** Contract on `--ease-contract` at half
    the arrival time. Pressables dip (`PRESS_DIP`).
 5. **Ambient motion is an event.** A wallpaper or decorative loop runs for a
-   window after mount or a touch (`createMotionWindow`, 30 s), then freezes
-   mid-phase; an idle screen animates nothing. Thumbnails are stills.
+   window after mount or a touch, then freezes mid-phase; an idle screen
+   animates nothing. The host holds `html[data-motion="live"]` for the window
+   (dash: `createMotionWindow`, 30 s); light-DOM loops gate on that attribute,
+   widget shadow roots on the inherited `--motion-ambient` (1 live, else 0).
+   A wrapper with `data-motion="still"` opts out: thumbnails are stills.
 
 A new component with an open, pick or reveal state uses these doors before it
 gets any motion of its own; a motion need none of them covers is added to
