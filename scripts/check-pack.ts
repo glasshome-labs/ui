@@ -20,7 +20,7 @@ function targets(value: unknown): string[] {
 	return [];
 }
 
-const missing = targets(pkg.exports)
+const missing = [...new Set(targets(pkg.exports))]
 	.map((t) => t.replace(/^\.\//, ""))
 	.filter((t) =>
 		t.endsWith("/*") ? ![...files].some((f) => f.startsWith(t.slice(0, -1))) : !files.has(t),
