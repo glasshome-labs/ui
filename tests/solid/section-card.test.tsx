@@ -1,9 +1,5 @@
 import { cleanup, render } from "@solidjs/testing-library";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-vi.mock("../../src/solid/icon.js", () => ({
-	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
-}));
+import { afterEach, describe, expect, it } from "vitest";
 
 import { CARD_INTERACTIVE, CARD_SURFACE_BASE } from "../../src/lib/card-classes.js";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "../../src/solid/empty.js";
@@ -86,7 +82,7 @@ describe("SectionCard spacing owner", () => {
 	it("names every part it renders with a data-slot", () => {
 		const { container } = full();
 		const section = slot(container, "section-card");
-		const caller = Array.from(section.querySelectorAll("[data-testid], [data-icon-stub]"));
+		const caller = Array.from(section.querySelectorAll("[data-testid], svg[data-slot=icon]"));
 		const own = Array.from(section.querySelectorAll<HTMLElement>("*")).filter(
 			(el) => !caller.some((c) => c === el || c.contains(el)),
 		);

@@ -1,10 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../src/solid/icon.js", () => ({
-	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
-}));
-
 import type { StoredMedia } from "../../src/solid/media-store.js";
 import { MediaTile } from "../../src/solid/media-tile.jsx";
 

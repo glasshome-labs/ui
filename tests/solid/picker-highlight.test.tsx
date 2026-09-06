@@ -2,11 +2,7 @@
  * must be too: a rounded-lg default pill overhangs the row's corners. */
 import { cleanup, fireEvent, render, waitFor } from "@solidjs/testing-library";
 import type { JSX } from "solid-js";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-vi.mock("../../src/solid/icon.js", () => ({
-	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
-}));
+import { afterEach, describe, expect, it } from "vitest";
 
 import { AreaPicker } from "../../src/solid/area-picker.js";
 import {

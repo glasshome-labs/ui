@@ -2,14 +2,6 @@ import { cleanup, fireEvent, render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-// The real iconify-icon custom element schedules render timers that fire after
-// this file's happy-dom window is torn down.
-vi.mock("../../src/solid/icon.js", () => ({
-	Icon: (props: { icon?: string; class?: string; "data-slot"?: string }) => (
-		<span class={props.class} data-icon={props.icon} data-slot={props["data-slot"]} />
-	),
-}));
-
 import { CARD_SURFACE } from "../../src/lib/card-classes.js";
 import { OptionCard, OptionCardGroup, OptionChoice } from "../../src/solid/option-card.js";
 

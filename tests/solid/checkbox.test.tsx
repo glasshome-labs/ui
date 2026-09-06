@@ -1,9 +1,5 @@
 import { cleanup, render } from "@solidjs/testing-library";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-vi.mock("../../src/solid/icon.js", () => ({
-	Icon: (props: { class?: string }) => <span class={props.class} data-icon-stub="" />,
-}));
+import { afterEach, describe, expect, it } from "vitest";
 
 import { Checkbox } from "../../src/solid/checkbox.js";
 
@@ -12,7 +8,7 @@ afterEach(cleanup);
 function parts(root: HTMLElement) {
 	const box = root.querySelector<HTMLElement>('[data-slot="checkbox-box"]');
 	if (!box) throw new Error("checkbox did not render");
-	const glyph = box.querySelector<HTMLElement>("[data-icon-stub]");
+	const glyph = box.querySelector<HTMLElement>('svg[data-slot="icon"]');
 	if (!glyph) throw new Error("check glyph did not render");
 	return { box, glyph };
 }

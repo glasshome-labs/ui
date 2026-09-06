@@ -9,15 +9,6 @@ import { fireEvent, render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { describe, expect, it, vi } from "vitest";
 
-// The real iconify-icon custom element schedules render timers that can fire
-// after this file's happy-dom window is torn down (unhandled "document is not
-// defined"); nothing here asserts icon internals.
-vi.mock("../../src/solid/icon.js", () => ({
-	Icon: (props: { class?: string; icon?: string }) => (
-		<span class={props.class} data-icon-stub={props.icon} />
-	),
-}));
-
 import { type EntityDataAdapter, EntityDataContext } from "../../src/solid/entity-data.js";
 import { dragTargetIndex } from "../../src/solid/list-reorder.js";
 import { type MediaStore, MediaStoreContext } from "../../src/solid/media-store.js";
@@ -454,7 +445,7 @@ describe("list rows preview their picture", () => {
 		const { container } = renderList(oneImage, { pictures: [{}] });
 		const box = thumb(container);
 		expect(box?.querySelector("img")).toBeNull();
-		expect(box?.querySelector("[data-icon-stub]")?.getAttribute("data-icon-stub")).toBe(
+		expect(box?.querySelector('svg[data-slot="icon"]')?.getAttribute("data-icon")).toBe(
 			"lucide:image",
 		);
 	});
@@ -466,7 +457,7 @@ describe("list rows preview their picture", () => {
 		if (img) fireEvent.error(img);
 		expect(thumb(container)?.querySelector("img")).toBeNull();
 		expect(
-			thumb(container)?.querySelector("[data-icon-stub]")?.getAttribute("data-icon-stub"),
+			thumb(container)?.querySelector('svg[data-slot="icon"]')?.getAttribute("data-icon"),
 		).toBe("lucide:image-off");
 	});
 
