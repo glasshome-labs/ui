@@ -18,6 +18,13 @@ Hand-written; drop this section once release-please cuts the version from the co
 
 * **input-classes:** add `FIELD_CHROME`, the recipe SPEC.md already documented. Toggle chrome and rails (checkbox box, radio ring, switch track, slider rail, chart wells) wear it and stay keyed to `--input` in both themes, so they keep reading as empty wells now that fields do not.
 
+## [1.12.0](https://github.com/glasshome/ui/compare/v1.11.0...v1.12.0) (2026-09-07)
+
+
+### Features
+
+* **theme:** --motion-play pauses a loop the ambient number cannot shorten ([6266892](https://github.com/glasshome/ui/commit/6266892547937ab3952a9057b9c82f226a84822b))
+
 ## [1.11.0](https://github.com/glasshome/ui/compare/v1.10.1...v1.11.0) (2026-09-07)
 
 
