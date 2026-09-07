@@ -149,8 +149,10 @@ Motion is one system, not per-component flair. Four rules, all held by
    window after mount or a touch, then freezes mid-phase; an idle screen
    animates nothing. The host holds `html[data-motion="live"]` for the window
    (dash: `createMotionWindow`, 30 s); light-DOM loops gate on that attribute,
-   widget shadow roots on the inherited `--motion-ambient` (1 live, else 0).
-   A wrapper with `data-motion="still"` opts out: thumbnails are stills.
+   widget shadow roots on the inherited `--motion-ambient` (1 live, else 0)
+   or, for a loop that can only pause, `--motion-play` (`running` live, else
+   `paused`). A wrapper with `data-motion="still"` opts out: thumbnails are
+   stills.
 
 A new component with an open, pick or reveal state uses these doors before it
 gets any motion of its own; a motion need none of them covers is added to
